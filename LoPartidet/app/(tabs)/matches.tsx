@@ -1,9 +1,9 @@
 import { Text, View } from "react-native";
 
-export default function Perfil() {
+export default function Matches() {
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text>Perfil</Text>
+      <Text>Matches</Text>
     </View>
   );
 }

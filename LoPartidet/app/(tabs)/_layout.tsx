@@ -7,21 +7,22 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: "#007AFF",
         tabBarInactiveTintColor: "#8E8E93",
+        headerShown: false,
       }}
     >
       <Tabs.Screen
-        name="partidos"
+        name="matches"
         options={{
-          title: "Partidos",
+          title: "Matches",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="football-outline" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="perfil"
+        name="profile"
         options={{
-          title: "Perfil",
+          title: "Profile",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person-outline" size={size} color={color} />
           ),
