@@ -1,5 +1,6 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { router } from "expo-router";
 import { Colors } from "@/constants/colors";
 
 export default function Profile() {
@@ -27,6 +28,23 @@ export default function Profile() {
           <Text style={styles.statValue}>0</Text>
           <Text style={styles.statLabel}>Wins</Text>
         </View>
+      </View>
+      <View style={styles.divider} />
+      <View style={styles.menu}>
+        {[
+          { label: "Player details", route: "/player-details" },
+          { label: "Settings", route: "/settings" },
+          { label: "About us", route: "/about-us" },
+        ].map((item, index, arr) => (
+          <TouchableOpacity
+            key={item.label}
+            style={[styles.menuItem, index < arr.length - 1 && styles.menuItemBorder]}
+            onPress={() => router.push(item.route as any)}
+          >
+            <Text style={styles.menuLabel}>{item.label}</Text>
+            <Text style={styles.menuChevron}>›</Text>
+          </TouchableOpacity>
+        ))}
       </View>
     </SafeAreaView>
   );
@@ -109,5 +127,31 @@ const styles = StyleSheet.create({
     width: 1,
     height: 40,
     backgroundColor: Colors.border,
+  },
+  menu: {
+    width: "100%",
+    backgroundColor: Colors.card,
+    borderRadius: 16,
+  },
+  menuItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+  },
+  menuItemBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  menuLabel: {
+    color: Colors.white,
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  menuChevron: {
+    color: Colors.muted,
+    fontSize: 22,
+    lineHeight: 24,
   },
 });

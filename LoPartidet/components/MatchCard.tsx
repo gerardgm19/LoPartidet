@@ -1,5 +1,6 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { Colors } from "@/constants/colors";
 import { Match } from "@/services/matchesService";
 
@@ -53,7 +54,10 @@ export default function MatchCard({ match }: Props) {
   const isFull = spotsLeft === 0;
 
   return (
-    <View style={[styles.card, match.isJoined && styles.cardJoined]}>
+    <Pressable
+      style={({ pressed }) => [styles.card, match.isJoined && styles.cardJoined, pressed && styles.cardPressed]}
+      onPress={() => router.push(`/match/${match.id}`)}
+    >
 
       {/* ── Row 1: Location (primary) ── */}
       <View style={styles.locationRow}>
@@ -134,7 +138,7 @@ export default function MatchCard({ match }: Props) {
         </View>
       </View>
 
-    </View>
+    </Pressable>
   );
 }
 
@@ -154,6 +158,9 @@ const styles = StyleSheet.create({
   },
   cardJoined: {
     borderColor: Colors.greenDim,
+  },
+  cardPressed: {
+    opacity: 0.7,
   },
 
   // Location

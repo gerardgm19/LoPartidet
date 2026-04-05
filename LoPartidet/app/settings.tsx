@@ -1,0 +1,219 @@
+import { useState } from "react";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { router, Stack } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { Colors } from "@/constants/colors";
+
+export default function Settings() {
+  const [name, setName] = useState("");
+  const [surname, setSurname] = useState("");
+  const [nickname, setNickname] = useState("");
+  const [email, setEmail] = useState("");
+  const [city, setCity] = useState("");
+  const [birthday, setBirthday] = useState("");
+
+  return (
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+            <Ionicons name="chevron-back" size={24} color={Colors.white} />
+          </TouchableOpacity>
+          <Text style={styles.title}>Settings</Text>
+          <TouchableOpacity style={styles.saveBtn}>
+            <Text style={styles.saveBtnText}>Save</Text>
+          </TouchableOpacity>
+        </View>
+
+        <KeyboardAvoidingView
+          style={styles.flex}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+        >
+          <ScrollView
+            style={styles.scroll}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.card}>
+              <Field
+                label="Name"
+                value={name}
+                onChangeText={setName}
+                placeholder="Enter your name"
+                autoCapitalize="words"
+              />
+              <Divider />
+              <Field
+                label="Surname"
+                value={surname}
+                onChangeText={setSurname}
+                placeholder="Enter your surname"
+                autoCapitalize="words"
+              />
+              <Divider />
+              <Field
+                label="Nickname"
+                value={nickname}
+                onChangeText={setNickname}
+                placeholder="Enter your nickname"
+                autoCapitalize="none"
+              />
+            </View>
+
+            <View style={styles.card}>
+              <Field
+                label="Email"
+                value={email}
+                onChangeText={setEmail}
+                placeholder="Enter your email"
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+              <Divider />
+              <Field
+                label="City"
+                value={city}
+                onChangeText={setCity}
+                placeholder="Enter your city"
+                autoCapitalize="words"
+              />
+              <Divider />
+              <Field
+                label="Birthday"
+                value={birthday}
+                onChangeText={setBirthday}
+                placeholder="DD/MM/YYYY"
+                keyboardType="numeric"
+                maxLength={10}
+              />
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </>
+  );
+}
+
+function Field({
+  label,
+  value,
+  onChangeText,
+  placeholder,
+  keyboardType,
+  autoCapitalize,
+  maxLength,
+}: {
+  label: string;
+  value: string;
+  onChangeText: (v: string) => void;
+  placeholder: string;
+  keyboardType?: TextInput["props"]["keyboardType"];
+  autoCapitalize?: TextInput["props"]["autoCapitalize"];
+  maxLength?: number;
+}) {
+  return (
+    <View style={styles.field}>
+      <Text style={styles.fieldLabel}>{label}</Text>
+      <TextInput
+        style={styles.fieldInput}
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        placeholderTextColor={Colors.muted}
+        keyboardType={keyboardType}
+        autoCapitalize={autoCapitalize ?? "sentences"}
+        maxLength={maxLength}
+      />
+    </View>
+  );
+}
+
+function Divider() {
+  return <View style={styles.divider} />;
+}
+
+const styles = StyleSheet.create({
+  flex: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: Colors.black,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  backBtn: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+  },
+  title: {
+    color: Colors.white,
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  saveBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: Colors.green,
+    borderRadius: 20,
+  },
+  saveBtnText: {
+    color: Colors.black,
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 40,
+    gap: 24,
+  },
+  card: {
+    backgroundColor: Colors.card,
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  field: {
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 4,
+  },
+  fieldLabel: {
+    color: Colors.muted,
+    fontSize: 11,
+    fontWeight: "600",
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
+  },
+  fieldInput: {
+    color: Colors.white,
+    fontSize: 16,
+    paddingVertical: 2,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: Colors.border,
+    marginLeft: 16,
+  },
+});
