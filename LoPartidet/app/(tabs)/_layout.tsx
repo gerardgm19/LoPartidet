@@ -1,8 +1,27 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { Text } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
 
+function TabLabel({ label, color }: { label: string; color: string }) {
+  return (
+    <Text
+      style={{
+        color,
+        fontSize: 11,
+        fontWeight: "600",
+        letterSpacing: 0.5,
+      }}
+    >
+      {label}
+    </Text>
+  );
+}
+
 export default function TabLayout() {
+  const { bottom } = useSafeAreaInsets();
+
   return (
     <Tabs
       screenOptions={{
@@ -13,14 +32,9 @@ export default function TabLayout() {
           backgroundColor: Colors.surface,
           borderTopColor: Colors.border,
           borderTopWidth: 1,
-          height: 60,
-          paddingBottom: 8,
+          paddingBottom: bottom + 8,
           paddingTop: 8,
-        },
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: "600",
-          letterSpacing: 0.5,
+          height: 65 + bottom,
         },
       }}
     >
@@ -31,6 +45,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="football-outline" size={size} color={color} />
           ),
+          tabBarLabel: ({ color }) => <TabLabel label="Matches" color={color} />,
         }}
       />
       <Tabs.Screen
@@ -40,6 +55,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person-outline" size={size} color={color} />
           ),
+          tabBarLabel: ({ color }) => <TabLabel label="Profile" color={color} />,
         }}
       />
     </Tabs>

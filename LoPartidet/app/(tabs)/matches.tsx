@@ -1,9 +1,10 @@
 import { StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
 
 export default function Matches() {
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.header}>
         <Text style={styles.title}>Matches</Text>
         <View style={styles.pill}>
@@ -15,7 +16,7 @@ export default function Matches() {
         <Text style={styles.emptyText}>No matches yet</Text>
         <Text style={styles.emptySubtext}>Matches will appear here</Text>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -23,7 +24,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.black,
-    paddingTop: 60,
+    paddingTop: 20,
     paddingHorizontal: 20,
   },
   header: {

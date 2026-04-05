@@ -1,9 +1,10 @@
 import { StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
 
 export default function Profile() {
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       <Text style={styles.title}>Profile</Text>
       <View style={styles.avatar}>
         <Text style={styles.avatarText}>?</Text>
@@ -27,7 +28,7 @@ export default function Profile() {
           <Text style={styles.statLabel}>Wins</Text>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -35,7 +36,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.black,
-    paddingTop: 60,
+    paddingTop: 16,
     paddingHorizontal: 20,
     alignItems: "center",
   },
