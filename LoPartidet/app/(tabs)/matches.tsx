@@ -6,18 +6,21 @@ import { Colors } from "@/constants/colors";
 import { getMatches } from "@/services/matchesService";
 import { Match } from "@/services/matchesService";
 import MatchCard from "@/components/MatchCard";
+import { Toast } from "@/components/Toast";
 
 export default function Matches() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
+  const [toastVisible, setToastVisible] = useState(false);
 
   useEffect(() => {
     getMatches()
       .then(setMatches)
+      .catch(() => setToastVisible(true))
       .finally(() => setLoading(false));
   }, []);
 
-  const liveCount = matches.filter((m) => m.status === "live").length;
+  const liveCount = matches.filter((m) => m.status === "Live").length;
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -50,6 +53,11 @@ export default function Matches() {
           showsVerticalScrollIndicator={false}
         />
       )}
+      <Toast
+        message="Could not load matches. Check your connection."
+        visible={toastVisible}
+        onHide={() => setToastVisible(false)}
+      />
     </SafeAreaView>
   );
 }

@@ -8,15 +8,18 @@ import { FOOTBALL_TYPE_LABEL, STATUS_CONFIG } from "@/constants/match";
 import { getMatchById, Match } from "@/services/matchesService";
 import { DetailRow } from "@/components/DetailRow";
 import { formatDate } from "@/utils/formatDate";
+import { Toast } from "@/components/Toast";
 
 export default function MatchDetail() {
 	const { id } = useLocalSearchParams<{ id: string }>();
 	const [match, setMatch] = useState<Match | undefined>();
 	const [loading, setLoading] = useState(true);
+	const [toastVisible, setToastVisible] = useState(false);
 
 	useEffect(() => {
 		getMatchById(id)
 			.then(setMatch)
+			.catch(() => setToastVisible(true))
 			.finally(() => setLoading(false));
 	}, [id]);
 
@@ -39,6 +42,11 @@ export default function MatchDetail() {
 				<View style={styles.centered}>
 					<Text style={styles.errorText}>Match not found</Text>
 				</View>
+				<Toast
+					message="Could not load match. Check your connection."
+					visible={toastVisible}
+					onHide={() => setToastVisible(false)}
+				/>
 			</SafeAreaView>
 		);
 	}
@@ -129,6 +137,11 @@ export default function MatchDetail() {
 				</View>
 
 			</ScrollView>
+			<Toast
+				message="Could not load match. Check your connection."
+				visible={toastVisible}
+				onHide={() => setToastVisible(false)}
+			/>
 		</SafeAreaView>
 	);
 }

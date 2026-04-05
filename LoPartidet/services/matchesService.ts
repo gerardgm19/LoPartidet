@@ -1,4 +1,11 @@
-const API_BASE_URL = "http://localhost:5000";
+import { Platform } from "react-native";
+
+// Android emulator routes localhost traffic to 10.0.2.2 (the host machine).
+// iOS simulator can reach the host directly via localhost.
+const API_BASE_URL =
+  Platform.OS === "android"
+    ? "http://10.0.2.2:5145"
+    : "http://localhost:5145";
 
 export type FootballType = "Fut5" | "Fut7" | "Fut11" | "Futsal" | "Beach" | "Indoor";
 
@@ -19,6 +26,7 @@ export type Match = {
 // ---------------------------------------------------------------------------
 
 export async function getMatches(): Promise<Match[]> {
+  console.log("calls")
   const response = await fetch(`${API_BASE_URL}/matches`);
   return response.json();
 }
