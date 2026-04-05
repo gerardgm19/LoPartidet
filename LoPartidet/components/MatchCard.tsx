@@ -1,6 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
 import { Colors } from "@/constants/colors";
 import { Match } from "@/services/matchesService";
 
@@ -44,9 +43,9 @@ const STATUS_CONFIG: Record<
 // Component
 // ---------------------------------------------------------------------------
 
-type Props = { match: Match };
+type Props = { match: Match; onPress: () => void };
 
-export default function MatchCard({ match }: Props) {
+export default function MatchCard({ match, onPress }: Props) {
   const { day, time } = formatDate(match.date);
   const statusCfg = STATUS_CONFIG[match.status];
   const spotsLeft = match.maxPeople - match.joinedCount;
@@ -56,7 +55,7 @@ export default function MatchCard({ match }: Props) {
   return (
     <Pressable
       style={({ pressed }) => [styles.card, match.isJoined && styles.cardJoined, pressed && styles.cardPressed]}
-      onPress={() => router.push(`/match/${match.id}`)}
+      onPress={onPress}
     >
 
       {/* ── Row 1: Location (primary) ── */}

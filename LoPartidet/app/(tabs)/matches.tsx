@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { router } from "expo-router";
 import { Colors } from "@/constants/colors";
 import { getMatches } from "@/services/matchesService";
 import { Match } from "@/services/matchesService";
@@ -44,7 +45,7 @@ export default function Matches() {
         <FlatList
           data={matches}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <MatchCard match={item} />}
+          renderItem={({ item }) => <MatchCard match={item} onPress={() => router.push(`/match/${item.id}`)} />}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
         />
