@@ -15,7 +15,8 @@ English only — all code, file names, comments, and UI text must be in English.
 - `services/` — business logic and data access (no UI)
 - `components/` — reusable UI components
 - `mocks/` — mock data for development
-- `constants/` — shared constants (colors)
+- `constants/` — shared constants (colors, match labels/config)
+- `utils/` — pure utility functions (e.g. date formatting)
 - `assets/` — images and fonts
 
 ## Key conventions
@@ -26,6 +27,7 @@ English only — all code, file names, comments, and UI text must be in English.
 - All screens use `SafeAreaView` with `edges={["top", "bottom"]}`.
 - Stack screens set `<Stack.Screen options={{ headerShown: false }} />` inline and implement their own header with a back chevron.
 - Color palette is in `constants/colors.ts` — always use `Colors.*`, never hardcode hex values.
+- Reuse before duplicating — before writing a helper, label map, or config object, check `constants/` and `utils/` first. If something already exists there, import it; do not copy it inline.
 
 ## Running the app
 ```bash
