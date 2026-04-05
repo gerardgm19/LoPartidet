@@ -1,21 +1,54 @@
-import { StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
+import { getMatches } from "@/services/matchesService";
+import { Match } from "@/services/matchesService";
+import MatchCard from "@/components/MatchCard";
 
 export default function Matches() {
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getMatches()
+      .then(setMatches)
+      .finally(() => setLoading(false));
+  }, []);
+
+  const liveCount = matches.filter((m) => m.status === "live").length;
+
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.header}>
         <Text style={styles.title}>Matches</Text>
-        <View style={styles.pill}>
-          <Text style={styles.pillText}>Live</Text>
+        {liveCount > 0 && (
+          <View style={styles.livePill}>
+            <View style={styles.liveDot} />
+            <Text style={styles.livePillText}>{liveCount} Live</Text>
+          </View>
+        )}
+      </View>
+
+      {loading ? (
+        <View style={styles.centered}>
+          <ActivityIndicator color={Colors.green} size="large" />
         </View>
-      </View>
-      <View style={styles.empty}>
-        <Text style={styles.emptyIcon}>⚽</Text>
-        <Text style={styles.emptyText}>No matches yet</Text>
-        <Text style={styles.emptySubtext}>Matches will appear here</Text>
-      </View>
+      ) : matches.length === 0 ? (
+        <View style={styles.centered}>
+          <Text style={styles.emptyIcon}>⚽</Text>
+          <Text style={styles.emptyText}>No matches yet</Text>
+          <Text style={styles.emptySubtext}>Matches will appear here</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={matches}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <MatchCard match={item} />}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -31,7 +64,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 28,
+    marginBottom: 24,
   },
   title: {
     color: Colors.white,
@@ -39,19 +72,31 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     letterSpacing: -0.5,
   },
-  pill: {
+  livePill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
     backgroundColor: Colors.green,
     borderRadius: 20,
     paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingVertical: 5,
   },
-  pillText: {
+  liveDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.black,
+  },
+  livePillText: {
     color: Colors.black,
     fontSize: 12,
     fontWeight: "700",
     letterSpacing: 0.5,
   },
-  empty: {
+  list: {
+    paddingBottom: 16,
+  },
+  centered: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",

@@ -1,41 +1,65 @@
+import { MOCK_MATCHES } from "@/mocks/matches.mock";
+
+export type FootballType = "fut5" | "fut7" | "fut11" | "futsal" | "beach" | "indoor";
+
 export type Match = {
   id: string;
-  homeTeam: string;
-  awayTeam: string;
+  footballType: FootballType;
   date: string;
   location: string;
-  homeScore?: number;
-  awayScore?: number;
+  organizer: string;
+  joinedCount: number;
+  maxPeople: number;
+  isJoined: boolean;
   status: "scheduled" | "live" | "finished";
 };
 
-// In-memory store — replace with API/DB calls as needed
-const matches: Match[] = [];
+// ---------------------------------------------------------------------------
+// Data source
+// Toggle USE_MOCK to false and fill in the API functions below when the
+// backend is ready. Everything above this block stays untouched.
+// ---------------------------------------------------------------------------
 
-export function getMatches(): Match[] {
-  return matches;
+const USE_MOCK = true;
+
+// -- Mock adapter -----------------------------------------------------------
+
+const mockAdapter = {
+  async getAll(): Promise<Match[]> {
+    return MOCK_MATCHES;
+  },
+  async getById(id: string): Promise<Match | undefined> {
+    return MOCK_MATCHES.find((m) => m.id === id);
+  },
+};
+
+// -- API adapter (fill in when backend is ready) ----------------------------
+
+const apiAdapter = {
+  async getAll(): Promise<Match[]> {
+    // TODO: replace with real endpoint
+    // const response = await fetch("https://api.example.com/matches");
+    // return response.json();
+    throw new Error("API not implemented yet");
+  },
+  async getById(id: string): Promise<Match | undefined> {
+    // TODO: replace with real endpoint
+    // const response = await fetch(`https://api.example.com/matches/${id}`);
+    // return response.json();
+    throw new Error("API not implemented yet");
+  },
+};
+
+const source = USE_MOCK ? mockAdapter : apiAdapter;
+
+// ---------------------------------------------------------------------------
+// Public service
+// ---------------------------------------------------------------------------
+
+export async function getMatches(): Promise<Match[]> {
+  return source.getAll();
 }
 
-export function getMatchById(id: string): Match | undefined {
-  return matches.find((m) => m.id === id);
-}
-
-export function createMatch(data: Omit<Match, "id">): Match {
-  const match: Match = { ...data, id: Date.now().toString() };
-  matches.push(match);
-  return match;
-}
-
-export function updateMatch(id: string, data: Partial<Omit<Match, "id">>): Match | undefined {
-  const index = matches.findIndex((m) => m.id === id);
-  if (index === -1) return undefined;
-  matches[index] = { ...matches[index], ...data };
-  return matches[index];
-}
-
-export function deleteMatch(id: string): boolean {
-  const index = matches.findIndex((m) => m.id === id);
-  if (index === -1) return false;
-  matches.splice(index, 1);
-  return true;
+export async function getMatchById(id: string): Promise<Match | undefined> {
+  return source.getById(id);
 }
