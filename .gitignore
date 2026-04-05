@@ -138,3 +138,6 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .claude
+LoPartidet.API/.vs
+LoPartidet.API/LoPartidet.API/obj
+LoPartidet.API/LoPartidet.API/bin
