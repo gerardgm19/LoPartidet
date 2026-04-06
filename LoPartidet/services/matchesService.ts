@@ -1,4 +1,5 @@
 import { Platform } from "react-native";
+import { FootballType } from "@/types/footballType";
 
 // Android emulator routes localhost traffic to 10.0.2.2 (the host machine).
 // iOS simulator can reach the host directly via localhost.
@@ -12,8 +13,6 @@ const PROD_API_BASE_URL = "http://178.33.119.182:5145"
 const isDebug = true;
 
 const API_BASE_URL = isDebug ? DEBUG_API_BASE_URL : PROD_API_BASE_URL;
-
-export type FootballType = "Fut5" | "Fut7" | "Fut11" | "Futsal" | "Beach" | "Indoor";
 
 export type Match = {
   id: string;
