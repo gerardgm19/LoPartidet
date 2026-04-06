@@ -1,8 +1,6 @@
-namespace LoPartidet.API.Models;
+using LoPartidet.API.Models;
 
-public enum FootballType { Fut5, Fut7, Fut11, Futsal, Beach, Indoor }
-
-public enum MatchStatus { Scheduled, Live, Finished }
+namespace LoPartidet.API.Entities;
 
 public class Match
 {

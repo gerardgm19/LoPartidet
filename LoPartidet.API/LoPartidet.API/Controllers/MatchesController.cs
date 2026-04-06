@@ -1,4 +1,4 @@
-using LoPartidet.API.Models;
+using LoPartidet.API.Entities;
 using LoPartidet.API.Services;
 using Microsoft.AspNetCore.Mvc;
 

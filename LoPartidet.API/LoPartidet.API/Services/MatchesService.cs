@@ -1,5 +1,5 @@
 using LoPartidet.API.Data;
-using LoPartidet.API.Models;
+using LoPartidet.API.Entities;
 
 namespace LoPartidet.API.Services;
 

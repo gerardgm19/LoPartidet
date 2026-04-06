@@ -13,6 +13,7 @@ builder.Services.AddDbContext<LoPartidetContext>(options =>
         new MySqlServerVersion(new Version(8, 0))));
 
 builder.Services.AddScoped<IMatchesService, MatchesService>();
+builder.Services.AddScoped<IUsersService, UsersService>();
 
 builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
