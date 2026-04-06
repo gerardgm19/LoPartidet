@@ -1,12 +1,14 @@
 using LoPartidet.API.Entities;
 using LoPartidet.API.Models;
 using LoPartidet.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LoPartidet.API.Controllers;
 
 [ApiController]
 [Route("users")]
+[Authorize]
 public class UsersController(IUsersService usersService) : ControllerBase
 {
     [HttpGet("{id}")]

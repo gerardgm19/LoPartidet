@@ -1,11 +1,13 @@
 using LoPartidet.API.Entities;
 using LoPartidet.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LoPartidet.API.Controllers;
 
 [ApiController]
 [Route("matches")]
+[Authorize]
 public class MatchesController(IMatchesService matchesService) : ControllerBase
 {
     [HttpGet]

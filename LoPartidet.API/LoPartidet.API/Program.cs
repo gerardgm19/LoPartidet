@@ -1,9 +1,8 @@
-using System.Text;
+using LoPartidet.API.Authentication;
 using LoPartidet.API.Data;
 using LoPartidet.API.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,19 +15,10 @@ builder.Services.AddDbContext<LoPartidetContext>(options =>
 builder.Services.AddScoped<IMatchesService, MatchesService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
-        });
+builder.Services.AddHttpClient();
+
+builder.Services.AddAuthentication("RemoteJwt")
+    .AddScheme<AuthenticationSchemeOptions, RemoteJwtAuthHandler>("RemoteJwt", null);
 
 builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>

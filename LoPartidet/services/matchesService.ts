@@ -1,5 +1,6 @@
 import { Platform } from "react-native";
 import { FootballType } from "@/types/footballType";
+import { fetchWithAuth } from "./api";
 
 // Android emulator routes localhost traffic to 10.0.2.2 (the host machine).
 // iOS simulator can reach the host directly via localhost.
@@ -31,13 +32,12 @@ export type Match = {
 // ---------------------------------------------------------------------------
 
 export async function getMatches(): Promise<Match[]> {
-  console.log("calls")
-  const response = await fetch(`${API_BASE_URL}/matches`);
+  const response = await fetchWithAuth(`${API_BASE_URL}/matches`);
   return response.json();
 }
 
 export async function getMatchById(id: string): Promise<Match | undefined> {
-  const response = await fetch(`${API_BASE_URL}/matches/${id}`);
+  const response = await fetchWithAuth(`${API_BASE_URL}/matches/${id}`);
   if (response.status === 404) return undefined;
   return response.json();
 }
