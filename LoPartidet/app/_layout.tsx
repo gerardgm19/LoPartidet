@@ -1,12 +1,20 @@
 import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { setUnauthorizedHandler } from "@/services/api";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 function RootNavigator() {
-  const { token, isLoading } = useAuth();
+  const { token, isLoading, signOut } = useAuth();
   const segments = useSegments();
   const router = useRouter();
+
+  useEffect(() => {
+    setUnauthorizedHandler(async () => {
+      await signOut();
+      router.replace("/(auth)/login");
+    });
+  }, [signOut, router]);
 
   useEffect(() => {
     if (isLoading) return;
