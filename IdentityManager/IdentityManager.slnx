@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/IdentityManager/">
+    <Project Path="IdentityManager/IdentityManager.csproj" />
+  </Folder>
+</Solution>
