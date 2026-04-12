@@ -99,6 +99,13 @@ const cat_es = {
   version: "Versió 1.0.0",
   madeWith: "Fet amb ♥ per als amants del futbol",
 
+  // Sign out
+  signOut: "Tancar sessió",
+  signOutConfirmTitle: "Tancar sessió?",
+  signOutConfirmMessage: "S'eliminarà la sessió del dispositiu.",
+  cancel: "Cancel·lar",
+  confirm: "Confirmar",
+
   // Language picker
   selectLanguage: "Seleccionar idioma",
   langCatalan: "Català",

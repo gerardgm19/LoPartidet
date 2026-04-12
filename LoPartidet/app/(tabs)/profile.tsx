@@ -5,12 +5,21 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/colors";
 import { useLangStore } from "@/store/langStore";
+import { useAuthStore } from "@/store/authStore";
 import { Lang } from "@/i18n";
 
 export default function Profile() {
   const t = useLangStore((s) => s.t);
   const { lang, setLang } = useLangStore();
+  const { signOut } = useAuthStore();
   const [langModalVisible, setLangModalVisible] = useState(false);
+  const [signOutModalVisible, setSignOutModalVisible] = useState(false);
+
+  async function handleSignOut() {
+    setSignOutModalVisible(false);
+    await signOut();
+    router.replace("/(auth)/login");
+  }
 
   const LANGUAGES: { value: Lang; label: string }[] = [
     { value: "es_es", label: t.langSpanish },
@@ -65,7 +74,7 @@ export default function Profile() {
             </TouchableOpacity>
           ))}
           <TouchableOpacity
-            style={styles.menuItem}
+            style={[styles.menuItem, styles.menuItemBorder]}
             onPress={() => setLangModalVisible(true)}
           >
             <Text style={styles.menuLabel}>{t.language}</Text>
@@ -76,8 +85,42 @@ export default function Profile() {
               <Text style={styles.menuChevron}>›</Text>
             </View>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => setSignOutModalVisible(true)}
+          >
+            <Text style={[styles.menuLabel, styles.signOutLabel]}>{t.signOut}</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={signOutModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSignOutModalVisible(false)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setSignOutModalVisible(false)}>
+          <View style={styles.dialogSheet}>
+            <Text style={styles.dialogTitle}>{t.signOutConfirmTitle}</Text>
+            <Text style={styles.dialogMessage}>{t.signOutConfirmMessage}</Text>
+            <View style={styles.dialogActions}>
+              <TouchableOpacity
+                style={[styles.dialogBtn, styles.dialogBtnCancel]}
+                onPress={() => setSignOutModalVisible(false)}
+              >
+                <Text style={styles.dialogBtnCancelText}>{t.cancel}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.dialogBtn, styles.dialogBtnConfirm]}
+                onPress={handleSignOut}
+              >
+                <Text style={styles.dialogBtnConfirmText}>{t.confirm}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Pressable>
+      </Modal>
 
       <Modal
         visible={langModalVisible}
@@ -166,6 +209,24 @@ const styles = StyleSheet.create({
   menuChevron: { color: Colors.muted, fontSize: 22, lineHeight: 24 },
   langRight: { flexDirection: "row", alignItems: "center", gap: 8 },
   langCurrent: { color: Colors.muted, fontSize: 14 },
+  signOutLabel: { color: "#FF5252" },
+
+  // Sign-out dialog
+  dialogSheet: {
+    margin: 32,
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
+    padding: 24,
+    gap: 8,
+  },
+  dialogTitle: { color: Colors.white, fontSize: 17, fontWeight: "700", textAlign: "center" },
+  dialogMessage: { color: Colors.muted, fontSize: 14, textAlign: "center", marginBottom: 8 },
+  dialogActions: { flexDirection: "row", gap: 12, marginTop: 4 },
+  dialogBtn: { flex: 1, paddingVertical: 13, borderRadius: 12, alignItems: "center" },
+  dialogBtnCancel: { backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border },
+  dialogBtnCancelText: { color: Colors.white, fontSize: 15, fontWeight: "600" },
+  dialogBtnConfirm: { backgroundColor: "#FF5252" },
+  dialogBtnConfirmText: { color: Colors.white, fontSize: 15, fontWeight: "700" },
 
   // Modal
   modalOverlay: {

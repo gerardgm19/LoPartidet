@@ -99,6 +99,13 @@ const es_es = {
   version: "Versión 1.0.0",
   madeWith: "Hecho con ♥ para los amantes del fútbol",
 
+  // Sign out
+  signOut: "Cerrar sesión",
+  signOutConfirmTitle: "¿Cerrar sesión?",
+  signOutConfirmMessage: "Se eliminará la sesión del dispositivo.",
+  cancel: "Cancelar",
+  confirm: "Confirmar",
+
   // Language picker
   selectLanguage: "Seleccionar idioma",
   langCatalan: "Català",
