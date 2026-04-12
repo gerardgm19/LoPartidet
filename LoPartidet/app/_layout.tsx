@@ -1,13 +1,21 @@
-import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { useAuthStore } from "@/store/authStore";
+import { useLangStore } from "@/store/langStore";
 import { setUnauthorizedHandler } from "@/services/api";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 function RootNavigator() {
-  const { token, isLoading, signOut } = useAuth();
+  const { token, isLoading, signOut, initialize } = useAuthStore();
   const segments = useSegments();
   const router = useRouter();
+
+  const initLang = useLangStore((s) => s.initialize);
+
+  useEffect(() => {
+    initialize();
+    initLang();
+  }, []);
 
   useEffect(() => {
     setUnauthorizedHandler(async () => {
@@ -43,9 +51,7 @@ function RootNavigator() {
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <AuthProvider>
-        <RootNavigator />
-      </AuthProvider>
+      <RootNavigator />
     </SafeAreaProvider>
   );
 }

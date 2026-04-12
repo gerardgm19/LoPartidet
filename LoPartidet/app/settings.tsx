@@ -13,8 +13,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/colors";
+import { useLangStore } from "@/store/langStore";
 
 export default function Settings() {
+  const t = useLangStore((s) => s.t);
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
   const [nickname, setNickname] = useState("");
@@ -30,9 +32,9 @@ export default function Settings() {
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Ionicons name="chevron-back" size={24} color={Colors.white} />
           </TouchableOpacity>
-          <Text style={styles.title}>Settings</Text>
+          <Text style={styles.title}>{t.settingsTitle}</Text>
           <TouchableOpacity style={styles.saveBtn}>
-            <Text style={styles.saveBtnText}>Save</Text>
+            <Text style={styles.saveBtnText}>{t.save}</Text>
           </TouchableOpacity>
         </View>
 
@@ -47,57 +49,19 @@ export default function Settings() {
             keyboardShouldPersistTaps="handled"
           >
             <View style={styles.card}>
-              <Field
-                label="Name"
-                value={name}
-                onChangeText={setName}
-                placeholder="Enter your name"
-                autoCapitalize="words"
-              />
+              <Field label={t.name} value={name} onChangeText={setName} placeholder={t.enterName} autoCapitalize="words" />
               <Divider />
-              <Field
-                label="Surname"
-                value={surname}
-                onChangeText={setSurname}
-                placeholder="Enter your surname"
-                autoCapitalize="words"
-              />
+              <Field label={t.surname} value={surname} onChangeText={setSurname} placeholder={t.enterSurname} autoCapitalize="words" />
               <Divider />
-              <Field
-                label="Nickname"
-                value={nickname}
-                onChangeText={setNickname}
-                placeholder="Enter your nickname"
-                autoCapitalize="none"
-              />
+              <Field label={t.nickname} value={nickname} onChangeText={setNickname} placeholder={t.enterNickname} autoCapitalize="none" />
             </View>
 
             <View style={styles.card}>
-              <Field
-                label="Email"
-                value={email}
-                onChangeText={setEmail}
-                placeholder="Enter your email"
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
+              <Field label={t.email} value={email} onChangeText={setEmail} placeholder={t.enterEmail} keyboardType="email-address" autoCapitalize="none" />
               <Divider />
-              <Field
-                label="City"
-                value={city}
-                onChangeText={setCity}
-                placeholder="Enter your city"
-                autoCapitalize="words"
-              />
+              <Field label={t.city} value={city} onChangeText={setCity} placeholder={t.enterCity} autoCapitalize="words" />
               <Divider />
-              <Field
-                label="Birthday"
-                value={birthday}
-                onChangeText={setBirthday}
-                placeholder="DD/MM/YYYY"
-                keyboardType="numeric"
-                maxLength={10}
-              />
+              <Field label={t.birthday} value={birthday} onChangeText={setBirthday} placeholder={t.birthdayPlaceholder} keyboardType="numeric" maxLength={10} />
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -107,13 +71,7 @@ export default function Settings() {
 }
 
 function Field({
-  label,
-  value,
-  onChangeText,
-  placeholder,
-  keyboardType,
-  autoCapitalize,
-  maxLength,
+  label, value, onChangeText, placeholder, keyboardType, autoCapitalize, maxLength,
 }: {
   label: string;
   value: string;
@@ -145,13 +103,8 @@ function Divider() {
 }
 
 const styles = StyleSheet.create({
-  flex: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: Colors.black,
-  },
+  flex: { flex: 1 },
+  container: { flex: 1, backgroundColor: Colors.black },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -159,46 +112,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-  backBtn: {
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-  },
-  title: {
-    color: Colors.white,
-    fontSize: 18,
-    fontWeight: "700",
-  },
-  saveBtn: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: Colors.green,
-    borderRadius: 20,
-  },
-  saveBtnText: {
-    color: Colors.black,
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 40,
-    gap: 24,
-  },
-  card: {
-    backgroundColor: Colors.card,
-    borderRadius: 16,
-    overflow: "hidden",
-  },
-  field: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    gap: 4,
-  },
+  backBtn: { width: 40, height: 40, justifyContent: "center" },
+  title: { color: Colors.white, fontSize: 18, fontWeight: "700" },
+  saveBtn: { paddingHorizontal: 16, paddingVertical: 8, backgroundColor: Colors.green, borderRadius: 20 },
+  saveBtnText: { color: Colors.black, fontSize: 14, fontWeight: "700" },
+  scroll: { flex: 1 },
+  scrollContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 40, gap: 24 },
+  card: { backgroundColor: Colors.card, borderRadius: 16, overflow: "hidden" },
+  field: { paddingHorizontal: 16, paddingVertical: 14, gap: 4 },
   fieldLabel: {
     color: Colors.muted,
     fontSize: 11,
@@ -206,14 +127,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
     textTransform: "uppercase",
   },
-  fieldInput: {
-    color: Colors.white,
-    fontSize: 16,
-    paddingVertical: 2,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: Colors.border,
-    marginLeft: 16,
-  },
+  fieldInput: { color: Colors.white, fontSize: 16, paddingVertical: 2 },
+  divider: { height: 1, backgroundColor: Colors.border, marginLeft: 16 },
 });

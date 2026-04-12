@@ -3,6 +3,7 @@ import { Tabs } from "expo-router";
 import { Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
+import { useLangStore } from "@/store/langStore";
 
 function TabLabel({ label, color }: { label: string; color: string }) {
   return (
@@ -14,6 +15,7 @@ function TabLabel({ label, color }: { label: string; color: string }) {
 
 export default function TabLayout() {
   const { bottom } = useSafeAreaInsets();
+  const t = useLangStore((s) => s.t);
 
   return (
     <Tabs
@@ -34,21 +36,21 @@ export default function TabLayout() {
       <Tabs.Screen
         name="matches"
         options={{
-          title: "Matches",
+          title: t.matches,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="football-outline" size={size} color={color} />
           ),
-          tabBarLabel: ({ color }) => <TabLabel label="Matches" color={color} />,
+          tabBarLabel: ({ color }) => <TabLabel label={t.matches} color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Profile",
+          title: t.profile,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person-outline" size={size} color={color} />
           ),
-          tabBarLabel: ({ color }) => <TabLabel label="Profile" color={color} />,
+          tabBarLabel: ({ color }) => <TabLabel label={t.profile} color={color} />,
         }}
       />
     </Tabs>

@@ -1,5 +1,6 @@
 import { Colors } from "@/constants/colors";
-import { useAuth } from "@/context/AuthContext";
+import { useAuthStore } from "@/store/authStore";
+import { useLangStore } from "@/store/langStore";
 import { register } from "@/services/authService";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -17,7 +18,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RegisterScreen() {
-  const { signIn } = useAuth();
+  const { signIn } = useAuthStore();
+  const t = useLangStore((s) => s.t);
   const router = useRouter();
 
   const [name, setName] = useState("");
@@ -54,42 +56,42 @@ export default function RegisterScreen() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-          <Text style={styles.title}>Create account</Text>
-          <Text style={styles.subtitle}>Join LoPartidet</Text>
+          <Text style={styles.title}>{t.createAccount}</Text>
+          <Text style={styles.subtitle}>{t.joinTagline}</Text>
 
           <View style={styles.form}>
-            <Text style={styles.label}>Name</Text>
+            <Text style={styles.label}>{t.name}</Text>
             <TextInput
               style={styles.input}
-              placeholder="Marc"
+              placeholder={t.namePlaceholder}
               placeholderTextColor={Colors.muted}
               value={name}
               onChangeText={setName}
             />
 
-            <Text style={styles.label}>Surname</Text>
+            <Text style={styles.label}>{t.surname}</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ribas"
+              placeholder={t.surnamePlaceholder}
               placeholderTextColor={Colors.muted}
               value={surname}
               onChangeText={setSurname}
             />
 
-            <Text style={styles.label}>Nickname</Text>
+            <Text style={styles.label}>{t.nickname}</Text>
             <TextInput
               style={styles.input}
-              placeholder="mribas10"
+              placeholder={t.nicknamePlaceholder}
               placeholderTextColor={Colors.muted}
               autoCapitalize="none"
               value={nickname}
               onChangeText={setNickname}
             />
 
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label}>{t.email}</Text>
             <TextInput
               style={styles.input}
-              placeholder="you@example.com"
+              placeholder={t.emailPlaceholder}
               placeholderTextColor={Colors.muted}
               autoCapitalize="none"
               keyboardType="email-address"
@@ -97,7 +99,7 @@ export default function RegisterScreen() {
               onChangeText={setEmail}
             />
 
-            <Text style={styles.label}>Password</Text>
+            <Text style={styles.label}>{t.password}</Text>
             <TextInput
               style={styles.input}
               placeholder="••••••••"
@@ -117,14 +119,14 @@ export default function RegisterScreen() {
               {loading ? (
                 <ActivityIndicator color={Colors.black} />
               ) : (
-                <Text style={styles.buttonText}>Register</Text>
+                <Text style={styles.buttonText}>{t.register}</Text>
               )}
             </Pressable>
 
             <Pressable onPress={() => router.back()}>
               <Text style={styles.link}>
-                Already have an account?{" "}
-                <Text style={styles.linkAccent}>Sign in</Text>
+                {t.alreadyAccount}
+                <Text style={styles.linkAccent}>{t.signInLink}</Text>
               </Text>
             </Pressable>
           </View>

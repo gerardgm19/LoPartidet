@@ -11,6 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/colors";
+import { useLangStore } from "@/store/langStore";
 
 type Position = "GK" | "DEF" | "MID" | "WIN" | "FWD";
 type Foot = "Left" | "Right" | "Both";
@@ -25,17 +26,34 @@ const POSITIONS: { value: Position; label: string }[] = [
   { value: "FWD", label: "FWD" },
 ];
 
-const FEET: Foot[] = ["Left", "Right", "Both"];
-const SKILL_LEVELS: SkillLevel[] = ["Beginner", "Intermediate", "Advanced", "Expert"];
-const SPEEDS: Speed[] = ["Slow", "Medium", "Fast", "Elite"];
-
 export default function PlayerDetails() {
+  const t = useLangStore((s) => s.t);
   const [position, setPosition] = useState<Position | null>(null);
   const [foot, setFoot] = useState<Foot | null>(null);
   const [skillLevel, setSkillLevel] = useState<SkillLevel | null>(null);
   const [speed, setSpeed] = useState<Speed | null>(null);
   const [jerseyNumber, setJerseyNumber] = useState("");
   const [height, setHeight] = useState("");
+
+  const FEET: { value: Foot; label: string }[] = [
+    { value: "Left", label: t.footLeft },
+    { value: "Right", label: t.footRight },
+    { value: "Both", label: t.footBoth },
+  ];
+
+  const SKILL_LEVELS: { value: SkillLevel; label: string }[] = [
+    { value: "Beginner", label: t.skillBeginner },
+    { value: "Intermediate", label: t.skillIntermediate },
+    { value: "Advanced", label: t.skillAdvanced },
+    { value: "Expert", label: t.skillExpert },
+  ];
+
+  const SPEEDS: { value: Speed; label: string }[] = [
+    { value: "Slow", label: t.speedSlow },
+    { value: "Medium", label: t.speedMedium },
+    { value: "Fast", label: t.speedFast },
+    { value: "Elite", label: t.speedElite },
+  ];
 
   return (
     <>
@@ -45,9 +63,9 @@ export default function PlayerDetails() {
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Ionicons name="chevron-back" size={24} color={Colors.white} />
           </TouchableOpacity>
-          <Text style={styles.title}>Player details</Text>
+          <Text style={styles.title}>{t.playerDetailsTitle}</Text>
           <TouchableOpacity style={styles.saveBtn}>
-            <Text style={styles.saveBtnText}>Save</Text>
+            <Text style={styles.saveBtnText}>{t.save}</Text>
           </TouchableOpacity>
         </View>
 
@@ -56,7 +74,7 @@ export default function PlayerDetails() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          <Section label="Position">
+          <Section label={t.position}>
             <View style={styles.pills}>
               {POSITIONS.map((p) => (
                 <TouchableOpacity
@@ -72,72 +90,72 @@ export default function PlayerDetails() {
             </View>
           </Section>
 
-          <Section label="Preferred foot">
+          <Section label={t.preferredFoot}>
             <View style={styles.pills}>
               {FEET.map((f) => (
                 <TouchableOpacity
-                  key={f}
-                  style={[styles.pill, foot === f && styles.pillActive]}
-                  onPress={() => setFoot(f)}
+                  key={f.value}
+                  style={[styles.pill, foot === f.value && styles.pillActive]}
+                  onPress={() => setFoot(f.value)}
                 >
-                  <Text style={[styles.pillText, foot === f && styles.pillTextActive]}>
-                    {f}
+                  <Text style={[styles.pillText, foot === f.value && styles.pillTextActive]}>
+                    {f.label}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
           </Section>
 
-          <Section label="Skill level">
+          <Section label={t.skillLevel}>
             <View style={styles.pills}>
               {SKILL_LEVELS.map((s) => (
                 <TouchableOpacity
-                  key={s}
-                  style={[styles.pill, skillLevel === s && styles.pillActive]}
-                  onPress={() => setSkillLevel(s)}
+                  key={s.value}
+                  style={[styles.pill, skillLevel === s.value && styles.pillActive]}
+                  onPress={() => setSkillLevel(s.value)}
                 >
-                  <Text style={[styles.pillText, skillLevel === s && styles.pillTextActive]}>
-                    {s}
+                  <Text style={[styles.pillText, skillLevel === s.value && styles.pillTextActive]}>
+                    {s.label}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
           </Section>
 
-          <Section label="Speed">
+          <Section label={t.speed}>
             <View style={styles.pills}>
               {SPEEDS.map((s) => (
                 <TouchableOpacity
-                  key={s}
-                  style={[styles.pill, speed === s && styles.pillActive]}
-                  onPress={() => setSpeed(s)}
+                  key={s.value}
+                  style={[styles.pill, speed === s.value && styles.pillActive]}
+                  onPress={() => setSpeed(s.value)}
                 >
-                  <Text style={[styles.pillText, speed === s && styles.pillTextActive]}>
-                    {s}
+                  <Text style={[styles.pillText, speed === s.value && styles.pillTextActive]}>
+                    {s.label}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
           </Section>
 
-          <Section label="Jersey number">
+          <Section label={t.jerseyNumber}>
             <TextInput
               style={styles.input}
               value={jerseyNumber}
               onChangeText={setJerseyNumber}
-              placeholder="e.g. 10"
+              placeholder={t.jerseyPlaceholder}
               placeholderTextColor={Colors.muted}
               keyboardType="number-pad"
               maxLength={2}
             />
           </Section>
 
-          <Section label="Height (cm)">
+          <Section label={t.height}>
             <TextInput
               style={styles.input}
               value={height}
               onChangeText={setHeight}
-              placeholder="e.g. 178"
+              placeholder={t.heightPlaceholder}
               placeholderTextColor={Colors.muted}
               keyboardType="number-pad"
               maxLength={3}
@@ -159,10 +177,7 @@ function Section({ label, children }: { label: string; children: React.ReactNode
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.black,
-  },
+  container: { flex: 1, backgroundColor: Colors.black },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -170,39 +185,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-  backBtn: {
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-  },
-  title: {
-    color: Colors.white,
-    fontSize: 18,
-    fontWeight: "700",
-  },
-  saveBtn: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: Colors.green,
-    borderRadius: 20,
-  },
-  saveBtnText: {
-    color: Colors.black,
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 40,
-    gap: 24,
-  },
-  section: {
-    gap: 10,
-  },
+  backBtn: { width: 40, height: 40, justifyContent: "center" },
+  title: { color: Colors.white, fontSize: 18, fontWeight: "700" },
+  saveBtn: { paddingHorizontal: 16, paddingVertical: 8, backgroundColor: Colors.green, borderRadius: 20 },
+  saveBtnText: { color: Colors.black, fontSize: 14, fontWeight: "700" },
+  scroll: { flex: 1 },
+  scrollContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 40, gap: 24 },
+  section: { gap: 10 },
   sectionLabel: {
     color: Colors.muted,
     fontSize: 12,
@@ -210,11 +199,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
     textTransform: "uppercase",
   },
-  pills: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
+  pills: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   pill: {
     paddingHorizontal: 16,
     paddingVertical: 10,
@@ -223,18 +208,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
-  pillActive: {
-    backgroundColor: Colors.green,
-    borderColor: Colors.green,
-  },
-  pillText: {
-    color: Colors.muted,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  pillTextActive: {
-    color: Colors.black,
-  },
+  pillActive: { backgroundColor: Colors.green, borderColor: Colors.green },
+  pillText: { color: Colors.muted, fontSize: 14, fontWeight: "600" },
+  pillTextActive: { color: Colors.black },
   input: {
     backgroundColor: Colors.card,
     borderWidth: 1,

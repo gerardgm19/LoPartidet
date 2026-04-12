@@ -7,8 +7,10 @@ import { getMatches } from "@/services/matchesService";
 import { Match } from "@/services/matchesService";
 import MatchCard from "@/components/MatchCard";
 import { Toast } from "@/components/Toast";
+import { useLangStore } from "@/store/langStore";
 
 export default function Matches() {
+  const t = useLangStore((s) => s.t);
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [toastVisible, setToastVisible] = useState(false);
@@ -25,11 +27,11 @@ export default function Matches() {
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.header}>
-        <Text style={styles.title}>Matches</Text>
+        <Text style={styles.title}>{t.matches}</Text>
         {liveCount > 0 && (
           <View style={styles.livePill}>
             <View style={styles.liveDot} />
-            <Text style={styles.livePillText}>{liveCount} Live</Text>
+            <Text style={styles.livePillText}>{liveCount} {t.live}</Text>
           </View>
         )}
       </View>
@@ -41,8 +43,8 @@ export default function Matches() {
       ) : matches.length === 0 ? (
         <View style={styles.centered}>
           <Text style={styles.emptyIcon}>⚽</Text>
-          <Text style={styles.emptyText}>No matches yet</Text>
-          <Text style={styles.emptySubtext}>Matches will appear here</Text>
+          <Text style={styles.emptyText}>{t.noMatchesTitle}</Text>
+          <Text style={styles.emptySubtext}>{t.noMatchesSubtitle}</Text>
         </View>
       ) : (
         <FlatList
@@ -54,7 +56,7 @@ export default function Matches() {
         />
       )}
       <Toast
-        message="Could not load matches. Check your connection."
+        message={t.matchesError}
         visible={toastVisible}
         onHide={() => setToastVisible(false)}
       />

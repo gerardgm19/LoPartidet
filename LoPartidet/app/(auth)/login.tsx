@@ -1,5 +1,6 @@
 import { Colors } from "@/constants/colors";
-import { useAuth } from "@/context/AuthContext";
+import { useAuthStore } from "@/store/authStore";
+import { useLangStore } from "@/store/langStore";
 import { login } from "@/services/authService";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -17,7 +18,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LoginScreen() {
-  const { signIn } = useAuth();
+  const { signIn } = useAuthStore();
+  const t = useLangStore((s) => s.t);
   const router = useRouter();
 
   const [email, setEmail] = useState("");
@@ -45,14 +47,14 @@ export default function LoginScreen() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-          <Text style={styles.title}>LoPartidet</Text>
-          <Text style={styles.subtitle}>Sign in to continue</Text>
+          <Text style={styles.title}>{t.signInTitle}</Text>
+          <Text style={styles.subtitle}>{t.appTagline}</Text>
 
           <View style={styles.form}>
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label}>{t.email}</Text>
             <TextInput
               style={styles.input}
-              placeholder="you@example.com"
+              placeholder={t.emailPlaceholder}
               placeholderTextColor={Colors.muted}
               autoCapitalize="none"
               keyboardType="email-address"
@@ -60,7 +62,7 @@ export default function LoginScreen() {
               onChangeText={setEmail}
             />
 
-            <Text style={styles.label}>Password</Text>
+            <Text style={styles.label}>{t.password}</Text>
             <TextInput
               style={styles.input}
               placeholder="••••••••"
@@ -80,14 +82,14 @@ export default function LoginScreen() {
               {loading ? (
                 <ActivityIndicator color={Colors.black} />
               ) : (
-                <Text style={styles.buttonText}>Sign In</Text>
+                <Text style={styles.buttonText}>{t.signIn}</Text>
               )}
             </Pressable>
 
             <Pressable onPress={() => router.push("/(auth)/register")}>
               <Text style={styles.link}>
-                Don't have an account?{" "}
-                <Text style={styles.linkAccent}>Register</Text>
+                {t.noAccount}
+                <Text style={styles.linkAccent}>{t.register}</Text>
               </Text>
             </Pressable>
           </View>
