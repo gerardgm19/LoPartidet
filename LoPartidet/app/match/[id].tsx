@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/colors";
-import { FOOTBALL_TYPE_LABEL, STATUS_CONFIG } from "@/constants/match";
+import { getFootballTypeLabel, getStatusConfig } from "@/constants/match";
 import { getMatchById, Match } from "@/services/matchesService";
 import { DetailRow } from "@/components/DetailRow";
 import { formatDate } from "@/utils/formatDate";
@@ -54,7 +54,8 @@ export default function MatchDetail() {
 	}
 
 	const { day, time } = formatDate(match.date);
-	const statusCfg = STATUS_CONFIG[match.status];
+	const footballTypeLabel = getFootballTypeLabel(t);
+	const statusCfg = getStatusConfig(t)[match.status];
 	const spotsLeft = match.maxPeople - match.joinedCount;
 	const fillRatio = match.joinedCount / match.maxPeople;
 	const isFull = spotsLeft === 0;
@@ -80,7 +81,7 @@ export default function MatchDetail() {
 				<View style={styles.hero}>
 					<View style={styles.heroTop}>
 						<View style={styles.typeBadge}>
-							<Text style={styles.typeText}>{FOOTBALL_TYPE_LABEL[match.footballType]}</Text>
+							<Text style={styles.typeText}>{footballTypeLabel[match.footballType]}</Text>
 						</View>
 						<View style={[styles.statusBadge, { backgroundColor: statusCfg.bg }]}>
 							{match.status === "live" && <View style={styles.liveDot} />}
@@ -122,7 +123,7 @@ export default function MatchDetail() {
 					<DetailRow icon="calendar-outline" label={t.date} value={day} />
 					<DetailRow icon="time-outline" label={t.time} value={time} />
 					<DetailRow icon="person-circle-outline" label={t.organizer} value={match.organizer} />
-					<DetailRow icon="football-outline" label={t.format} value={FOOTBALL_TYPE_LABEL[match.footballType]} />
+					<DetailRow icon="football-outline" label={t.format} value={footballTypeLabel[match.footballType]} />
 				</View>
 
 				{/* ── Joined status ── */}

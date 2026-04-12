@@ -3,8 +3,6 @@ using LoPartidet.API.Data;
 using LoPartidet.API.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<LoPartidetContext>(options =>
@@ -24,9 +22,7 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
         policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();

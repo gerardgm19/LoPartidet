@@ -1,20 +1,26 @@
-import { Match } from "@/services/matchesService";
 import { Colors } from "@/constants/colors";
+import { Translations } from "@/i18n";
+import { FootballType } from "@/types/footballType";
+import { MatchStatus } from "@/types/matchStatus";
 
-export const FOOTBALL_TYPE_LABEL: Record<Match["footballType"], string> = {
-  Fut5:   "Fut 5",
-  Fut7:   "Fut 7",
-  Fut11:  "Fut 11",
-  Futsal: "Futsal",
-  Beach:  "Beach",
-  Indoor: "Indoor",
-};
+export function getFootballTypeLabel(t: Translations): Record<FootballType, string> {
+  return {
+    [FootballType.Fut5]:   t.footballTypeFut5,
+    [FootballType.Fut7]:   t.footballTypeFut7,
+    [FootballType.Fut11]:  t.footballTypeFut11,
+    [FootballType.Futsal]: t.footballTypeFutsal,
+    [FootballType.Beach]:  t.footballTypeBeach,
+    [FootballType.Indoor]: t.footballTypeIndoor,
+  };
+}
 
-export const STATUS_CONFIG: Record<
-  Match["status"],
+export function getStatusConfig(t: Translations): Record<
+  MatchStatus,
   { label: string; bg: string; fg: string }
-> = {
-  Live:      { label: "Live",      bg: Colors.green,  fg: Colors.black },
-  Scheduled: { label: "Scheduled", bg: Colors.border, fg: Colors.muted },
-  Finished:  { label: "Finished",  bg: Colors.border, fg: Colors.muted },
-};
+> {
+  return {
+    [MatchStatus.Live]:      { label: t.statusLive,      bg: Colors.green,  fg: Colors.black },
+    [MatchStatus.Scheduled]: { label: t.statusScheduled, bg: Colors.border, fg: Colors.muted },
+    [MatchStatus.Finished]:  { label: t.statusFinished,  bg: Colors.border, fg: Colors.muted },
+  };
+}

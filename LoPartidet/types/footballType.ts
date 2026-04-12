@@ -1,1 +1,8 @@
-export type FootballType = "Fut5" | "Fut7" | "Fut11" | "Futsal" | "Beach" | "Indoor";
+export enum FootballType {
+  Fut5   = 0,
+  Fut7   = 1,
+  Fut11  = 2,
+  Futsal = 3,
+  Beach  = 4,
+  Indoor = 5,
+}

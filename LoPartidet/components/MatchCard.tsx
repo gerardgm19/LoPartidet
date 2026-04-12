@@ -1,8 +1,9 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/colors";
-import { FOOTBALL_TYPE_LABEL, STATUS_CONFIG } from "@/constants/match";
+import { getFootballTypeLabel, getStatusConfig } from "@/constants/match";
 import { Match } from "@/services/matchesService";
+import { useLangStore } from "@/store/langStore";
 import { formatDateShort } from "@/utils/formatDate";
 
 // ---------------------------------------------------------------------------
@@ -12,8 +13,9 @@ import { formatDateShort } from "@/utils/formatDate";
 type Props = { match: Match; onPress: () => void };
 
 export default function MatchCard({ match, onPress }: Props) {
+  const t = useLangStore((s) => s.t);
   const { day, time } = formatDateShort(match.date);
-  const statusCfg = STATUS_CONFIG[match.status];
+  const statusCfg = getStatusConfig(t)[match.status];
   const spotsLeft = match.maxPeople - match.joinedCount;
   const fillRatio = match.joinedCount / match.maxPeople;
   const isFull = spotsLeft === 0;
@@ -76,7 +78,7 @@ export default function MatchCard({ match, onPress }: Props) {
         {/* Left: type badge + organizer */}
         <View style={styles.secondaryLeft}>
           <View style={styles.typeBadge}>
-            <Text style={styles.typeText}>{FOOTBALL_TYPE_LABEL[match.footballType]}</Text>
+            <Text style={styles.typeText}>{getFootballTypeLabel(t)[match.footballType]}</Text>
           </View>
           <View style={styles.organizerItem}>
             <Ionicons name="person-outline" size={12} color={Colors.muted} />

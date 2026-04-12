@@ -29,6 +29,19 @@ const cat_es = {
   noMatchesSubtitle: "Els partits apareixeran aquí",
   matchesError: "No s'han pogut carregar els partits. Comprova la connexió.",
 
+  // Football types
+  footballTypeFut5:   "Futbol 5",
+  footballTypeFut7:   "Futbol 7",
+  footballTypeFut11:  "Futbol 11",
+  footballTypeFutsal: "Futsal",
+  footballTypeBeach:  "Futbol platja",
+  footballTypeIndoor: "Futbol sala",
+
+  // Match statuses
+  statusScheduled: "Programat",
+  statusLive:      "En viu",
+  statusFinished:  "Finalitzat",
+
   // Match detail
   matchDetails: "Detalls del partit",
   matchNotFound: "Partit no trobat",

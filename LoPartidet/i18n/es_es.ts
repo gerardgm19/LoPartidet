@@ -29,6 +29,19 @@ const es_es = {
   noMatchesSubtitle: "Los partidos aparecerán aquí",
   matchesError: "No se pudieron cargar los partidos. Comprueba tu conexión.",
 
+  // Football types
+  footballTypeFut5:   "Fútbol 5",
+  footballTypeFut7:   "Fútbol 7",
+  footballTypeFut11:  "Fútbol 11",
+  footballTypeFutsal: "Fútsal",
+  footballTypeBeach:  "Fútbol playa",
+  footballTypeIndoor: "Fútbol sala",
+
+  // Match statuses
+  statusScheduled: "Programado",
+  statusLive:      "En vivo",
+  statusFinished:  "Finalizado",
+
   // Match detail
   matchDetails: "Detalles del partido",
   matchNotFound: "Partido no encontrado",

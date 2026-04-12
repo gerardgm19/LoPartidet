@@ -1,8 +1,10 @@
 import { Platform } from "react-native";
 import { FootballType } from "@/types/footballType";
+import { MatchStatus } from "@/types/matchStatus";
 import { apiClient } from "./api";
 
 export type { FootballType };
+export type { MatchStatus };
 
 // Android emulator routes localhost traffic to 10.0.2.2 (the host machine).
 // iOS simulator can reach the host directly via localhost.
@@ -26,7 +28,7 @@ export type Match = {
   joinedCount: number;
   maxPeople: number;
   isJoined: boolean;
-  status: "Scheduled" | "Live" | "Finished";
+  status: MatchStatus;
 };
 
 // ---------------------------------------------------------------------------
