@@ -1,3 +1,4 @@
+import axios from "axios";
 import { Platform } from "react-native";
 
 const DEBUG_BASE_URL =
@@ -11,22 +12,23 @@ const isDebug = true;
 
 const BASE_URL = isDebug ? DEBUG_BASE_URL : PROD_BASE_URL;
 
+const authClient = axios.create({
+  headers: { "Content-Type": "application/json" },
+});
+
 export type AuthResponse = {
   userId: string;
   token: string;
 };
 
 export async function login(email: string, password: string): Promise<AuthResponse> {
-  const response = await fetch(`${BASE_URL}/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  });
-
-  if (response.status === 401) throw new Error("Invalid email or password.");
-  if (!response.ok) throw new Error("Login failed. Please try again.");
-
-  return response.json();
+  try {
+    const { data } = await authClient.post<AuthResponse>(`${BASE_URL}/auth/login`, { email, password });
+    return data;
+  } catch (error: any) {
+    if (error.response?.status === 401) throw new Error("Invalid email or password.");
+    throw new Error("Login failed. Please try again.");
+  }
 }
 
 export async function register(
@@ -36,16 +38,17 @@ export async function register(
   surname: string,
   nickname: string
 ): Promise<AuthResponse> {
-  const response = await fetch(`${BASE_URL}/auth/register`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password, name, surname, nickname }),
-  });
-
-  if (!response.ok) {
-    const body = await response.json().catch(() => null);
+  try {
+    const { data } = await authClient.post<AuthResponse>(`${BASE_URL}/auth/register`, {
+      email,
+      password,
+      name,
+      surname,
+      nickname,
+    });
+    return data;
+  } catch (error: any) {
+    const body = error.response?.data;
     throw new Error(body?.error ?? "Registration failed. Please try again.");
   }
-
-  return response.json();
 }

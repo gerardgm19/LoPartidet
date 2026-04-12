@@ -1,3 +1,4 @@
+import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 
@@ -7,25 +8,28 @@ export function setUnauthorizedHandler(handler: () => void) {
   onUnauthorized = handler;
 }
 
-async function getToken(): Promise<string | null> {
-  if (Platform.OS === "web") return localStorage.getItem("auth_token");
-  return SecureStore.getItemAsync("auth_token");
-}
+export const apiClient = axios.create({
+  headers: { "Content-Type": "application/json" },
+});
 
-export async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Response> {
-  const token = await getToken();
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-  });
+apiClient.interceptors.request.use(async (config) => {
+  const token =
+    Platform.OS === "web"
+      ? localStorage.getItem("auth_token")
+      : await SecureStore.getItemAsync("auth_token");
 
-  if (response.status === 401) {
-    onUnauthorized?.();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
+  return config;
+});
 
-  return response;
-}
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      onUnauthorized?.();
+    }
+    return Promise.reject(error);
+  }
+);
