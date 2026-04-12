@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Colors } from "@/constants/colors";
@@ -6,6 +6,10 @@ import { Colors } from "@/constants/colors";
 export default function Profile() {
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
       <Text style={styles.title}>Profile</Text>
       <View style={styles.avatar}>
         <Text style={styles.avatarText}>?</Text>
@@ -46,6 +50,7 @@ export default function Profile() {
           </TouchableOpacity>
         ))}
       </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -54,8 +59,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.black,
+  },
+  scroll: {
     paddingTop: 16,
     paddingHorizontal: 20,
+    paddingBottom: 32,
     alignItems: "center",
   },
   title: {

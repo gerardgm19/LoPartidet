@@ -1,19 +1,12 @@
-import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { Tabs } from "expo-router";
 import { Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
 
 function TabLabel({ label, color }: { label: string; color: string }) {
   return (
-    <Text
-      style={{
-        color,
-        fontSize: 11,
-        fontWeight: "600",
-        letterSpacing: 0.5,
-      }}
-    >
+    <Text style={{ color, fontSize: 11, fontWeight: "600", letterSpacing: 0.5 }}>
       {label}
     </Text>
   );
