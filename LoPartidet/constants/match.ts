@@ -18,9 +18,10 @@ export function getStatusConfig(t: Translations): Record<
   MatchStatus,
   { label: string; bg: string; fg: string }
 > {
+
   return {
-    [MatchStatus.Live]:      { label: t.statusLive,      bg: Colors.green,  fg: Colors.black },
+    [MatchStatus.Live]: { label: t.statusLive, bg: Colors.green, fg: Colors.black },
     [MatchStatus.Scheduled]: { label: t.statusScheduled, bg: Colors.border, fg: Colors.muted },
-    [MatchStatus.Finished]:  { label: t.statusFinished,  bg: Colors.border, fg: Colors.muted },
+    [MatchStatus.Finished]: { label: t.statusFinished, bg: Colors.border, fg: Colors.muted },
   };
 }

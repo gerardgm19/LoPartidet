@@ -8,6 +8,7 @@ import { Match } from "@/services/matchesService";
 import MatchCard from "@/components/MatchCard";
 import { Toast } from "@/components/Toast";
 import { useLangStore } from "@/store/langStore";
+import { MatchStatus } from "@/types/matchStatus";
 
 export default function Matches() {
   const t = useLangStore((s) => s.t);
@@ -22,7 +23,7 @@ export default function Matches() {
       .finally(() => setLoading(false));
   }, []);
 
-  const liveCount = matches.filter((m) => m.status === "Live").length;
+  const liveCount = matches.filter((m) => m.status === MatchStatus.Live).length;
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
