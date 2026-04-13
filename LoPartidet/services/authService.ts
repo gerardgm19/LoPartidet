@@ -1,16 +1,7 @@
 import axios from "axios";
-import { Platform } from "react-native";
+import { AUTH_BASE_URL } from "@/constants/env";
 
-const DEBUG_BASE_URL =
-  Platform.OS === "android"
-    ? "http://10.0.2.2:5193"
-    : "http://localhost:5193";
-
-const PROD_BASE_URL = "http://178.33.119.182:5193";
-
-const isDebug = true;
-
-const BASE_URL = isDebug ? DEBUG_BASE_URL : PROD_BASE_URL;
+const BASE_URL = AUTH_BASE_URL;
 
 const authClient = axios.create({
   headers: { "Content-Type": "application/json" },
