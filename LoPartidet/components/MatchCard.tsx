@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/colors";
 import { getFootballTypeLabel, getStatusConfig } from "@/constants/match";
 import { Match } from "@/services/matchesService";
+import { MatchStatus } from "@/types/matchStatus";
 import { useLangStore } from "@/store/langStore";
 import { formatDateShort } from "@/utils/formatDate";
 
@@ -89,7 +90,7 @@ export default function MatchCard({ match, onPress }: Props) {
         {/* Right: status + joined */}
         <View style={styles.secondaryRight}>
           <View style={[styles.statusBadge, { backgroundColor: statusCfg.bg }]}>
-            {match.status === "live" && <View style={styles.liveDot} />}
+            {match.status === MatchStatus.Live && <View style={styles.liveDot} />}
             <Text style={[styles.statusText, { color: statusCfg.fg }]}>{statusCfg.label}</Text>
           </View>
           <View style={[styles.joinedBadge, match.isJoined && styles.joinedBadgeActive]}>
