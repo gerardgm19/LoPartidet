@@ -76,8 +76,8 @@ mocks/
 ## API base URLs
 
 Two services, two ports:
-- **Matches API** — port `5145` (`matchesService.ts`)
-- **Auth API** — port `5193` (`authService.ts`)
+- **Matches API** — port `10004` (`matchesService.ts`)
+- **Auth API** — port `10002` (`authService.ts`)
 
 Android emulator routes `localhost` to `10.0.2.2`. Toggle `isDebug` in each service file to switch between local and production (`178.33.119.182`).
 

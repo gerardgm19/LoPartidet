@@ -29,18 +29,26 @@ const es_es = {
   noMatchesSubtitle: "Los partidos aparecerán aquí",
   matchesError: "No se pudieron cargar los partidos. Comprueba tu conexión.",
 
-  // Football types
-  footballTypeFut5:   "Fútbol 5",
-  footballTypeFut7:   "Fútbol 7",
-  footballTypeFut11:  "Fútbol 11",
-  footballTypeFutsal: "Fútsal",
-  footballTypeBeach:  "Fútbol playa",
-  footballTypeIndoor: "Fútbol sala",
+  // Sport types
+  sportTypeFut5:   "Fútbol 5",
+  sportTypeFut7:   "Fútbol 7",
+  sportTypeFut11:  "Fútbol 11",
+  sportTypeFutsal: "Fútsal",
+  sportTypeBeach:  "Fútbol playa",
+  sportTypeIndoor: "Fútbol sala",
 
   // Match statuses
   statusScheduled: "Programado",
   statusLive:      "En vivo",
   statusFinished:  "Finalizado",
+
+  // Create match
+  createMatchTitle:  "Nuevo partido",
+  createMatchBtn:    "Crear partido",
+  sportType:         "Tipo de deporte",
+  maxPlayers:        "Jugadores máximos",
+  matchCreated:      "¡Partido creado!",
+  createMatchError:  "No se pudo crear el partido.",
 
   // Match detail
   matchDetails: "Detalles del partido",

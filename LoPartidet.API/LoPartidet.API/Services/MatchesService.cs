@@ -15,11 +15,12 @@ public class MatchesService(LoPartidetContext db) : IMatchesService
         var match = new Match
         {
             Id = Guid.NewGuid().ToString(),
-            Type = request.FootballType,
+            Type = request.Type,
             Date = request.Date,
             Location = request.Location,
             CreatedBy = request.CreatedBy,
             CreatedAt = DateTime.UtcNow,
+            MaxPlayers = request.MaxPlayers,
             Status = MatchStatus.Scheduled,
         };
 

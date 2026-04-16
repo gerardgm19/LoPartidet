@@ -39,6 +39,7 @@ module.exports = {
         },
       ],
       "expo-secure-store",
+      "@react-native-community/datetimepicker",
     ],
     experiments: {
       typedRoutes: true,
