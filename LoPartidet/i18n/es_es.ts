@@ -127,6 +127,11 @@ const es_es = {
   cancel: "Cancelar",
   confirm: "Confirmar",
 
+  // Theme
+  theme: "Tema",
+  themeDark: "Oscuro",
+  themeLight: "Claro",
+
   // Language picker
   selectLanguage: "Seleccionar idioma",
   langCatalan: "Català",

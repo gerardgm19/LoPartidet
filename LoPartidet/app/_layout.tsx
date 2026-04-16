@@ -1,5 +1,6 @@
 import { useAuthStore } from "@/store/authStore";
 import { useLangStore } from "@/store/langStore";
+import { useThemeStore } from "@/store/themeStore";
 import { setUnauthorizedHandler } from "@/services/api";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
@@ -11,10 +12,12 @@ function RootNavigator() {
   const router = useRouter();
 
   const initLang = useLangStore((s) => s.initialize);
+  const initTheme = useThemeStore((s) => s.initialize);
 
   useEffect(() => {
     initialize();
     initLang();
+    initTheme();
   }, []);
 
   useEffect(() => {

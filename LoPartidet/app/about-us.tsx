@@ -11,13 +11,76 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { Colors } from "@/constants/colors";
+import { useThemeStore } from "@/store/themeStore";
+import { makeStyles } from "@/utils/makeStyles";
 import { useLangStore } from "@/store/langStore";
 
 const TAP_TARGET = 5;
 
+const LOGO_SIZE = 160;
+
+const useStyles = makeStyles((colors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.black },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  backBtn: { width: 40, height: 40, justifyContent: "center" },
+  title: { color: colors.white, fontSize: 18, fontWeight: "700" },
+  headerSpacer: { width: 40 },
+  body: { flex: 1, alignItems: "center", justifyContent: "center", gap: 16 },
+  logoWrapper: {
+    width: LOGO_SIZE,
+    height: LOGO_SIZE,
+    borderRadius: LOGO_SIZE / 2,
+    borderWidth: 3,
+    borderColor: colors.green,
+    backgroundColor: colors.card,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+  },
+  logoInner: { width: LOGO_SIZE, height: LOGO_SIZE, alignItems: "center", justifyContent: "center" },
+  outerRing: {
+    position: "absolute",
+    width: LOGO_SIZE - 24,
+    height: LOGO_SIZE - 24,
+    borderRadius: (LOGO_SIZE - 24) / 2,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  fieldLineH: { position: "absolute", width: LOGO_SIZE, height: 1, backgroundColor: colors.border },
+  fieldLineV: { position: "absolute", width: 1, height: LOGO_SIZE, backgroundColor: colors.border },
+  centerCircle: { position: "absolute", width: 48, height: 48, borderRadius: 24, borderWidth: 1, borderColor: colors.border },
+  initialsWrapper: { position: "absolute", alignItems: "center", justifyContent: "center" },
+  initials: { color: colors.green, fontSize: 36, fontWeight: "800", letterSpacing: -1 },
+  appName: { color: colors.white, fontSize: 28, fontWeight: "800", letterSpacing: -0.5, marginTop: 8 },
+  appTagline: { color: colors.muted, fontSize: 14 },
+  tapHint: {
+    marginTop: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    backgroundColor: colors.card,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  tapHintText: { color: colors.green, fontSize: 12, fontWeight: "600" },
+  footer: { paddingHorizontal: 24, paddingBottom: 32, alignItems: "center", gap: 12 },
+  infoCard: { backgroundColor: colors.card, borderRadius: 16, padding: 20 },
+  infoText: { color: colors.muted, fontSize: 14, lineHeight: 22, textAlign: "center" },
+  version: { color: colors.border, fontSize: 12 },
+  credit: { color: colors.muted, fontSize: 13 },
+}));
+
 export default function AboutUs() {
   const t = useLangStore((s) => s.t);
+  const colors = useThemeStore((s) => s.colors);
+  const styles = useStyles();
+
   const [tapCount, setTapCount] = useState(0);
   const spinValue = useRef(new Animated.Value(0)).current;
   const scaleValue = useRef(new Animated.Value(1)).current;
@@ -51,7 +114,7 @@ export default function AboutUs() {
   };
 
   const spin = spinValue.interpolate({ inputRange: [0, 1], outputRange: ["0deg", "360deg"] });
-  const glowBorder = glowValue.interpolate({ inputRange: [0, 1], outputRange: [Colors.green, "#ffffff"] });
+  const glowBorder = glowValue.interpolate({ inputRange: [0, 1], outputRange: [colors.green, "#ffffff"] });
   const dotsRemaining = TAP_TARGET - 1 - tapCount;
 
   return (
@@ -60,7 +123,7 @@ export default function AboutUs() {
       <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Ionicons name="chevron-back" size={24} color={Colors.white} />
+            <Ionicons name="chevron-back" size={24} color={colors.white} />
           </TouchableOpacity>
           <Text style={styles.title}>{t.aboutUsTitle}</Text>
           <View style={styles.headerSpacer} />
@@ -104,62 +167,3 @@ export default function AboutUs() {
     </>
   );
 }
-
-const LOGO_SIZE = 160;
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.black },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  backBtn: { width: 40, height: 40, justifyContent: "center" },
-  title: { color: Colors.white, fontSize: 18, fontWeight: "700" },
-  headerSpacer: { width: 40 },
-  body: { flex: 1, alignItems: "center", justifyContent: "center", gap: 16 },
-  logoWrapper: {
-    width: LOGO_SIZE,
-    height: LOGO_SIZE,
-    borderRadius: LOGO_SIZE / 2,
-    borderWidth: 3,
-    borderColor: Colors.green,
-    backgroundColor: Colors.card,
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-  },
-  logoInner: { width: LOGO_SIZE, height: LOGO_SIZE, alignItems: "center", justifyContent: "center" },
-  outerRing: {
-    position: "absolute",
-    width: LOGO_SIZE - 24,
-    height: LOGO_SIZE - 24,
-    borderRadius: (LOGO_SIZE - 24) / 2,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  fieldLineH: { position: "absolute", width: LOGO_SIZE, height: 1, backgroundColor: Colors.border },
-  fieldLineV: { position: "absolute", width: 1, height: LOGO_SIZE, backgroundColor: Colors.border },
-  centerCircle: { position: "absolute", width: 48, height: 48, borderRadius: 24, borderWidth: 1, borderColor: Colors.border },
-  initialsWrapper: { position: "absolute", alignItems: "center", justifyContent: "center" },
-  initials: { color: Colors.green, fontSize: 36, fontWeight: "800", letterSpacing: -1 },
-  appName: { color: Colors.white, fontSize: 28, fontWeight: "800", letterSpacing: -0.5, marginTop: 8 },
-  appTagline: { color: Colors.muted, fontSize: 14 },
-  tapHint: {
-    marginTop: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    backgroundColor: Colors.card,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  tapHintText: { color: Colors.green, fontSize: 12, fontWeight: "600" },
-  footer: { paddingHorizontal: 24, paddingBottom: 32, alignItems: "center", gap: 12 },
-  infoCard: { backgroundColor: Colors.card, borderRadius: 16, padding: 20 },
-  infoText: { color: Colors.muted, fontSize: 14, lineHeight: 22, textAlign: "center" },
-  version: { color: Colors.border, fontSize: 12 },
-  credit: { color: Colors.muted, fontSize: 13 },
-});

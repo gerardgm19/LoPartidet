@@ -6,13 +6,12 @@ namespace LoPartidet.API.Services;
 
 public class UsersService(LoPartidetContext db) : IUsersService
 {
-    public User? GetById(string id) => db.Users.Find(id);
+    public User? GetById(int id) => db.Users.Find(id);
 
     public User CreateUser(CreateUserRequest request)
     {
         var user = new User
         {
-            Id = Guid.NewGuid().ToString(),
             Name = request.Name,
             Surname = request.Surname,
             Nickname = request.Nickname,
@@ -32,7 +31,7 @@ public class UsersService(LoPartidetContext db) : IUsersService
         return user;
     }
 
-    public User? UpdateUser(string id, UpdateUserRequest request)
+    public User? UpdateUser(int id, UpdateUserRequest request)
     {
         var user = db.Users.Find(id);
         if (user is null) return null;

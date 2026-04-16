@@ -1,21 +1,7 @@
-/**
- * DateTimePickerField
- *
- * Individual numeric segment inputs for DD / MM / YYYY and HH : MM.
- * Works identically on web, Android and iOS — no native modules required.
- *
- * Display values are NOT zero-padded while typing so that "1" stays "1"
- * until the user adds a second digit (e.g. "15"), at which point the cursor
- * auto-advances to the next segment.
- */
-
 import { useRef } from "react";
 import { Platform, StyleSheet, Text, TextInput, View } from "react-native";
-import { Colors } from "@/constants/colors";
-
-// ---------------------------------------------------------------------------
-// Public API
-// ---------------------------------------------------------------------------
+import { useThemeStore } from "@/store/themeStore";
+import { makeStyles } from "@/utils/makeStyles";
 
 type Props = {
   mode: "date" | "time";
@@ -33,11 +19,42 @@ export default function DateTimePickerField({ mode, value, onChange }: Props) {
 // Date field  ·  DD / MM / YYYY
 // ---------------------------------------------------------------------------
 
+const useStyles = makeStyles((colors) => StyleSheet.create({
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: 10,
+    paddingVertical: Platform.OS === "web" ? 4 : 2,
+  },
+  sep: {
+    color: colors.muted,
+    fontSize: 16,
+    fontWeight: "600",
+    paddingHorizontal: 2,
+  },
+  segment: {
+    color: colors.white,
+    fontSize: 15,
+    paddingVertical: 10,
+    paddingHorizontal: 4,
+    minWidth: 30,
+    ...(Platform.OS === "web" ? ({ outlineWidth: 0, borderWidth: 0 } as object) : {}),
+  },
+  segmentWide: {
+    minWidth: 46,
+  },
+}));
+
 function DateField({ value, onChange }: Omit<Props, "mode">) {
+  const styles = useStyles();
+  const colors = useThemeStore((s) => s.colors);
   const monthRef = useRef<TextInput>(null);
   const yearRef  = useRef<TextInput>(null);
 
-  // Use raw (unpadded) numbers so the controlled value doesn't fight typing.
   const day   = value.getDate();
   const month = value.getMonth() + 1;
   const year  = value.getFullYear();
@@ -50,33 +67,15 @@ function DateField({ value, onChange }: Omit<Props, "mode">) {
 
   return (
     <View style={styles.row}>
-      <Segment
-        value={String(day)}
-        maxLength={2}
-        placeholder="DD"
-        onChangeText={(v) => {
-          commit(num(v), month, year);
-          if (v.length === 2) monthRef.current?.focus();
-        }}
+      <Segment styles={styles} colors={colors} value={String(day)} maxLength={2} placeholder="DD"
+        onChangeText={(v) => { commit(num(v), month, year); if (v.length === 2) monthRef.current?.focus(); }}
       />
-      <Sep>/</Sep>
-      <Segment
-        ref={monthRef}
-        value={String(month)}
-        maxLength={2}
-        placeholder="MM"
-        onChangeText={(v) => {
-          commit(day, num(v), year);
-          if (v.length === 2) yearRef.current?.focus();
-        }}
+      <Text style={styles.sep}>/</Text>
+      <Segment ref={monthRef} styles={styles} colors={colors} value={String(month)} maxLength={2} placeholder="MM"
+        onChangeText={(v) => { commit(day, num(v), year); if (v.length === 2) yearRef.current?.focus(); }}
       />
-      <Sep>/</Sep>
-      <Segment
-        ref={yearRef}
-        value={String(year)}
-        maxLength={4}
-        placeholder="YYYY"
-        wide
+      <Text style={styles.sep}>/</Text>
+      <Segment ref={yearRef} styles={styles} colors={colors} value={String(year)} maxLength={4} placeholder="YYYY" wide
         onChangeText={(v) => commit(day, month, num(v))}
       />
     </View>
@@ -88,6 +87,8 @@ function DateField({ value, onChange }: Omit<Props, "mode">) {
 // ---------------------------------------------------------------------------
 
 function TimeField({ value, onChange }: Omit<Props, "mode">) {
+  const styles = useStyles();
+  const colors = useThemeStore((s) => s.colors);
   const minRef = useRef<TextInput>(null);
 
   const hours   = value.getHours();
@@ -101,21 +102,11 @@ function TimeField({ value, onChange }: Omit<Props, "mode">) {
 
   return (
     <View style={styles.row}>
-      <Segment
-        value={String(hours)}
-        maxLength={2}
-        placeholder="HH"
-        onChangeText={(v) => {
-          commit(num(v), minutes);
-          if (v.length === 2) minRef.current?.focus();
-        }}
+      <Segment styles={styles} colors={colors} value={String(hours)} maxLength={2} placeholder="HH"
+        onChangeText={(v) => { commit(num(v), minutes); if (v.length === 2) minRef.current?.focus(); }}
       />
-      <Sep>:</Sep>
-      <Segment
-        ref={minRef}
-        value={String(minutes)}
-        maxLength={2}
-        placeholder="MM"
+      <Text style={styles.sep}>:</Text>
+      <Segment ref={minRef} styles={styles} colors={colors} value={String(minutes)} maxLength={2} placeholder="MM"
         onChangeText={(v) => commit(hours, num(v))}
       />
     </View>
@@ -126,8 +117,12 @@ function TimeField({ value, onChange }: Omit<Props, "mode">) {
 // Shared segment input
 // ---------------------------------------------------------------------------
 
+type SegmentStyles = { segment: object; segmentWide: object };
+
 type SegmentProps = {
   ref?: React.Ref<TextInput>;
+  styles: SegmentStyles;
+  colors: { muted: string };
   value: string;
   maxLength: number;
   placeholder: string;
@@ -135,7 +130,7 @@ type SegmentProps = {
   onChangeText: (v: string) => void;
 };
 
-function Segment({ ref, value, maxLength, placeholder, wide, onChangeText }: SegmentProps) {
+function Segment({ ref, styles, colors, value, maxLength, placeholder, wide, onChangeText }: SegmentProps) {
   return (
     <TextInput
       ref={ref}
@@ -146,7 +141,7 @@ function Segment({ ref, value, maxLength, placeholder, wide, onChangeText }: Seg
         onChangeText(digits);
       }}
       placeholder={placeholder}
-      placeholderTextColor={Colors.muted}
+      placeholderTextColor={colors.muted}
       keyboardType="number-pad"
       inputMode="numeric"
       maxLength={maxLength}
@@ -155,46 +150,6 @@ function Segment({ ref, value, maxLength, placeholder, wide, onChangeText }: Seg
     />
   );
 }
-
-// Inline separator label
-function Sep({ children }: { children: string }) {
-  return <Text style={styles.sep}>{children}</Text>;
-}
-
-// ---------------------------------------------------------------------------
-// Styles
-// ---------------------------------------------------------------------------
-
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: Colors.card,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    paddingHorizontal: 10,
-    paddingVertical: Platform.OS === "web" ? 4 : 2,
-  },
-  sep: {
-    color: Colors.muted,
-    fontSize: 16,
-    fontWeight: "600",
-    paddingHorizontal: 2,
-  },
-  segment: {
-    color: Colors.white,
-    fontSize: 15,
-    paddingVertical: 10,
-    paddingHorizontal: 4,
-    minWidth: 30,
-    // Remove browser outline/border on web
-    ...(Platform.OS === "web" ? { outlineWidth: 0, borderWidth: 0 } : {}),
-  },
-  segmentWide: {
-    minWidth: 46,
-  },
-});
 
 // ---------------------------------------------------------------------------
 // Helpers

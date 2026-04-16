@@ -12,7 +12,7 @@ namespace LoPartidet.API.Controllers;
 public class UsersController(IUsersService usersService) : ControllerBase
 {
     [HttpGet("{id}")]
-    public ActionResult<User> GetById(string id)
+    public ActionResult<User> GetById(int id)
     {
         var user = usersService.GetById(id);
         return user is null ? NotFound() : Ok(user);
@@ -26,7 +26,7 @@ public class UsersController(IUsersService usersService) : ControllerBase
     }
 
     [HttpPatch("{id}")]
-    public ActionResult<User> UpdateUser(string id, UpdateUserRequest request)
+    public ActionResult<User> UpdateUser(int id, UpdateUserRequest request)
     {
         var user = usersService.UpdateUser(id, request);
         return user is null ? NotFound() : Ok(user);

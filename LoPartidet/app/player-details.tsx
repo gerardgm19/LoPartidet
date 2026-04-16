@@ -10,7 +10,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { Colors } from "@/constants/colors";
+import { useThemeStore } from "@/store/themeStore";
+import { makeStyles } from "@/utils/makeStyles";
 import { useLangStore } from "@/store/langStore";
 
 type Position = "GK" | "DEF" | "MID" | "WIN" | "FWD";
@@ -26,8 +27,58 @@ const POSITIONS: { value: Position; label: string }[] = [
   { value: "FWD", label: "FWD" },
 ];
 
+const useStyles = makeStyles((colors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.black },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  backBtn: { width: 40, height: 40, justifyContent: "center" },
+  title: { color: colors.white, fontSize: 18, fontWeight: "700" },
+  saveBtn: { paddingHorizontal: 16, paddingVertical: 8, backgroundColor: colors.green, borderRadius: 20 },
+  saveBtnText: { color: colors.black, fontSize: 14, fontWeight: "700" },
+  scroll: { flex: 1 },
+  scrollContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 40, gap: 24 },
+  section: { gap: 10 },
+  sectionLabel: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "600",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+  },
+  pills: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  pill: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  pillActive: { backgroundColor: colors.green, borderColor: colors.green },
+  pillText: { color: colors.muted, fontSize: 14, fontWeight: "600" },
+  pillTextActive: { color: colors.black },
+  input: {
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    color: colors.white,
+    fontSize: 16,
+  },
+}));
+
 export default function PlayerDetails() {
   const t = useLangStore((s) => s.t);
+  const colors = useThemeStore((s) => s.colors);
+  const styles = useStyles();
+
   const [position, setPosition] = useState<Position | null>(null);
   const [foot, setFoot] = useState<Foot | null>(null);
   const [skillLevel, setSkillLevel] = useState<SkillLevel | null>(null);
@@ -61,7 +112,7 @@ export default function PlayerDetails() {
       <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Ionicons name="chevron-back" size={24} color={Colors.white} />
+            <Ionicons name="chevron-back" size={24} color={colors.white} />
           </TouchableOpacity>
           <Text style={styles.title}>{t.playerDetailsTitle}</Text>
           <TouchableOpacity style={styles.saveBtn}>
@@ -74,7 +125,8 @@ export default function PlayerDetails() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          <Section label={t.position}>
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>{t.position}</Text>
             <View style={styles.pills}>
               {POSITIONS.map((p) => (
                 <TouchableOpacity
@@ -88,9 +140,10 @@ export default function PlayerDetails() {
                 </TouchableOpacity>
               ))}
             </View>
-          </Section>
+          </View>
 
-          <Section label={t.preferredFoot}>
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>{t.preferredFoot}</Text>
             <View style={styles.pills}>
               {FEET.map((f) => (
                 <TouchableOpacity
@@ -104,9 +157,10 @@ export default function PlayerDetails() {
                 </TouchableOpacity>
               ))}
             </View>
-          </Section>
+          </View>
 
-          <Section label={t.skillLevel}>
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>{t.skillLevel}</Text>
             <View style={styles.pills}>
               {SKILL_LEVELS.map((s) => (
                 <TouchableOpacity
@@ -120,9 +174,10 @@ export default function PlayerDetails() {
                 </TouchableOpacity>
               ))}
             </View>
-          </Section>
+          </View>
 
-          <Section label={t.speed}>
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>{t.speed}</Text>
             <View style={styles.pills}>
               {SPEEDS.map((s) => (
                 <TouchableOpacity
@@ -136,89 +191,35 @@ export default function PlayerDetails() {
                 </TouchableOpacity>
               ))}
             </View>
-          </Section>
+          </View>
 
-          <Section label={t.jerseyNumber}>
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>{t.jerseyNumber}</Text>
             <TextInput
               style={styles.input}
               value={jerseyNumber}
               onChangeText={setJerseyNumber}
               placeholder={t.jerseyPlaceholder}
-              placeholderTextColor={Colors.muted}
+              placeholderTextColor={colors.muted}
               keyboardType="number-pad"
               maxLength={2}
             />
-          </Section>
+          </View>
 
-          <Section label={t.height}>
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>{t.height}</Text>
             <TextInput
               style={styles.input}
               value={height}
               onChangeText={setHeight}
               placeholder={t.heightPlaceholder}
-              placeholderTextColor={Colors.muted}
+              placeholderTextColor={colors.muted}
               keyboardType="number-pad"
               maxLength={3}
             />
-          </Section>
+          </View>
         </ScrollView>
       </SafeAreaView>
     </>
   );
 }
-
-function Section({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <View style={styles.section}>
-      <Text style={styles.sectionLabel}>{label}</Text>
-      {children}
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.black },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  backBtn: { width: 40, height: 40, justifyContent: "center" },
-  title: { color: Colors.white, fontSize: 18, fontWeight: "700" },
-  saveBtn: { paddingHorizontal: 16, paddingVertical: 8, backgroundColor: Colors.green, borderRadius: 20 },
-  saveBtnText: { color: Colors.black, fontSize: 14, fontWeight: "700" },
-  scroll: { flex: 1 },
-  scrollContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 40, gap: 24 },
-  section: { gap: 10 },
-  sectionLabel: {
-    color: Colors.muted,
-    fontSize: 12,
-    fontWeight: "600",
-    letterSpacing: 0.8,
-    textTransform: "uppercase",
-  },
-  pills: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  pill: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  pillActive: { backgroundColor: Colors.green, borderColor: Colors.green },
-  pillText: { color: Colors.muted, fontSize: 14, fontWeight: "600" },
-  pillTextActive: { color: Colors.black },
-  input: {
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    color: Colors.white,
-    fontSize: 16,
-  },
-});

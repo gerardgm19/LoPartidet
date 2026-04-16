@@ -15,16 +15,23 @@ public class MatchesController(IMatchesService matchesService) : ControllerBase
     public ActionResult<IEnumerable<Match>> GetAll() => Ok(matchesService.GetAll());
 
     [HttpGet("{id}")]
-    public ActionResult<Match> GetById(string id)
+    public ActionResult<Match> GetById(int id)
     {
         var match = matchesService.GetById(id);
         return match is null ? NotFound() : Ok(match);
     }
 
     [HttpPost]
-    public ActionResult<Match> CreateMatch(CreateMatchDto request)
+    public async Task<ActionResult<Match>> CreateMatch(CreateMatchDto request)
     {
-        var match = matchesService.CreateMatch(request);
-        return CreatedAtAction(nameof(GetById), new { id = match.Id }, match);
+        try
+        {
+            var match = await matchesService.CreateMatch(request);
+            return CreatedAtAction(nameof(GetById), new { id = match.Id }, match);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }

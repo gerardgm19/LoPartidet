@@ -1,4 +1,4 @@
-import { Colors } from "@/constants/colors";
+import { ColorPalette } from "@/constants/colors";
 import { Translations } from "@/i18n";
 import { SportType } from "@/types/sportType";
 import { MatchStatus } from "@/types/matchStatus";
@@ -14,13 +14,13 @@ export function getSportTypeLabel(t: Translations): Record<SportType, string> {
   };
 }
 
-export function getStatusConfig(t: Translations): Record<
-  MatchStatus,
-  { label: string; bg: string; fg: string }
-> {
+export function getStatusConfig(
+  t: Translations,
+  colors: ColorPalette,
+): Record<MatchStatus, { label: string; bg: string; fg: string }> {
   return {
-    [MatchStatus.Live]:      { label: t.statusLive,      bg: Colors.green,  fg: Colors.black },
-    [MatchStatus.Scheduled]: { label: t.statusScheduled, bg: Colors.border, fg: Colors.muted },
-    [MatchStatus.Finished]:  { label: t.statusFinished,  bg: Colors.border, fg: Colors.muted },
+    [MatchStatus.Live]:      { label: t.statusLive,      bg: colors.green,  fg: colors.black },
+    [MatchStatus.Scheduled]: { label: t.statusScheduled, bg: colors.border, fg: colors.muted },
+    [MatchStatus.Finished]:  { label: t.statusFinished,  bg: colors.border, fg: colors.muted },
   };
 }

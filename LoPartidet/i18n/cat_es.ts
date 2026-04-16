@@ -127,6 +127,11 @@ const cat_es = {
   cancel: "Cancel·lar",
   confirm: "Confirmar",
 
+  // Theme
+  theme: "Tema",
+  themeDark: "Fosc",
+  themeLight: "Clar",
+
   // Language picker
   selectLanguage: "Seleccionar idioma",
   langCatalan: "Català",

@@ -5,7 +5,7 @@ namespace LoPartidet.API.Services;
 
 public interface IUsersService
 {
-    User? GetById(string id);
+    User? GetById(int id);
     User CreateUser(CreateUserRequest request);
-    User? UpdateUser(string id, UpdateUserRequest request);
+    User? UpdateUser(int id, UpdateUserRequest request);
 }

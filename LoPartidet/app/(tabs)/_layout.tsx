@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Colors } from "@/constants/colors";
+import { useThemeStore } from "@/store/themeStore";
 import { useLangStore } from "@/store/langStore";
 
 function TabLabel({ label, color }: { label: string; color: string }) {
@@ -16,16 +16,17 @@ function TabLabel({ label, color }: { label: string; color: string }) {
 export default function TabLayout() {
   const { bottom } = useSafeAreaInsets();
   const t = useLangStore((s) => s.t);
+  const colors = useThemeStore((s) => s.colors);
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: Colors.green,
-        tabBarInactiveTintColor: Colors.muted,
+        tabBarActiveTintColor: colors.green,
+        tabBarInactiveTintColor: colors.muted,
         tabBarStyle: {
-          backgroundColor: Colors.surface,
-          borderTopColor: Colors.border,
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
           borderTopWidth: 1,
           paddingBottom: bottom + 8,
           paddingTop: 8,
@@ -50,8 +51,21 @@ export default function TabLayout() {
           title: "",
           tabBarLabel: () => null,
           tabBarIcon: () => (
-            <View style={styles.createBtn}>
-              <Ionicons name="add" size={28} color={Colors.black} />
+            <View style={{
+              width: 52,
+              height: 52,
+              borderRadius: 26,
+              backgroundColor: colors.green,
+              justifyContent: "center",
+              alignItems: "center",
+              marginBottom: 8,
+              shadowColor: colors.green,
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.4,
+              shadowRadius: 8,
+              elevation: 8,
+            }}>
+              <Ionicons name="add" size={28} color={colors.black} />
             </View>
           ),
         }}
@@ -70,20 +84,3 @@ export default function TabLayout() {
     </Tabs>
   );
 }
-
-const styles = StyleSheet.create({
-  createBtn: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: Colors.green,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 8,
-    shadowColor: Colors.green,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-});

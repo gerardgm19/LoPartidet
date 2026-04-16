@@ -1,20 +1,24 @@
 using LoPartidet.API.Data;
 using LoPartidet.API.Entities;
 using LoPartidet.API.Models;
+using LoPartidet.API.Services.Validators;
 
 namespace LoPartidet.API.Services;
 
-public class MatchesService(LoPartidetContext db) : IMatchesService
+public class MatchesService(LoPartidetContext db, IMatchValidationService validationService) : IMatchesService
 {
     public IEnumerable<Match> GetAll() => db.Matches.ToList();
 
-    public Match? GetById(string id) => db.Matches.Find(id);
+    public Match? GetById(int id) => db.Matches.Find(id);
 
-    public Match CreateMatch(CreateMatchDto request)
+    public async Task<Match> CreateMatch(CreateMatchDto request)
     {
+        var validation = await validationService.ValidateCreateMatchAsync(request);
+        if (!validation.IsValid)
+            throw new InvalidOperationException(validation.Error);
+
         var match = new Match
         {
-            Id = Guid.NewGuid().ToString(),
             Type = request.Type,
             Date = request.Date,
             Location = request.Location,
@@ -25,7 +29,8 @@ public class MatchesService(LoPartidetContext db) : IMatchesService
         };
 
         db.Matches.Add(match);
-        db.SaveChanges();
+        await db.SaveChangesAsync();
+
         return match;
     }
 }

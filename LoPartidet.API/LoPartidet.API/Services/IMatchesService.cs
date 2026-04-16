@@ -6,6 +6,6 @@ namespace LoPartidet.API.Services;
 public interface IMatchesService
 {
     IEnumerable<Match> GetAll();
-    Match? GetById(string id);
-    Match CreateMatch(CreateMatchDto request);
+    Match? GetById(int id);
+    Task<Match> CreateMatch(CreateMatchDto request);
 }

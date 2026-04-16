@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Animated, StyleSheet, Text } from "react-native";
-import { Colors } from "@/constants/colors";
+import { makeStyles } from "@/utils/makeStyles";
 
 type Props = {
   message: string;
@@ -8,7 +8,30 @@ type Props = {
   onHide: () => void;
 };
 
+const useStyles = makeStyles((colors) => StyleSheet.create({
+  container: {
+    position: "absolute",
+    bottom: 32,
+    left: 24,
+    right: 24,
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    zIndex: 100,
+  },
+  text: {
+    color: colors.white,
+    fontSize: 14,
+    fontWeight: "500",
+    textAlign: "center",
+  },
+}));
+
 export function Toast({ message, visible, onHide }: Props) {
+  const styles = useStyles();
   const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -29,25 +52,3 @@ export function Toast({ message, visible, onHide }: Props) {
     </Animated.View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    position: "absolute",
-    bottom: 32,
-    left: 24,
-    right: 24,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    zIndex: 100,
-  },
-  text: {
-    color: Colors.white,
-    fontSize: 14,
-    fontWeight: "500",
-    textAlign: "center",
-  },
-});
