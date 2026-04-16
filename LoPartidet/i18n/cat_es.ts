@@ -71,6 +71,8 @@ const cat_es = {
   joinMatchError: "No s'ha pogut apuntar al partit.",
   joinMatchAlreadyJoined: "Ja estàs apuntat a aquest partit.",
   joinMatchFull: "El partit està complet.",
+  playersList: "Jugadors apuntats",
+  noPlayers: "Ningú apuntat encara",
 
   // Profile
   guestUser: "Usuari convidat",

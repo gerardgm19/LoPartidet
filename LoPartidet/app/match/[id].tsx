@@ -6,7 +6,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useThemeStore } from "@/store/themeStore";
 import { makeStyles } from "@/utils/makeStyles";
 import { getSportTypeLabel, getStatusConfig } from "@/constants/match";
-import { getMatchById, joinMatch, Match } from "@/services/matchesService";
+import { getMatchById, joinMatch, MatchDetail, MatchPlayer } from "@/services/matchesService";
+import { useAuthStore } from "@/store/authStore";
 import { MatchStatus } from "@/types/matchStatus";
 import { DetailRow } from "@/components/DetailRow";
 import { formatDate } from "@/utils/formatDate";
@@ -78,14 +79,38 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
   },
   joinButtonText: { color: colors.black, fontSize: 16, fontWeight: "800" },
   joinButtonTextJoined: { color: colors.muted },
+  sectionHeader: {
+    flexDirection: "row", alignItems: "center",
+    justifyContent: "space-between", paddingVertical: 16,
+  },
+  sectionTitle: { color: colors.white, fontSize: 15, fontWeight: "700" },
+  sectionCount: { color: colors.muted, fontSize: 13 },
+  playerRow: {
+    flexDirection: "row", alignItems: "center", gap: 12,
+    paddingVertical: 12,
+    borderTopWidth: 1, borderTopColor: colors.border,
+  },
+  playerAvatar: {
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: colors.green,
+    alignItems: "center", justifyContent: "center",
+  },
+  playerAvatarMe: { backgroundColor: colors.green },
+  playerAvatarOther: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
+  playerAvatarText: { color: colors.black, fontSize: 13, fontWeight: "800" },
+  playerAvatarTextOther: { color: colors.muted },
+  playerName: { color: colors.white, fontSize: 14, fontWeight: "600" },
+  playerNickname: { color: colors.muted, fontSize: 12 },
+  noPlayersText: { color: colors.muted, fontSize: 14, paddingVertical: 16, textAlign: "center" },
 }));
 
-export default function MatchDetail() {
+export default function MatchDetailPage() {
   const t = useLangStore((s) => s.t);
   const colors = useThemeStore((s) => s.colors);
   const styles = useStyles();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [match, setMatch] = useState<Match | undefined>();
+  const userId = useAuthStore((s) => s.userId);
+  const [match, setMatch] = useState<MatchDetail | undefined>();
   const [loading, setLoading] = useState(true);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
@@ -100,6 +125,8 @@ export default function MatchDetail() {
       setJoined(true);
       setToastMessage(t.joinMatchSuccess);
       setToastVisible(true);
+      const refreshed = await getMatchById(id);
+      if (refreshed) setMatch(refreshed);
     } catch (error: any) {
       const msg: string = error.response?.data ?? "";
       if (msg.includes("already joined")) {
@@ -121,6 +148,12 @@ export default function MatchDetail() {
       .catch(() => { setToastMessage(t.matchError); setToastVisible(true); })
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    if (match && userId) {
+      setJoined(match.players.some((p) => p.id === parseInt(userId)));
+    }
+  }, [match, userId]);
 
   if (loading) {
     return (
@@ -149,6 +182,24 @@ export default function MatchDetail() {
   const { day, time } = formatDate(match.date);
   const sportTypeLabel = getSportTypeLabel(t);
   const statusCfg = getStatusConfig(t, colors)[match.status];
+  const myId = userId ? parseInt(userId) : -1;
+
+  const renderPlayer = (player: MatchPlayer) => {
+    const isMe = player.id === myId;
+    const initials = (player.name[0] ?? "") + (player.surname[0] ?? "");
+    const displayName = `${player.name} ${player.surname}`;
+    return (
+      <View key={player.id} style={styles.playerRow}>
+        <View style={[styles.playerAvatar, isMe ? styles.playerAvatarMe : styles.playerAvatarOther]}>
+          <Text style={[styles.playerAvatarText, !isMe && styles.playerAvatarTextOther]}>{initials}</Text>
+        </View>
+        <View>
+          <Text style={styles.playerName}>{displayName}</Text>
+          {player.nickname ? <Text style={styles.playerNickname}>@{player.nickname}</Text> : null}
+        </View>
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -191,10 +242,21 @@ export default function MatchDetail() {
         </View>
 
         <View style={styles.section}>
-          <DetailRow icon="location-sharp"       label={t.location}  value={match.location} accent />
-          <DetailRow icon="calendar-outline"     label={t.date}      value={day} />
-          <DetailRow icon="time-outline"         label={t.time}      value={time} />
-          <DetailRow icon="football-outline"     label={t.format}    value={sportTypeLabel[match.type]} />
+          <DetailRow icon="location-sharp" label={t.location} value={match.location} accent />
+          <DetailRow icon="calendar-outline" label={t.date} value={day} />
+          <DetailRow icon="time-outline" label={t.time} value={time} />
+          <DetailRow icon="football-outline" label={t.format} value={sportTypeLabel[match.type]} />
+        </View>
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>{t.playersList}</Text>
+            <Text style={styles.sectionCount}>{match.players.length} / {match.maxPlayers}</Text>
+          </View>
+          {match.players.length === 0
+            ? <Text style={styles.noPlayersText}>{t.noPlayers}</Text>
+            : match.players.map(renderPlayer)
+          }
         </View>
 
       </ScrollView>
@@ -211,8 +273,8 @@ export default function MatchDetail() {
         {joining
           ? <ActivityIndicator color={colors.black} size="small" />
           : <Text style={[styles.joinButtonText, joined && styles.joinButtonTextJoined]}>
-              {joined ? t.joinedStatus : t.joinMatch}
-            </Text>
+            {joined ? t.joinedStatus : t.joinMatch}
+          </Text>
         }
       </Pressable>
 

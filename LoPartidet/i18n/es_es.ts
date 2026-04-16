@@ -71,6 +71,8 @@ const es_es = {
   joinMatchError: "No se pudo apuntar al partido.",
   joinMatchAlreadyJoined: "Ya estás apuntado a este partido.",
   joinMatchFull: "El partido está completo.",
+  playersList: "Jugadores apuntados",
+  noPlayers: "Nadie apuntado todavía",
 
   // Profile
   guestUser: "Usuario invitado",

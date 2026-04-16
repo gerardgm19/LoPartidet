@@ -17,6 +17,17 @@ export type Match = {
   status: MatchStatus;
 };
 
+export type MatchPlayer = {
+  id: number;
+  name: string;
+  surname: string;
+  nickname: string;
+};
+
+export type MatchDetail = Match & {
+  players: MatchPlayer[];
+};
+
 export type CreateMatchRequest = {
   type: SportType;
   date: string;
@@ -42,6 +53,13 @@ function normalizeMatch(raw: any): Match {
   };
 }
 
+function normalizeMatchDetail(raw: any): MatchDetail {
+  return {
+    ...normalizeMatch(raw),
+    players: raw.players ?? [],
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Public service
 // ---------------------------------------------------------------------------
@@ -51,10 +69,10 @@ export async function getMatches(): Promise<Match[]> {
   return data.map(normalizeMatch);
 }
 
-export async function getMatchById(id: string): Promise<Match | undefined> {
+export async function getMatchById(id: string): Promise<MatchDetail | undefined> {
   try {
     const { data } = await apiClient.get<any>(`${API_BASE_URL}/matches/${id}`);
-    return normalizeMatch(data);
+    return normalizeMatchDetail(data);
   } catch (error: any) {
     if (error.response?.status === 404) return undefined;
     throw error;

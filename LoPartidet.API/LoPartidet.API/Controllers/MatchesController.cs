@@ -16,7 +16,7 @@ public class MatchesController(IMatchesService matchesService, IMatchValidationS
     public ActionResult<IEnumerable<Match>> GetAll() => Ok(matchesService.GetAll());
 
     [HttpGet("{id}")]
-    public ActionResult<Match> GetById(int id)
+    public ActionResult<MatchDetailDto> GetById(int id)
     {
         var match = matchesService.GetById(id);
         return match is null ? NotFound() : Ok(match);

@@ -6,7 +6,7 @@ namespace LoPartidet.API.Services;
 public interface IMatchesService
 {
     IEnumerable<Match> GetAll();
-    Match? GetById(int id);
+    MatchDetailDto? GetById(int id);
     Task<Match> CreateMatch(CreateMatchDto request);
     Task<UserMatch> JoinMatchAsync(int matchId, int userId);
 }

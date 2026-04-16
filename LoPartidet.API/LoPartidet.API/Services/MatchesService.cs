@@ -9,7 +9,28 @@ public class MatchesService(LoPartidetContext db, IMatchValidationService valida
 {
     public IEnumerable<Match> GetAll() => db.Matches.ToList();
 
-    public Match? GetById(int id) => db.Matches.Find(id);
+    public MatchDetailDto? GetById(int id)
+    {
+        var match = db.Matches.Find(id);
+        if (match is null) return null;
+
+        var players = db.UserMatches
+            .Where(um => um.MatchId == id)
+            .Select(um => new MatchPlayerDto(um.User.Id, um.User.Name, um.User.Surname, um.User.Nickname))
+            .ToList();
+
+        return new MatchDetailDto(
+            match.Id,
+            match.CreatedById,
+            match.CreatedAt,
+            match.Type,
+            match.Date,
+            match.Location,
+            match.MaxPlayers,
+            match.Status,
+            players
+        );
+    }
 
     public async Task<Match> CreateMatch(CreateMatchDto request)
     {
