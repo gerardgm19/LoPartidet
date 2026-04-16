@@ -20,6 +20,7 @@ module.exports = {
       },
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
+      "package": "com.gerardgm.LoPartidet",
     },
     web: {
       output: "static",
@@ -46,11 +47,14 @@ module.exports = {
     extra: {
       apiDebug: process.env.EXPO_PUBLIC_API_DEBUG === "true",
       apiBaseUrlAndroid: process.env.EXPO_PUBLIC_API_BASE_URL_ANDROID,
-      apiBaseUrlIos:     process.env.EXPO_PUBLIC_API_BASE_URL_IOS,
-      apiBaseUrlProd:    process.env.EXPO_PUBLIC_API_BASE_URL_PROD,
+      apiBaseUrlIos: process.env.EXPO_PUBLIC_API_BASE_URL_IOS,
+      apiBaseUrlProd: process.env.EXPO_PUBLIC_API_BASE_URL_PROD,
       authBaseUrlAndroid: process.env.EXPO_PUBLIC_AUTH_BASE_URL_ANDROID,
-      authBaseUrlIos:     process.env.EXPO_PUBLIC_AUTH_BASE_URL_IOS,
-      authBaseUrlProd:    process.env.EXPO_PUBLIC_AUTH_BASE_URL_PROD,
+      authBaseUrlIos: process.env.EXPO_PUBLIC_AUTH_BASE_URL_IOS,
+      authBaseUrlProd: process.env.EXPO_PUBLIC_AUTH_BASE_URL_PROD,
+      eas: {
+        "projectId": "dc4d462e-09ea-485e-b9d5-cf18769a44d4"
+      }
     },
   },
 };
