@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LoPartidet.API.Migrations
 {
     [DbContext(typeof(LoPartidetContext))]
-    [Migration("20260416132351_RelateId_CreatedById_Match")]
-    partial class RelateId_CreatedById_Match
+    [Migration("20260416214559_AddForeignKey_Match_CreatedById")]
+    partial class AddForeignKey_Match_CreatedById
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,11 +36,7 @@ namespace LoPartidet.API.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
-
                     b.Property<int>("CreatedById")
-                        .HasMaxLength(100)
                         .HasColumnType("int");
 
                     b.Property<DateTime>("Date")
@@ -62,7 +58,7 @@ namespace LoPartidet.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedBy");
+                    b.HasIndex("CreatedById");
 
                     b.ToTable("Matches");
                 });
@@ -147,13 +143,13 @@ namespace LoPartidet.API.Migrations
 
             modelBuilder.Entity("LoPartidet.API.Entities.Match", b =>
                 {
-                    b.HasOne("LoPartidet.API.Entities.User", "User")
+                    b.HasOne("LoPartidet.API.Entities.User", "CreatedBy")
                         .WithMany()
-                        .HasForeignKey("CreatedBy")
+                        .HasForeignKey("CreatedById")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("CreatedBy");
                 });
 
             modelBuilder.Entity("LoPartidet.API.Entities.UserMatch", b =>

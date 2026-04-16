@@ -33,11 +33,7 @@ namespace LoPartidet.API.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
-
                     b.Property<int>("CreatedById")
-                        .HasMaxLength(100)
                         .HasColumnType("int");
 
                     b.Property<DateTime>("Date")
@@ -59,7 +55,7 @@ namespace LoPartidet.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedBy");
+                    b.HasIndex("CreatedById");
 
                     b.ToTable("Matches");
                 });
@@ -144,13 +140,13 @@ namespace LoPartidet.API.Migrations
 
             modelBuilder.Entity("LoPartidet.API.Entities.Match", b =>
                 {
-                    b.HasOne("LoPartidet.API.Entities.User", "User")
+                    b.HasOne("LoPartidet.API.Entities.User", "CreatedBy")
                         .WithMany()
-                        .HasForeignKey("CreatedBy")
+                        .HasForeignKey("CreatedById")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("CreatedBy");
                 });
 
             modelBuilder.Entity("LoPartidet.API.Entities.UserMatch", b =>

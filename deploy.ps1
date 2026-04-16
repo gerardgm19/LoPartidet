@@ -132,7 +132,7 @@ if ($exitCode -ne 0) {
 
 # ── 4. CLEAR REMOTE ───────────────────────────────────────────────────────────
 $clearCmds = ($selected | ForEach-Object {
-    "sudo find '$($_.RemoteDir)' -mindepth 1 -maxdepth 1 ! -name backups -exec rm -rf {} +"
+    "sudo find '$($_.RemoteDir)' -mindepth 1 -maxdepth 1 ! -name backups ! -name 'appsettings*.json' -exec rm -rf {} +"
 }) -join " && "
 
 $exitCode, $out = Invoke-Remote $clearCmds
