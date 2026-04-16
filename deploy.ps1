@@ -44,13 +44,15 @@ function Close-Sessions {
 
 function Invoke-Remote {
     param([string]$Command)
-    $r = Invoke-SSHCommand -SSHSession $SshSession -Command $Command
+    $cmd = $Command -replace '\bsudo\b', "echo '$SshPass' | sudo -S"
+    $r = Invoke-SSHCommand -SSHSession $SshSession -Command $cmd
     return $r.ExitStatus, $r.Output
 }
 
 function Send-Dir {
     param([string]$LocalDir, [string]$RemotePath)
     foreach ($item in Get-ChildItem -Path $LocalDir) {
+        if ($item.Name -like "appsettings*.json") { continue }
         if ($item.PSIsContainer) {
             $dest = "$RemotePath/$($item.Name)"
             Invoke-Remote "mkdir -p '$dest'" | Out-Null
@@ -63,8 +65,8 @@ function Send-Dir {
 
 # ── PROJECT SELECTION ─────────────────────────────────────────────────────────
 $projects = @(
-    [PSCustomObject]@{ Name = "LoPartidet.API";  Service = "lopartidet.service";      BuildOut = $ApiBuildOut; CsprojPath = $ApiProject; RemoteDir = "/opt/lopartidet" }
-    [PSCustomObject]@{ Name = "IdentityManager"; Service = "identitymanager.service"; BuildOut = $IdmBuildOut; CsprojPath = $IdmProject; RemoteDir = "/opt/identitymanager" }
+    [PSCustomObject]@{ Name = "LoPartidet.API";  Service = "lopartidet";      BuildOut = $ApiBuildOut; CsprojPath = $ApiProject; RemoteDir = "/opt/lopartidet" }
+    [PSCustomObject]@{ Name = "IdentityManager"; Service = "identitymanager"; BuildOut = $IdmBuildOut; CsprojPath = $IdmProject; RemoteDir = "/opt/identitymanager" }
 )
 
 Write-Host "`nSelect projects to deploy:" -ForegroundColor Yellow

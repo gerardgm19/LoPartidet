@@ -142,3 +142,4 @@ vite.config.ts.timestamp-*
 **/obj
 **/bin
 **/PublishProfiles
+.deploy-build
