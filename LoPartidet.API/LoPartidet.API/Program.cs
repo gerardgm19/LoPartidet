@@ -1,6 +1,7 @@
 using LoPartidet.API.Authentication;
 using LoPartidet.API.Data;
 using LoPartidet.API.Services;
+using LoPartidet.API.Services.Validators;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,7 @@ builder.Services.AddDbContext<LoPartidetContext>(options =>
 
 builder.Services.AddScoped<IMatchesService, MatchesService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
+builder.Services.AddScoped<IMatchValidationService, MatchValidationService>();
 
 builder.Services.AddHttpClient();
 

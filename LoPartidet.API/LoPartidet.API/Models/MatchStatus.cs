@@ -1,3 +1,7 @@
 namespace LoPartidet.API.Models;
 
-public enum MatchStatus { Scheduled, Live, Finished }
+public enum MatchStatus { 
+    Scheduled, 
+    Live,
+    Finished 
+}

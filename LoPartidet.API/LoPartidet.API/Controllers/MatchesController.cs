@@ -1,4 +1,5 @@
 using LoPartidet.API.Entities;
+using LoPartidet.API.Models;
 using LoPartidet.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,5 +19,12 @@ public class MatchesController(IMatchesService matchesService) : ControllerBase
     {
         var match = matchesService.GetById(id);
         return match is null ? NotFound() : Ok(match);
+    }
+
+    [HttpPost]
+    public ActionResult<Match> CreateMatch(CreateMatchDto request)
+    {
+        var match = matchesService.CreateMatch(request);
+        return CreatedAtAction(nameof(GetById), new { id = match.Id }, match);
     }
 }
