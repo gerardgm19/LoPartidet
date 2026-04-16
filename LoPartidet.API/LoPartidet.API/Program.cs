@@ -1,6 +1,7 @@
 using LoPartidet.API.Authentication;
 using LoPartidet.API.Data;
 using LoPartidet.API.Services;
+using LoPartidet.API.Services.Interfaces;
 using LoPartidet.API.Services.Validators;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +17,10 @@ builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<IMatchValidationService, MatchValidationService>();
 
 builder.Services.AddHttpClient();
+builder.Services.AddHttpClient<IIdentityManagerService, IdentityManagerService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["IdentityManager:BaseUrl"]!);
+});
 
 builder.Services.AddAuthentication("RemoteJwt")
     .AddScheme<AuthenticationSchemeOptions, RemoteJwtAuthHandler>("RemoteJwt", null);

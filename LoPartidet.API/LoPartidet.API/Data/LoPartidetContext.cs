@@ -39,7 +39,7 @@ public class LoPartidetContext(DbContextOptions<LoPartidetContext> options) : Db
         {
             entity.HasKey(m => m.Id);
             entity.Property(m => m.Location).HasMaxLength(200);
-            entity.Property(m => m.CreatedBy).HasMaxLength(100);
+            entity.Property(m => m.CreatedById).HasMaxLength(100);
 
             //entity.HasData(
             //    new Match { Id = "1", Type = SportType.Fut7,   Date = new DateTime(2026, 4, 10, 20, 0,  0, DateTimeKind.Utc), Location = "Poliesportiu Les Corts, Barcelona",     Organizer = "Marc Ribas",   JoinedCount = 11, MaxPeople = 14, IsJoined = true,  Status = MatchStatus.Scheduled },

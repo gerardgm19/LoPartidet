@@ -1,11 +1,42 @@
 using LoPartidet.API.Data;
 using LoPartidet.API.Entities;
 using LoPartidet.API.Models;
+using LoPartidet.API.Services.Interfaces;
 
 namespace LoPartidet.API.Services;
 
-public class UsersService(LoPartidetContext db) : IUsersService
+public class UsersService(LoPartidetContext db, IIdentityManagerService identityManagerService) : IUsersService
 {
+    public async Task<RegisterUserResponse?> RegisterUserAsync(RegisterUserDto request)
+    {
+        var identity = await identityManagerService.RegisterAsync(
+            request.Name, request.Surname, request.Nickname, request.Email, request.Password);
+
+        if (identity is null) return null;
+
+        var user = new User
+        {
+            IdentityId = identity.UserId,
+            Name = request.Name,
+            Surname = request.Surname,
+            Nickname = request.Nickname,
+            Email = request.Email,
+            City = request.City,
+            Birthday = request.Birthday,
+            Position = request.Position,
+            PreferredFoot = request.PreferredFoot,
+            SkillLevel = request.SkillLevel,
+            Speed = request.Speed,
+            JerseyNumber = request.JerseyNumber,
+            Height = request.Height,
+        };
+
+        db.Users.Add(user);
+        await db.SaveChangesAsync();
+        return new RegisterUserResponse(user, identity.Token);
+    }
+
+
     public User? GetById(int id) => db.Users.Find(id);
 
     public User CreateUser(CreateUserRequest request)

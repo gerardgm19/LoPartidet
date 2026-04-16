@@ -22,7 +22,7 @@ public class MatchesService(LoPartidetContext db, IMatchValidationService valida
             Type = request.Type,
             Date = request.Date,
             Location = request.Location,
-            CreatedBy = request.CreatedBy,
+            CreatedById = int.Parse(request.CreatedBy),
             CreatedAt = DateTime.UtcNow,
             MaxPlayers = request.MaxPlayers,
             Status = MatchStatus.Scheduled,

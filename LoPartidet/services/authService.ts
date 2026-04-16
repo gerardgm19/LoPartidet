@@ -1,7 +1,5 @@
 import axios from "axios";
-import { AUTH_BASE_URL } from "@/constants/env";
-
-const BASE_URL = AUTH_BASE_URL;
+import { API_BASE_URL, AUTH_BASE_URL } from "@/constants/env";
 
 const authClient = axios.create({
   headers: { "Content-Type": "application/json" },
@@ -12,9 +10,14 @@ export type AuthResponse = {
   token: string;
 };
 
+type RegisterApiResponse = {
+  user: { id: number };
+  token: string;
+};
+
 export async function login(email: string, password: string): Promise<AuthResponse> {
   try {
-    const { data } = await authClient.post<AuthResponse>(`${BASE_URL}/auth/login`, { email, password });
+    const { data } = await authClient.post<AuthResponse>(`${AUTH_BASE_URL}/auth/login`, { email, password });
     return data;
   } catch (error: any) {
     if (error.response?.status === 401) throw new Error("Invalid email or password.");
@@ -30,14 +33,15 @@ export async function register(
   nickname: string
 ): Promise<AuthResponse> {
   try {
-    const { data } = await authClient.post<AuthResponse>(`${BASE_URL}/auth/register`, {
-      email,
-      password,
+    const { data } = await authClient.post<RegisterApiResponse>(`${API_BASE_URL}/users`, {
       name,
       surname,
       nickname,
+      email,
+      password,
+      city: "",
     });
-    return data;
+    return { token: data.token, userId: data.user.id.toString() };
   } catch (error: any) {
     const body = error.response?.data;
     throw new Error(body?.error ?? "Registration failed. Please try again.");

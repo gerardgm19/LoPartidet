@@ -7,7 +7,8 @@ public class MatchValidationService(LoPartidetContext db) : IMatchValidationServ
 {
     public Task<ValidationResult> ValidateCreateMatchAsync(CreateMatchDto request)
     {
-        var userExists = db.Users.Any(u => u.IdentityId == request.CreatedBy);
+        var userId = int.Parse(request.CreatedBy);
+        var userExists = db.Users.Any(u => u.Id == userId);
         if (!userExists)
             return Task.FromResult(ValidationResult.Fail("User not found."));
 

@@ -19,10 +19,12 @@ public class UsersController(IUsersService usersService) : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult<User> CreateUser(CreateUserRequest request)
+    [AllowAnonymous]
+    public async Task<ActionResult<RegisterUserResponse>> RegisterUser(RegisterUserDto request)
     {
-        var user = usersService.CreateUser(request);
-        return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
+        var result = await usersService.RegisterUserAsync(request);
+        if (result is null) return BadRequest("Registration failed.");
+        return CreatedAtAction(nameof(GetById), new { id = result.User.Id }, result);
     }
 
     [HttpPatch("{id}")]
