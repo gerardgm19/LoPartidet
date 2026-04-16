@@ -33,4 +33,12 @@ public class MatchesService(LoPartidetContext db, IMatchValidationService valida
 
         return match;
     }
+
+    public async Task<UserMatch> JoinMatchAsync(int matchId, int userId)
+    {
+        var userMatch = new UserMatch { MatchId = matchId, UserId = userId };
+        db.UserMatches.Add(userMatch);
+        await db.SaveChangesAsync();
+        return userMatch;
+    }
 }

@@ -66,6 +66,11 @@ const cat_es = {
   format: "Format",
   joinedStatus: "Estàs apuntat a aquest partit",
   notJoinedStatus: "No estàs apuntat a aquest partit",
+  joinMatch: "Apuntar-se al partit",
+  joinMatchSuccess: "T'has apuntat al partit!",
+  joinMatchError: "No s'ha pogut apuntar al partit.",
+  joinMatchAlreadyJoined: "Ja estàs apuntat a aquest partit.",
+  joinMatchFull: "El partit està complet.",
 
   // Profile
   guestUser: "Usuari convidat",

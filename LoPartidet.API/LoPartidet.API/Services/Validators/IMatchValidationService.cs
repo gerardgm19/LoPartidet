@@ -5,4 +5,5 @@ namespace LoPartidet.API.Services.Validators;
 public interface IMatchValidationService
 {
     Task<ValidationResult> ValidateCreateMatchAsync(CreateMatchDto request);
+    Task<ValidationResult> ValidateJoinMatchAsync(JoinMatchValidationRequest request);
 }

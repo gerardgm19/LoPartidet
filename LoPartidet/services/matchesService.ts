@@ -72,3 +72,8 @@ export async function createMatch(request: CreateMatchRequest): Promise<Match> {
   });
   return normalizeMatch(data);
 }
+
+export async function joinMatch(matchId: string): Promise<void> {
+  const userId = useAuthStore.getState().userId ?? "";
+  await apiClient.post(`${API_BASE_URL}/matches/${matchId}/join`, { userId });
+}

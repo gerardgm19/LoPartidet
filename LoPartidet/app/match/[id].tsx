@@ -6,7 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useThemeStore } from "@/store/themeStore";
 import { makeStyles } from "@/utils/makeStyles";
 import { getSportTypeLabel, getStatusConfig } from "@/constants/match";
-import { getMatchById, Match } from "@/services/matchesService";
+import { getMatchById, joinMatch, Match } from "@/services/matchesService";
 import { MatchStatus } from "@/types/matchStatus";
 import { DetailRow } from "@/components/DetailRow";
 import { formatDate } from "@/utils/formatDate";
@@ -62,6 +62,22 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
   playersCountRow: { flexDirection: "row", alignItems: "baseline", gap: 8 },
   playersCountBig: { color: colors.green, fontSize: 40, fontWeight: "800" },
   playersLabel: { color: colors.muted, fontSize: 16 },
+  joinButton: {
+    marginHorizontal: 16,
+    marginBottom: 24,
+    borderRadius: 14,
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.green,
+  },
+  joinButtonJoined: {
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  joinButtonText: { color: colors.black, fontSize: 16, fontWeight: "800" },
+  joinButtonTextJoined: { color: colors.muted },
 }));
 
 export default function MatchDetail() {
@@ -72,11 +88,37 @@ export default function MatchDetail() {
   const [match, setMatch] = useState<Match | undefined>();
   const [loading, setLoading] = useState(true);
   const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [joining, setJoining] = useState(false);
+  const [joined, setJoined] = useState(false);
+
+  const handleJoin = async () => {
+    if (joining || joined || !id) return;
+    setJoining(true);
+    try {
+      await joinMatch(id);
+      setJoined(true);
+      setToastMessage(t.joinMatchSuccess);
+      setToastVisible(true);
+    } catch (error: any) {
+      const msg: string = error.response?.data ?? "";
+      if (msg.includes("already joined")) {
+        setToastMessage(t.joinMatchAlreadyJoined);
+      } else if (msg.includes("full")) {
+        setToastMessage(t.joinMatchFull);
+      } else {
+        setToastMessage(t.joinMatchError);
+      }
+      setToastVisible(true);
+    } finally {
+      setJoining(false);
+    }
+  };
 
   useEffect(() => {
     getMatchById(id)
       .then(setMatch)
-      .catch(() => setToastVisible(true))
+      .catch(() => { setToastMessage(t.matchError); setToastVisible(true); })
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -99,7 +141,7 @@ export default function MatchDetail() {
         <View style={styles.centered}>
           <Text style={styles.errorText}>{t.matchNotFound}</Text>
         </View>
-        <Toast message={t.matchError} visible={toastVisible} onHide={() => setToastVisible(false)} />
+        <Toast message={toastMessage} visible={toastVisible} onHide={() => setToastVisible(false)} />
       </SafeAreaView>
     );
   }
@@ -157,7 +199,24 @@ export default function MatchDetail() {
 
       </ScrollView>
 
-      <Toast message={t.matchError} visible={toastVisible} onHide={() => setToastVisible(false)} />
+      <Pressable
+        style={({ pressed }) => [
+          styles.joinButton,
+          joined && styles.joinButtonJoined,
+          pressed && !joined && { opacity: 0.8 },
+        ]}
+        onPress={handleJoin}
+        disabled={joining || joined}
+      >
+        {joining
+          ? <ActivityIndicator color={colors.black} size="small" />
+          : <Text style={[styles.joinButtonText, joined && styles.joinButtonTextJoined]}>
+              {joined ? t.joinedStatus : t.joinMatch}
+            </Text>
+        }
+      </Pressable>
+
+      <Toast message={toastMessage} visible={toastVisible} onHide={() => setToastVisible(false)} />
     </SafeAreaView>
   );
 }

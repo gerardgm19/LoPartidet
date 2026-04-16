@@ -66,6 +66,11 @@ const es_es = {
   format: "Formato",
   joinedStatus: "Estás apuntado a este partido",
   notJoinedStatus: "No estás apuntado a este partido",
+  joinMatch: "Apuntarse al partido",
+  joinMatchSuccess: "¡Te has apuntado al partido!",
+  joinMatchError: "No se pudo apuntar al partido.",
+  joinMatchAlreadyJoined: "Ya estás apuntado a este partido.",
+  joinMatchFull: "El partido está completo.",
 
   // Profile
   guestUser: "Usuario invitado",
