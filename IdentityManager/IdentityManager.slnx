@@ -2,4 +2,7 @@
   <Folder Name="/IdentityManager/">
     <Project Path="IdentityManager/IdentityManager.csproj" />
   </Folder>
+  <Folder Name="/IdentityManager.Tests/">
+    <Project Path="IdentityManager.Tests/IdentityManager.Tests.csproj" />
+  </Folder>
 </Solution>
