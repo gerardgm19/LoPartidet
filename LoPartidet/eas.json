@@ -14,6 +14,15 @@
     "preview_apk": {
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_DEBUG": "false",
+        "EXPO_PUBLIC_API_BASE_URL_ANDROID": "http://10.0.2.2:10004",
+        "EXPO_PUBLIC_API_BASE_URL_IOS": "http://localhost:10004",
+        "EXPO_PUBLIC_API_BASE_URL_PROD": "http://178.33.119.182:10004",
+        "EXPO_PUBLIC_AUTH_BASE_URL_ANDROID": "http://10.0.2.2:10002",
+        "EXPO_PUBLIC_AUTH_BASE_URL_IOS": "http://localhost:10002",
+        "EXPO_PUBLIC_AUTH_BASE_URL_PROD": "http://178.33.119.182:10002"
       }
     },
     "production": {

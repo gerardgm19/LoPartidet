@@ -3,7 +3,7 @@ import { Platform } from "react-native";
 
 const extra = Constants.expoConfig?.extra ?? {};
 
-const isDebug: boolean = extra.apiDebug ?? true;
+const isDebug: boolean = extra.apiDebug ?? false;
 
 function resolveUrl(android: string, ios: string, prod: string): string {
   if (!isDebug) return prod;

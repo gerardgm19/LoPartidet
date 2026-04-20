@@ -79,6 +79,7 @@ export default function LoginScreen() {
     try {
       const { token, userId } = await login(email.trim(), password);
       await signIn(token, userId);
+      router.replace("/(tabs)/matches");
     } catch (e: any) {
       setError(e.message);
     } finally {
