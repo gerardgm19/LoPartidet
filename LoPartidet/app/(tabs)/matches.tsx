@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useThemeStore } from "@/store/themeStore";
@@ -7,6 +7,7 @@ import { makeStyles } from "@/utils/makeStyles";
 import { getMatches } from "@/services/matchesService";
 import { Match } from "@/services/matchesService";
 import MatchCard from "@/components/MatchCard";
+import MatchCardSkeleton from "@/components/MatchCardSkeleton";
 import { Toast } from "@/components/Toast";
 import { useLangStore } from "@/store/langStore";
 import { MatchStatus } from "@/types/matchStatus";
@@ -77,7 +78,6 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
 
 export default function Matches() {
   const t = useLangStore((s) => s.t);
-  const colors = useThemeStore((s) => s.colors);
   const styles = useStyles();
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
@@ -105,8 +105,8 @@ export default function Matches() {
       </View>
 
       {loading ? (
-        <View style={styles.centered}>
-          <ActivityIndicator color={colors.green} size="large" />
+        <View>
+          {Array.from({ length: 5 }).map((_, i) => <MatchCardSkeleton key={i} />)}
         </View>
       ) : matches.length === 0 ? (
         <View style={styles.centered}>
