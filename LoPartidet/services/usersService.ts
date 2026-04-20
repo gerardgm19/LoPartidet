@@ -8,6 +8,7 @@ export type User = {
   nickname: string;
   email: string;
   city: string;
+  birthday?: string;
 };
 
 export async function getUserById(id: number): Promise<User | undefined> {

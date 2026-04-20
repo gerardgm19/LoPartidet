@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -16,6 +16,8 @@ import { ColorPalette } from "@/constants/colors";
 import { useThemeStore } from "@/store/themeStore";
 import { makeStyles } from "@/utils/makeStyles";
 import { useLangStore } from "@/store/langStore";
+import { useAuthStore } from "@/store/authStore";
+import { getUserById } from "@/services/usersService";
 
 const useStyles = makeStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
@@ -50,6 +52,7 @@ export default function Settings() {
   const t = useLangStore((s) => s.t);
   const colors = useThemeStore((s) => s.colors);
   const styles = useStyles();
+  const { userId } = useAuthStore();
 
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
@@ -57,6 +60,19 @@ export default function Settings() {
   const [email, setEmail] = useState("");
   const [city, setCity] = useState("");
   const [birthday, setBirthday] = useState("");
+
+  useEffect(() => {
+    if (!userId) return;
+    getUserById(Number(userId)).then((user) => {
+      if (!user) return;
+      setName(user.name);
+      setSurname(user.surname);
+      setNickname(user.nickname);
+      setEmail(user.email);
+      setCity(user.city);
+      if (user.birthday) setBirthday(user.birthday.slice(0, 10));
+    }).catch(() => {});
+  }, [userId]);
 
   return (
     <>
