@@ -134,9 +134,9 @@ export default function Create() {
 
     setLoading(true);
     try {
-      await createMatch({ type: selectedType, date: datetime.toISOString(), location: location.trim(), maxPlayers });
+      const match = await createMatch({ type: selectedType, date: datetime.toISOString(), location: location.trim(), maxPlayers });
       showToast(t.matchCreated);
-      setTimeout(() => router.replace("/(tabs)/matches"), 1200);
+      setTimeout(() => router.replace(`/match/${match.id}`), 1200);
     } catch {
       showToast(t.createMatchError);
     } finally {
