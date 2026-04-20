@@ -30,25 +30,25 @@ const cat_es = {
   matchesError: "No s'han pogut carregar els partits. Comprova la connexió.",
 
   // Sport types
-  sportTypeFut5:   "Futbol 5",
-  sportTypeFut7:   "Futbol 7",
-  sportTypeFut11:  "Futbol 11",
+  sportTypeFut5: "Futbol 5",
+  sportTypeFut7: "Futbol 7",
+  sportTypeFut11: "Futbol 11",
   sportTypeFutsal: "Futsal",
-  sportTypeBeach:  "Futbol platja",
+  sportTypeBeach: "Futbol platja",
   sportTypeIndoor: "Futbol sala",
 
   // Match statuses
   statusScheduled: "Programat",
-  statusLive:      "En viu",
-  statusFinished:  "Finalitzat",
+  statusLive: "En viu",
+  statusFinished: "Finalitzat",
 
   // Create match
-  createMatchTitle:  "Nou partit",
-  createMatchBtn:    "Crear partit",
-  sportType:         "Tipus d'esport",
-  maxPlayers:        "Jugadors màxims",
-  matchCreated:      "Partit creat!",
-  createMatchError:  "No s'ha pogut crear el partit.",
+  createMatchTitle: "Nou partit",
+  createMatchBtn: "Crear partit",
+  sportType: "Tipus d'esport",
+  maxPlayers: "Jugadors màxims",
+  matchCreated: "Partit creat!",
+  createMatchError: "No s'ha pogut crear el partit.",
 
   // Match detail
   matchDetails: "Detalls del partit",
@@ -75,8 +75,8 @@ const cat_es = {
   noPlayers: "Ningú apuntat encara",
 
   // Profile
-  guestUser: "Usuari convidat",
-  noAccountYet: "Sense compte encara",
+  notFoundUser: "Usuari no trobat",
+  noCityYet: "Sense ciutat",
   statMatches: "Partits",
   statGoals: "Gols",
   statWins: "Victòries",

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -8,6 +8,7 @@ import { makeStyles } from "@/utils/makeStyles";
 import { useLangStore } from "@/store/langStore";
 import { useAuthStore } from "@/store/authStore";
 import { Lang } from "@/i18n";
+import { getUserById, User } from "@/services/usersService";
 
 const useStyles = makeStyles((colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.black },
@@ -142,12 +143,17 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
 export default function Profile() {
   const t = useLangStore((s) => s.t);
   const { lang, setLang } = useLangStore();
-  const { signOut } = useAuthStore();
+  const { signOut, userId } = useAuthStore();
   const { theme, setTheme, colors } = useThemeStore();
   const styles = useStyles();
-
+  const [user, setUser] = useState<User | undefined>(undefined);
   const [langModalVisible, setLangModalVisible] = useState(false);
   const [signOutModalVisible, setSignOutModalVisible] = useState(false);
+
+  useEffect(() => {
+    if (!userId) return;
+    getUserById(Number(userId)).then(setUser).catch(() => { });
+  }, [userId]);
 
   async function handleSignOut() {
     setSignOutModalVisible(false);
@@ -176,8 +182,8 @@ export default function Profile() {
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>?</Text>
         </View>
-        <Text style={styles.name}>{t.guestUser}</Text>
-        <Text style={styles.sub}>{t.noAccountYet}</Text>
+        <Text style={styles.name}>{user ? `${user.name} ${user.surname}` : t.notFoundUser}</Text>
+        <Text style={styles.sub}>{user?.city || t.noCityYet}</Text>
         <View style={styles.divider} />
         <View style={styles.statsRow}>
           <View style={styles.stat}>
