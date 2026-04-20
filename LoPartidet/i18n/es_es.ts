@@ -25,6 +25,7 @@ const es_es = {
 
   // Matches screen
   live: "En vivo",
+  refresh: "Actualizar",
   noMatchesTitle: "Sin partidos",
   noMatchesSubtitle: "Los partidos aparecerán aquí",
   matchesError: "No se pudieron cargar los partidos. Comprueba tu conexión.",

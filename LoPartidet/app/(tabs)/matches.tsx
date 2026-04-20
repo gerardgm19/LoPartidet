@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Animated, FlatList, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { useThemeStore } from "@/store/themeStore";
 import { makeStyles } from "@/utils/makeStyles";
 import { getMatches } from "@/services/matchesService";
@@ -30,6 +31,9 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
     fontSize: 32,
     fontWeight: "800",
     letterSpacing: -0.5,
+  },
+  refreshBtn: {
+    padding: 6,
   },
   livePill: {
     flexDirection: "row",
@@ -78,17 +82,45 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
 
 export default function Matches() {
   const t = useLangStore((s) => s.t);
+  const colors = useThemeStore((s) => s.colors);
   const styles = useStyles();
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
+  const spinAnim = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
+  const fetchMatches = useCallback((isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
     getMatches()
       .then(setMatches)
       .catch(() => setToastVisible(true))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        setRefreshing(false);
+      });
   }, []);
+
+  useEffect(() => { fetchMatches(); }, [fetchMatches]);
+
+  const handleRefresh = useCallback(() => {
+    if (refreshing) return;
+    if (Platform.OS === "web") {
+      Animated.loop(
+        Animated.timing(spinAnim, { toValue: 1, duration: 600, useNativeDriver: true })
+      ).start();
+    }
+    fetchMatches(true);
+  }, [fetchMatches, refreshing, spinAnim]);
+
+  useEffect(() => {
+    if (!refreshing && Platform.OS === "web") {
+      spinAnim.stopAnimation();
+      spinAnim.setValue(0);
+    }
+  }, [refreshing, spinAnim]);
+
+  const spin = spinAnim.interpolate({ inputRange: [0, 1], outputRange: ["0deg", "360deg"] });
 
   const liveCount = matches.filter((m) => m.status === MatchStatus.Live).length;
 
@@ -96,15 +128,24 @@ export default function Matches() {
     <SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.header}>
         <Text style={styles.title}>{t.matches}</Text>
-        {liveCount > 0 && (
-          <View style={styles.livePill}>
-            <View style={styles.liveDot} />
-            <Text style={styles.livePillText}>{liveCount} {t.live}</Text>
-          </View>
-        )}
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          {liveCount > 0 && (
+            <View style={styles.livePill}>
+              <View style={styles.liveDot} />
+              <Text style={styles.livePillText}>{liveCount} {t.live}</Text>
+            </View>
+          )}
+          {Platform.OS === "web" && (
+            <Pressable style={styles.refreshBtn} onPress={handleRefresh} accessibilityLabel={t.refresh}>
+              <Animated.View style={{ transform: [{ rotate: spin }] }}>
+                <Ionicons name="refresh" size={22} color={colors.white} />
+              </Animated.View>
+            </Pressable>
+          )}
+        </View>
       </View>
 
-      {loading ? (
+      {loading || refreshing ? (
         <View>
           {Array.from({ length: 5 }).map((_, i) => <MatchCardSkeleton key={i} />)}
         </View>
@@ -121,6 +162,7 @@ export default function Matches() {
           renderItem={({ item }) => <MatchCard match={item} onPress={() => router.push(`/match/${item.id}`)} />}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
+          onRefresh={Platform.OS !== "web" ? handleRefresh : undefined}
         />
       )}
       <Toast

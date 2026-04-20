@@ -25,6 +25,7 @@ const cat_es = {
 
   // Matches screen
   live: "En viu",
+  refresh: "Actualitzar",
   noMatchesTitle: "Sense partits",
   noMatchesSubtitle: "Els partits apareixeran aquí",
   matchesError: "No s'han pogut carregar els partits. Comprova la connexió.",
