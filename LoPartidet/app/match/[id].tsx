@@ -168,7 +168,7 @@ export default function MatchDetailPage() {
   if (!match) {
     return (
       <SafeAreaView style={styles.container} edges={["top"]}>
-        <Pressable style={styles.backButton} onPress={() => router.back()}>
+        <Pressable style={styles.backButton} onPress={() => router.replace("/(tabs)/matches")}>
           <Ionicons name="arrow-back" size={22} color={colors.white} />
         </Pressable>
         <View style={styles.centered}>
@@ -207,7 +207,7 @@ export default function MatchDetailPage() {
       <View style={styles.navbar}>
         <Pressable
           style={({ pressed }) => [styles.backButton, pressed && { opacity: 0.6 }]}
-          onPress={() => router.back()}
+          onPress={() => router.replace("/(tabs)/matches")}
         >
           <Ionicons name="arrow-back" size={22} color={colors.white} />
         </Pressable>
