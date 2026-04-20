@@ -17,7 +17,8 @@ import { useThemeStore } from "@/store/themeStore";
 import { makeStyles } from "@/utils/makeStyles";
 import { useLangStore } from "@/store/langStore";
 import { useAuthStore } from "@/store/authStore";
-import { getUserById } from "@/services/usersService";
+import { getUserById, updateUser } from "@/services/usersService";
+import { Toast } from "@/components/Toast";
 
 const useStyles = makeStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
@@ -45,8 +46,30 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
     textTransform: "uppercase",
   },
   fieldInput: { color: colors.white, fontSize: 16, paddingVertical: 2 },
+  fieldError: { color: "#FF5252", fontSize: 12, marginTop: 2 },
   divider: { height: 1, backgroundColor: colors.border, marginLeft: 16 },
 }));
+
+function isoToDisplay(iso: string): string {
+  const [y, m, d] = iso.slice(0, 10).split("-");
+  return `${d}/${m}/${y}`;
+}
+
+function displayToIso(display: string): string {
+  const [d, m, y] = display.split("/");
+  return `${y}-${m}-${d}`;
+}
+
+function isValidDisplayDate(value: string): boolean {
+  if (!/^\d{2}\/\d{2}\/\d{4}$/.test(value)) return false;
+  const [d, m, y] = value.split("/").map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d;
+}
+
+function isValidEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
 
 export default function Settings() {
   const t = useLangStore((s) => s.t);
@@ -60,6 +83,9 @@ export default function Settings() {
   const [email, setEmail] = useState("");
   const [city, setCity] = useState("");
   const [birthday, setBirthday] = useState("");
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastVisible, setToastVisible] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!userId) return;
@@ -70,9 +96,33 @@ export default function Settings() {
       setNickname(user.nickname);
       setEmail(user.email);
       setCity(user.city);
-      if (user.birthday) setBirthday(user.birthday.slice(0, 10));
+      if (user.birthday) setBirthday(isoToDisplay(user.birthday));
     }).catch(() => {});
   }, [userId]);
+
+  async function handleSave() {
+    if (!userId) return;
+
+    const nextErrors: Record<string, string> = {};
+    if (!name.trim()) nextErrors.name = t.validationRequired;
+    if (!surname.trim()) nextErrors.surname = t.validationRequired;
+    if (!nickname.trim()) nextErrors.nickname = t.validationRequired;
+    if (!email.trim()) nextErrors.email = t.validationRequired;
+    else if (!isValidEmail(email)) nextErrors.email = t.validationEmail;
+    if (birthday && !isValidDisplayDate(birthday)) nextErrors.birthday = t.validationBirthday;
+
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
+    try {
+      await updateUser(Number(userId), { name, surname, nickname, email, city, birthday: birthday ? displayToIso(birthday) : undefined });
+      setToastMessage(t.settingsSaved);
+      setToastVisible(true);
+    } catch {
+      setToastMessage(t.settingsError);
+      setToastVisible(true);
+    }
+  }
 
   return (
     <>
@@ -83,7 +133,7 @@ export default function Settings() {
             <Ionicons name="chevron-back" size={24} color={colors.white} />
           </TouchableOpacity>
           <Text style={styles.title}>{t.settingsTitle}</Text>
-          <TouchableOpacity style={styles.saveBtn}>
+          <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
             <Text style={styles.saveBtnText}>{t.save}</Text>
           </TouchableOpacity>
         </View>
@@ -99,22 +149,23 @@ export default function Settings() {
             keyboardShouldPersistTaps="handled"
           >
             <View style={styles.card}>
-              <Field styles={styles} colors={colors} label={t.name} value={name} onChangeText={setName} placeholder={t.enterName} autoCapitalize="words" />
+              <Field styles={styles} colors={colors} label={t.name} value={name} onChangeText={setName} placeholder={t.enterName} autoCapitalize="words" error={errors.name} />
               <View style={styles.divider} />
-              <Field styles={styles} colors={colors} label={t.surname} value={surname} onChangeText={setSurname} placeholder={t.enterSurname} autoCapitalize="words" />
+              <Field styles={styles} colors={colors} label={t.surname} value={surname} onChangeText={setSurname} placeholder={t.enterSurname} autoCapitalize="words" error={errors.surname} />
               <View style={styles.divider} />
-              <Field styles={styles} colors={colors} label={t.nickname} value={nickname} onChangeText={setNickname} placeholder={t.enterNickname} autoCapitalize="none" />
+              <Field styles={styles} colors={colors} label={t.nickname} value={nickname} onChangeText={setNickname} placeholder={t.enterNickname} autoCapitalize="none" error={errors.nickname} />
             </View>
 
             <View style={styles.card}>
-              <Field styles={styles} colors={colors} label={t.email} value={email} onChangeText={setEmail} placeholder={t.enterEmail} keyboardType="email-address" autoCapitalize="none" />
+              <Field styles={styles} colors={colors} label={t.email} value={email} onChangeText={setEmail} placeholder={t.enterEmail} keyboardType="email-address" autoCapitalize="none" error={errors.email} />
               <View style={styles.divider} />
               <Field styles={styles} colors={colors} label={t.city} value={city} onChangeText={setCity} placeholder={t.enterCity} autoCapitalize="words" />
               <View style={styles.divider} />
-              <Field styles={styles} colors={colors} label={t.birthday} value={birthday} onChangeText={setBirthday} placeholder={t.birthdayPlaceholder} keyboardType="numeric" maxLength={10} />
+              <Field styles={styles} colors={colors} label={t.birthday} value={birthday} onChangeText={setBirthday} placeholder={t.birthdayPlaceholder} keyboardType="numeric" maxLength={10} error={errors.birthday} />
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
+        <Toast message={toastMessage} visible={toastVisible} onHide={() => setToastVisible(false)} />
       </SafeAreaView>
     </>
   );
@@ -124,10 +175,11 @@ type FieldStyles = {
   field: object;
   fieldLabel: object;
   fieldInput: object;
+  fieldError: object;
 };
 
 function Field({
-  styles, colors, label, value, onChangeText, placeholder, keyboardType, autoCapitalize, maxLength,
+  styles, colors, label, value, onChangeText, placeholder, keyboardType, autoCapitalize, maxLength, error,
 }: {
   styles: FieldStyles;
   colors: ColorPalette;
@@ -138,6 +190,7 @@ function Field({
   keyboardType?: TextInput["props"]["keyboardType"];
   autoCapitalize?: TextInput["props"]["autoCapitalize"];
   maxLength?: number;
+  error?: string;
 }) {
   return (
     <View style={styles.field}>
@@ -152,6 +205,7 @@ function Field({
         autoCapitalize={autoCapitalize ?? "sentences"}
         maxLength={maxLength}
       />
+      {error ? <Text style={styles.fieldError}>{error}</Text> : null}
     </View>
   );
 }

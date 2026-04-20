@@ -118,6 +118,11 @@ const es_es = {
   city: "Ciudad",
   birthday: "Fecha de nacimiento",
   birthdayPlaceholder: "DD/MM/AAAA",
+  settingsSaved: "Cambios guardados",
+  settingsError: "No se pudieron guardar los cambios.",
+  validationRequired: "Este campo es obligatorio",
+  validationEmail: "Correo electrónico no válido",
+  validationBirthday: "Formato de fecha no válido (DD/MM/AAAA)",
 
   // About us
   aboutUsTitle: "Quiénes somos",

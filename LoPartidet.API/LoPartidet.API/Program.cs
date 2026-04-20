@@ -15,6 +15,7 @@ builder.Services.AddDbContext<LoPartidetContext>(options =>
 builder.Services.AddScoped<IMatchesService, MatchesService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<IMatchValidationService, MatchValidationService>();
+builder.Services.AddScoped<IUserValidationService, UserValidationService>();
 
 builder.Services.AddHttpClient();
 builder.Services.AddHttpClient<IIdentityManagerService, IdentityManagerService>(client =>

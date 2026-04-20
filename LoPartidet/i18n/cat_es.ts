@@ -118,6 +118,11 @@ const cat_es = {
   city: "Ciutat",
   birthday: "Data de naixement",
   birthdayPlaceholder: "DD/MM/AAAA",
+  settingsSaved: "Canvis desats",
+  settingsError: "No s'han pogut desar els canvis.",
+  validationRequired: "Aquest camp és obligatori",
+  validationEmail: "Correu electrònic no vàlid",
+  validationBirthday: "Format de data no vàlid (DD/MM/AAAA)",
 
   // About us
   aboutUsTitle: "Qui som",

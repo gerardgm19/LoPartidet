@@ -1,6 +1,7 @@
 using LoPartidet.API.Entities;
 using LoPartidet.API.Models;
 using LoPartidet.API.Services;
+using LoPartidet.API.Services.Validators;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,7 +10,7 @@ namespace LoPartidet.API.Controllers;
 [ApiController]
 [Route("users")]
 [Authorize]
-public class UsersController(IUsersService usersService) : ControllerBase
+public class UsersController(IUsersService usersService, IUserValidationService userValidationService) : ControllerBase
 {
     [HttpGet("{id}")]
     public ActionResult<User> GetById(int id)
@@ -30,6 +31,18 @@ public class UsersController(IUsersService usersService) : ControllerBase
     [HttpPatch("{id}")]
     public ActionResult<User> UpdateUser(int id, UpdateUserRequest request)
     {
+        var user = usersService.UpdateUser(id, request);
+        return user is null ? NotFound() : Ok(user);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult<User>> PutUser(int id, UpdateUserRequest request)
+    {
+        var validation = await userValidationService.ValidateUpdateUserAsync(
+            new UpdateUserValidationRequest(id, request.Name, request.Surname, request.Nickname, request.Email));
+        if (!validation.IsValid)
+            return BadRequest(validation.Error);
+
         var user = usersService.UpdateUser(id, request);
         return user is null ? NotFound() : Ok(user);
     }

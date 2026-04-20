@@ -6,7 +6,7 @@ public record UpdateUserRequest(
     string? Nickname,
     string? Email,
     string? City,
-    DateTime? Birthday,
+    DateOnly? Birthday,
     Position? Position,
     PreferredFoot? PreferredFoot,
     SkillLevel? SkillLevel,
