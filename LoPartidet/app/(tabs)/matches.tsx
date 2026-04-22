@@ -162,6 +162,7 @@ export default function Matches() {
           renderItem={({ item }) => <MatchCard match={item} onPress={() => router.push(`/match/${item.id}`)} />}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
+          refreshing={false}
           onRefresh={Platform.OS !== "web" ? handleRefresh : undefined}
         />
       )}
