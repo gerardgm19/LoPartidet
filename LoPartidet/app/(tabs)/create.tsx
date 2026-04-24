@@ -1,6 +1,8 @@
 import { useState } from "react";
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -30,6 +32,7 @@ const SPORT_TYPES = [
 
 const useStyles = makeStyles((colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.black },
+  flex: { flex: 1 },
   scroll: { paddingHorizontal: 20, paddingBottom: 32, gap: 20 },
   title: {
     color: colors.white,
@@ -146,6 +149,10 @@ export default function Create() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
@@ -225,6 +232,7 @@ export default function Create() {
         </Pressable>
       </ScrollView>
 
+      </KeyboardAvoidingView>
       <Toast message={toastMessage} visible={toastVisible} onHide={() => setToastVisible(false)} />
     </SafeAreaView>
   );
