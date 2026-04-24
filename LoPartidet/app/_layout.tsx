@@ -2,12 +2,13 @@ import { useAuthStore } from "@/store/authStore";
 import { useLangStore } from "@/store/langStore";
 import { useThemeStore } from "@/store/themeStore";
 import { setUnauthorizedHandler } from "@/services/api";
+import { getMe } from "@/services/usersService";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 function RootNavigator() {
-  const { token, isLoading, signOut, initialize } = useAuthStore();
+  const { token, userId, isLoading, signOut, initialize, setUserId } = useAuthStore();
   const segments = useSegments();
   const router = useRouter();
 
@@ -36,6 +37,13 @@ function RootNavigator() {
       router.replace("/(auth)/login");
     } else if (token && inAuthGroup) {
       router.replace("/(tabs)/matches");
+    }
+
+    if (token && !userId) {
+      getMe().then((userId) => {
+        console.log(userId)
+        if (userId) setUserId(userId.toString());
+      });
     }
   }, [token, isLoading, segments]);
 

@@ -27,6 +27,7 @@ type AuthStore = {
   initialize: () => Promise<void>;
   signIn: (token: string, userId: string) => Promise<void>;
   signOut: () => Promise<void>;
+  setUserId: (userId: string) => void;
 };
 
 export const useAuthStore = create<AuthStore>((set) => ({
@@ -42,13 +43,15 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
   signIn: async (token, userId) => {
     await storage.set(TOKEN_KEY, token);
-    await storage.set(USER_ID_KEY, userId);
-    set({ token, userId });
+    // await storage.set(USER_ID_KEY, userId);
+    set({ token });
   },
 
   signOut: async () => {
     await storage.del(TOKEN_KEY);
     await storage.del(USER_ID_KEY);
-    set({ token: null, userId: null });
+    set({ token: null });
   },
+
+  setUserId: (userId) => set({ userId }),
 }));

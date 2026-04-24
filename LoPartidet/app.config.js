@@ -23,6 +23,7 @@ module.exports = {
       "package": "com.gerardgm.LoPartidet",
     },
     web: {
+      bundler: "metro",
       output: "static",
       favicon: "./assets/images/favicon.png",
     },

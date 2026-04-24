@@ -36,6 +36,16 @@ export type UpdateUserRequest = {
   height?: number;
 };
 
+export async function getMe(): Promise<User | undefined> {
+  try {
+    const { data } = await apiClient.get<User>(`${API_BASE_URL}/users/me`);
+    return data;
+  } catch (error: any) {
+    if (error.response?.status === 404) return undefined;
+    throw error;
+  }
+}
+
 export async function getUserById(id: number): Promise<User | undefined> {
   try {
     const { data } = await apiClient.get<User>(`${API_BASE_URL}/users/${id}`);
