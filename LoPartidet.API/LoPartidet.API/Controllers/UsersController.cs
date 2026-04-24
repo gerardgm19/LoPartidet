@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using LoPartidet.API.Entities;
 using LoPartidet.API.Models;
 using LoPartidet.API.Services;
@@ -12,6 +13,15 @@ namespace LoPartidet.API.Controllers;
 [Authorize]
 public class UsersController(IUsersService usersService, IUserValidationService userValidationService) : ControllerBase
 {
+    [HttpGet("me")]
+    public ActionResult<User> GetMe()
+    {
+        var identityId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (identityId is null) return Unauthorized();
+        var userId = usersService.GetUserIdByIdentityId(identityId);
+        return userId is 0 ? NotFound() : Ok(userId);
+    }
+
     [HttpGet("{id}")]
     public ActionResult<User> GetById(int id)
     {

@@ -36,8 +36,10 @@ public class UsersService(LoPartidetContext db, IIdentityManagerService identity
         return new RegisterUserResponse(user, identity.Token);
     }
 
-
     public User? GetById(int id) => db.Users.Find(id);
+
+    public int GetUserIdByIdentityId(string identityId) =>
+        db.Users.Where(u => u.IdentityId == identityId).Select(u => u.Id).FirstOrDefault();
 
     public User CreateUser(CreateUserRequest request)
     {
@@ -72,7 +74,7 @@ public class UsersService(LoPartidetContext db, IIdentityManagerService identity
         if (request.Nickname is not null) user.Nickname = request.Nickname;
         if (request.Email is not null) user.Email = request.Email;
         if (request.City is not null) user.City = request.City;
-        if (request.Birthday is not null) user.Birthday = request.Birthday;
+        if (request.Birthday is not null) user.Birthday = request.Birthday.Value.ToDateTime(new TimeOnly(0, 0));
         if (request.Position is not null) user.Position = request.Position;
         if (request.PreferredFoot is not null) user.PreferredFoot = request.PreferredFoot;
         if (request.SkillLevel is not null) user.SkillLevel = request.SkillLevel;
