@@ -62,4 +62,11 @@ public class MatchesService(LoPartidetContext db, IMatchValidationService valida
         await db.SaveChangesAsync();
         return userMatch;
     }
+
+    public async Task UnjoinMatchAsync(int matchId, int userId)
+    {
+        var userMatch = db.UserMatches.First(um => um.MatchId == matchId && um.UserId == userId);
+        db.UserMatches.Remove(userMatch);
+        await db.SaveChangesAsync();
+    }
 }

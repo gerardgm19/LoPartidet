@@ -50,4 +50,23 @@ public class MatchValidationService(LoPartidetContext db) : IMatchValidationServ
 
         return Task.FromResult(ValidationResult.Ok());
     }
+
+    public Task<ValidationResult> ValidateUnjoinMatchAsync(UnjoinMatchValidationRequest request)
+    {
+        if (!int.TryParse(request.UserId, out var userId))
+            return Task.FromResult(ValidationResult.Fail("Invalid user ID."));
+
+        var match = db.Matches.Find(request.MatchId);
+        if (match is null)
+            return Task.FromResult(ValidationResult.Fail("Match not found."));
+
+        if (match.Status != MatchStatus.Scheduled)
+            return Task.FromResult(ValidationResult.Fail("Can only unjoin scheduled matches."));
+
+        var joined = db.UserMatches.Any(um => um.MatchId == request.MatchId && um.UserId == userId);
+        if (!joined)
+            return Task.FromResult(ValidationResult.Fail("User is not joined to this match."));
+
+        return Task.FromResult(ValidationResult.Ok());
+    }
 }

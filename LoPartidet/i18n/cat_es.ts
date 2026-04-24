@@ -72,6 +72,11 @@ const cat_es = {
   joinMatchError: "No s'ha pogut apuntar al partit.",
   joinMatchAlreadyJoined: "Ja estàs apuntat a aquest partit.",
   joinMatchFull: "El partit està complet.",
+  unjoinMatch: "Desapuntar-se del partit",
+  unjoinMatchConfirmTitle: "Desapuntar-se?",
+  unjoinMatchConfirmMessage: "S'eliminarà la teva plaça en aquest partit.",
+  unjoinMatchSuccess: "T'has desapuntat del partit.",
+  unjoinMatchError: "No s'ha pogut desapuntar del partit.",
   playersList: "Jugadors apuntats",
   noPlayers: "Ningú apuntat encara",
 
@@ -81,13 +86,13 @@ const cat_es = {
   statMatches: "Partits",
   statGoals: "Gols",
   statWins: "Victòries",
-  playerDetails: "Detalls del jugador",
-  settings: "Ajustos",
+  skills: "Habilitats",
+  playerInformation: "Informació del jugador",
   aboutUs: "Qui som",
   language: "Idioma",
 
-  // Player details
-  playerDetailsTitle: "Detalls del jugador",
+  // Skills
+  skillsTitle: "Habilitats",
   save: "Desar",
   position: "Posició",
   preferredFoot: "Peu preferit",
@@ -109,8 +114,8 @@ const cat_es = {
   height: "Alçada (cm)",
   heightPlaceholder: "p.ex. 178",
 
-  // Settings
-  settingsTitle: "Ajustos",
+  // Player information
+  playerInformationTitle: "Informació del jugador",
   enterName: "Introdueix el teu nom",
   enterSurname: "Introdueix el teu cognom",
   enterNickname: "Introdueix el teu sobrenom",
@@ -119,8 +124,8 @@ const cat_es = {
   city: "Ciutat",
   birthday: "Data de naixement",
   birthdayPlaceholder: "DD/MM/AAAA",
-  settingsSaved: "Canvis desats",
-  settingsError: "No s'han pogut desar els canvis.",
+  playerInformationSaved: "Canvis desats",
+  playerInformationError: "No s'han pogut desar els canvis.",
   validationRequired: "Aquest camp és obligatori",
   validationEmail: "Correu electrònic no vàlid",
   validationBirthday: "Format de data no vàlid (DD/MM/AAAA)",

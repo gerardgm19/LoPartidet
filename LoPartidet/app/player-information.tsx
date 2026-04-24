@@ -71,7 +71,7 @@ function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
-export default function Settings() {
+export default function PlayerInformation() {
   const t = useLangStore((s) => s.t);
   const colors = useThemeStore((s) => s.colors);
   const styles = useStyles();
@@ -116,10 +116,10 @@ export default function Settings() {
 
     try {
       await updateUser(Number(userId), { name, surname, nickname, email, city, birthday: birthday ? displayToIso(birthday) : undefined });
-      setToastMessage(t.settingsSaved);
+      setToastMessage(t.playerInformationSaved);
       setToastVisible(true);
     } catch {
-      setToastMessage(t.settingsError);
+      setToastMessage(t.playerInformationError);
       setToastVisible(true);
     }
   }
@@ -132,7 +132,7 @@ export default function Settings() {
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Ionicons name="chevron-back" size={24} color={colors.white} />
           </TouchableOpacity>
-          <Text style={styles.title}>{t.settingsTitle}</Text>
+          <Text style={styles.title}>{t.playerInformationTitle}</Text>
           <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
             <Text style={styles.saveBtnText}>{t.save}</Text>
           </TouchableOpacity>

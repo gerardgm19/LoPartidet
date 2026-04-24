@@ -74,7 +74,7 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
   },
 }));
 
-export default function PlayerDetails() {
+export default function Skills() {
   const t = useLangStore((s) => s.t);
   const colors = useThemeStore((s) => s.colors);
   const styles = useStyles();
@@ -114,7 +114,7 @@ export default function PlayerDetails() {
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Ionicons name="chevron-back" size={24} color={colors.white} />
           </TouchableOpacity>
-          <Text style={styles.title}>{t.playerDetailsTitle}</Text>
+          <Text style={styles.title}>{t.skillsTitle}</Text>
           <TouchableOpacity style={styles.saveBtn}>
             <Text style={styles.saveBtnText}>{t.save}</Text>
           </TouchableOpacity>

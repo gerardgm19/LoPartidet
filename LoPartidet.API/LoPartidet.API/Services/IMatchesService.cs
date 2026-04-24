@@ -9,4 +9,5 @@ public interface IMatchesService
     MatchDetailDto? GetById(int id);
     Task<Match> CreateMatch(CreateMatchDto request);
     Task<UserMatch> JoinMatchAsync(int matchId, int userId);
+    Task UnjoinMatchAsync(int matchId, int userId);
 }

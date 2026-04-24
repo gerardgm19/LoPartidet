@@ -95,3 +95,8 @@ export async function joinMatch(matchId: string): Promise<void> {
   const userId = useAuthStore.getState().userId ?? "";
   await apiClient.post(`${API_BASE_URL}/matches/${matchId}/join`, { userId });
 }
+
+export async function unjoinMatch(matchId: string): Promise<void> {
+  const userId = useAuthStore.getState().userId ?? "";
+  await apiClient.delete(`${API_BASE_URL}/matches/${matchId}/join`, { data: { userId } });
+}

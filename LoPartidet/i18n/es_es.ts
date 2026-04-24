@@ -72,6 +72,11 @@ const es_es = {
   joinMatchError: "No se pudo apuntar al partido.",
   joinMatchAlreadyJoined: "Ya estás apuntado a este partido.",
   joinMatchFull: "El partido está completo.",
+  unjoinMatch: "Desapuntarse del partido",
+  unjoinMatchConfirmTitle: "¿Desapuntarse?",
+  unjoinMatchConfirmMessage: "Se eliminará tu plaza en este partido.",
+  unjoinMatchSuccess: "Te has desapuntado del partido.",
+  unjoinMatchError: "No se pudo desapuntar del partido.",
   playersList: "Jugadores apuntados",
   noPlayers: "Nadie apuntado todavía",
 
@@ -81,13 +86,13 @@ const es_es = {
   statMatches: "Partidos",
   statGoals: "Goles",
   statWins: "Victorias",
-  playerDetails: "Detalles del jugador",
-  settings: "Ajustes",
+  skills: "Habilidades",
+  playerInformation: "Información del jugador",
   aboutUs: "Quiénes somos",
   language: "Idioma",
 
-  // Player details
-  playerDetailsTitle: "Detalles del jugador",
+  // Skills
+  skillsTitle: "Habilidades",
   save: "Guardar",
   position: "Posición",
   preferredFoot: "Pie preferido",
@@ -109,8 +114,8 @@ const es_es = {
   height: "Altura (cm)",
   heightPlaceholder: "p.ej. 178",
 
-  // Settings
-  settingsTitle: "Ajustes",
+  // Player information
+  playerInformationTitle: "Información del jugador",
   enterName: "Introduce tu nombre",
   enterSurname: "Introduce tu apellido",
   enterNickname: "Introduce tu apodo",
@@ -119,8 +124,8 @@ const es_es = {
   city: "Ciudad",
   birthday: "Fecha de nacimiento",
   birthdayPlaceholder: "DD/MM/AAAA",
-  settingsSaved: "Cambios guardados",
-  settingsError: "No se pudieron guardar los cambios.",
+  playerInformationSaved: "Cambios guardados",
+  playerInformationError: "No se pudieron guardar los cambios.",
   validationRequired: "Este campo es obligatorio",
   validationEmail: "Correo electrónico no válido",
   validationBirthday: "Formato de fecha no válido (DD/MM/AAAA)",

@@ -47,4 +47,16 @@ public class MatchesController(IMatchesService matchesService, IMatchValidationS
         var userMatch = await matchesService.JoinMatchAsync(id, int.Parse(request.UserId));
         return Ok(userMatch);
     }
+
+    [HttpDelete("{id}/join")]
+    public async Task<IActionResult> UnjoinMatch(int id, [FromBody] JoinMatchDto request)
+    {
+        var validationRequest = new UnjoinMatchValidationRequest(id, request.UserId);
+        var validation = await validationService.ValidateUnjoinMatchAsync(validationRequest);
+        if (!validation.IsValid)
+            return BadRequest(validation.Error);
+
+        await matchesService.UnjoinMatchAsync(id, int.Parse(request.UserId));
+        return NoContent();
+    }
 }

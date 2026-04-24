@@ -67,7 +67,7 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
   menuChevron: { color: colors.muted, fontSize: 22, lineHeight: 24 },
   menuRight: { flexDirection: "row", alignItems: "center", gap: 8 },
   menuRightText: { color: colors.muted, fontSize: 14 },
-  signOutLabel: { color: "#FF5252" },
+  signOutLabel: { color: colors.red },
 
   // Theme toggle
   themeToggle: {
@@ -167,8 +167,8 @@ export default function Profile() {
   ];
 
   const menuItems = [
-    { label: t.playerDetails, route: "/player-details" },
-    { label: t.settings, route: "/settings" },
+    { label: t.skills, route: "/skills" },
+    { label: t.playerInformation, route: "/player-information" },
     { label: t.aboutUs, route: "/about-us" },
   ];
 

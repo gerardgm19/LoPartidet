@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useThemeStore } from "@/store/themeStore";
 import { makeStyles } from "@/utils/makeStyles";
 import { getSportTypeLabel, getStatusConfig } from "@/constants/match";
-import { getMatchById, joinMatch, MatchDetail, MatchPlayer } from "@/services/matchesService";
+import { getMatchById, joinMatch, unjoinMatch, MatchDetail, MatchPlayer } from "@/services/matchesService";
 import { useAuthStore } from "@/store/authStore";
 import { MatchStatus } from "@/types/matchStatus";
 import { DetailRow } from "@/components/DetailRow";
@@ -73,12 +73,10 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
     backgroundColor: colors.green,
   },
   joinButtonJoined: {
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
+    backgroundColor: colors.red,
   },
   joinButtonText: { color: colors.black, fontSize: 16, fontWeight: "800" },
-  joinButtonTextJoined: { color: colors.muted },
+  joinButtonTextJoined: { color: colors.white },
   sectionHeader: {
     flexDirection: "row", alignItems: "center",
     justifyContent: "space-between", paddingVertical: 16,
@@ -102,6 +100,26 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
   playerName: { color: colors.white, fontSize: 14, fontWeight: "600" },
   playerNickname: { color: colors.muted, fontSize: 12 },
   noPlayersText: { color: colors.muted, fontSize: 14, paddingVertical: 16, textAlign: "center" },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "flex-end",
+  },
+  dialogSheet: {
+    margin: 32,
+    backgroundColor: colors.surface,
+    borderRadius: 20,
+    padding: 24,
+    gap: 8,
+  },
+  dialogTitle: { color: colors.white, fontSize: 17, fontWeight: "700", textAlign: "center" },
+  dialogMessage: { color: colors.muted, fontSize: 14, textAlign: "center", marginBottom: 8 },
+  dialogActions: { flexDirection: "row", gap: 12, marginTop: 4 },
+  dialogBtn: { flex: 1, paddingVertical: 13, borderRadius: 12, alignItems: "center" },
+  dialogBtnCancel: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
+  dialogBtnCancelText: { color: colors.white, fontSize: 15, fontWeight: "600" },
+  dialogBtnConfirm: { backgroundColor: colors.red },
+  dialogBtnConfirmText: { color: colors.white, fontSize: 15, fontWeight: "700" },
 }));
 
 export default function MatchDetailPage() {
@@ -116,6 +134,7 @@ export default function MatchDetailPage() {
   const [toastMessage, setToastMessage] = useState("");
   const [joining, setJoining] = useState(false);
   const [joined, setJoined] = useState(false);
+  const [unjoinModalVisible, setUnjoinModalVisible] = useState(false);
 
   const handleJoin = async () => {
     if (joining || joined || !id) return;
@@ -136,6 +155,29 @@ export default function MatchDetailPage() {
       } else {
         setToastMessage(t.joinMatchError);
       }
+      setToastVisible(true);
+    } finally {
+      setJoining(false);
+    }
+  };
+
+  const handleUnjoin = () => {
+    if (!id) return;
+    setUnjoinModalVisible(true);
+  };
+
+  const confirmUnjoin = async () => {
+    setUnjoinModalVisible(false);
+    setJoining(true);
+    try {
+      await unjoinMatch(id!);
+      setJoined(false);
+      setToastMessage(t.unjoinMatchSuccess);
+      setToastVisible(true);
+      const refreshed = await getMatchById(id!);
+      if (refreshed) setMatch(refreshed);
+    } catch {
+      setToastMessage(t.unjoinMatchError);
       setToastVisible(true);
     } finally {
       setJoining(false);
@@ -265,20 +307,48 @@ export default function MatchDetailPage() {
         style={({ pressed }) => [
           styles.joinButton,
           joined && styles.joinButtonJoined,
-          pressed && !joined && { opacity: 0.8 },
+          pressed && { opacity: 0.8 },
         ]}
-        onPress={handleJoin}
-        disabled={joining || joined}
+        onPress={joined ? handleUnjoin : handleJoin}
+        disabled={joining}
       >
         {joining
-          ? <ActivityIndicator color={colors.black} size="small" />
+          ? <ActivityIndicator color={joined ? colors.white : colors.black} size="small" />
           : <Text style={[styles.joinButtonText, joined && styles.joinButtonTextJoined]}>
-            {joined ? t.joinedStatus : t.joinMatch}
+            {joined ? t.unjoinMatch : t.joinMatch}
           </Text>
         }
       </Pressable>
 
       <Toast message={toastMessage} visible={toastVisible} onHide={() => setToastVisible(false)} />
+
+      <Modal
+        visible={unjoinModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setUnjoinModalVisible(false)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setUnjoinModalVisible(false)}>
+          <View style={styles.dialogSheet}>
+            <Text style={styles.dialogTitle}>{t.unjoinMatchConfirmTitle}</Text>
+            <Text style={styles.dialogMessage}>{t.unjoinMatchConfirmMessage}</Text>
+            <View style={styles.dialogActions}>
+              <TouchableOpacity
+                style={[styles.dialogBtn, styles.dialogBtnCancel]}
+                onPress={() => setUnjoinModalVisible(false)}
+              >
+                <Text style={styles.dialogBtnCancelText}>{t.cancel}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.dialogBtn, styles.dialogBtnConfirm]}
+                onPress={confirmUnjoin}
+              >
+                <Text style={styles.dialogBtnConfirmText}>{t.confirm}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }

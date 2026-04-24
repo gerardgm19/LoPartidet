@@ -6,4 +6,5 @@ public interface IMatchValidationService
 {
     Task<ValidationResult> ValidateCreateMatchAsync(CreateMatchDto request);
     Task<ValidationResult> ValidateJoinMatchAsync(JoinMatchValidationRequest request);
+    Task<ValidationResult> ValidateUnjoinMatchAsync(UnjoinMatchValidationRequest request);
 }

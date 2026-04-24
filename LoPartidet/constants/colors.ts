@@ -4,6 +4,7 @@ export type ColorPalette = {
   card: string;
   green: string;
   greenDim: string;
+  red: string;
   white: string;
   muted: string;
   border: string;
@@ -15,6 +16,7 @@ export const darkColors: ColorPalette = {
   card: "#1C1C1C",
   green: "#00E676",
   greenDim: "#00C853",
+  red: "#E53935",
   white: "#F5F5F5",
   muted: "#6B6B6B",
   border: "#2A2A2A",
@@ -26,6 +28,7 @@ export const lightColors: ColorPalette = {
   card: "#FFFFFF",    // cards
   green: "#00A854",   // accent — darker for legibility on white
   greenDim: "#007A3D",
+  red: "#E53935",
   white: "#0D0D0D",   // primary text
   muted: "#8E8E93",   // secondary text
   border: "#D1D1D6",  // borders / separators
