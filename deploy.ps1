@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-# deploy.ps1 - Build and deploy LoPartidet.API and IdentityManager to remote server
+# deploy.ps1 - Build and deploy LoPartidet services to remote server
 
 param(
     [string]$SshHost = "100.64.116.23",
@@ -16,14 +16,34 @@ if (-not (Get-Module -ListAvailable -Name Posh-SSH)) {
 }
 Import-Module Posh-SSH
 
-$RepoRoot    = $PSScriptRoot
-$ApiProject  = "$RepoRoot/LoPartidet.API/LoPartidet.API/LoPartidet.API.csproj"
-$IdmProject  = "$RepoRoot/IdentityManager/IdentityManager/IdentityManager.csproj"
-$BuildDir    = "$RepoRoot/.deploy-build"
-$ApiBuildOut = "$BuildDir/lopartidet"
-$IdmBuildOut = "$BuildDir/identitymanager"
-$Date        = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
+# ── PATHS ─────────────────────────────────────────────────────────────────────
+$RepoRoot = $PSScriptRoot
+$BuildDir = "$RepoRoot/.deploy-build"
+$Date     = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
 
+$Cfg = @{
+    LoPartidetAPI = @{
+        Name       = "LoPartidet.API"
+        Service    = "lopartidet"
+        CsprojPath = "$RepoRoot/LoPartidet.API/LoPartidet.API/LoPartidet.API.csproj"
+        BuildOut   = "$BuildDir/lopartidet"
+        RemoteDir  = "/opt/lopartidet"
+    }
+    IdentityManager = @{
+        Name       = "IdentityManager"
+        Service    = "identitymanager"
+        CsprojPath = "$RepoRoot/IdentityManager/IdentityManager/IdentityManager.csproj"
+        BuildOut   = "$BuildDir/identitymanager"
+        RemoteDir  = "/opt/identitymanager"
+    }
+    ExpoWeb = @{
+        SourceDir = "$RepoRoot/LoPartidet"
+        BuildOut  = "$RepoRoot/LoPartidet/dist"
+        RemoteDir = "/var/www/html"
+    }
+}
+
+# ── SESSION HELPERS ───────────────────────────────────────────────────────────
 function Write-Step { param([string]$Msg) Write-Host "`n==> $Msg" -ForegroundColor Cyan }
 function Write-Err  { param([string]$Msg) Write-Host "ERROR: $Msg" -ForegroundColor Red }
 
@@ -63,111 +83,185 @@ function Send-Dir {
     }
 }
 
-# ── PROJECT SELECTION ─────────────────────────────────────────────────────────
-$projects = @(
-    [PSCustomObject]@{ Name = "LoPartidet.API";  Service = "lopartidet";      BuildOut = $ApiBuildOut; CsprojPath = $ApiProject; RemoteDir = "/opt/lopartidet" }
-    [PSCustomObject]@{ Name = "IdentityManager"; Service = "identitymanager"; BuildOut = $IdmBuildOut; CsprojPath = $IdmProject; RemoteDir = "/opt/identitymanager" }
-)
+# ── BACKUP HELPER ─────────────────────────────────────────────────────────────
+function Invoke-RemoteBackup {
+    param([string]$RemoteDir)
+    # Finds unique filename: name.zip → name(1).zip → name(2).zip …
+    # Skips zip if directory is empty (first deploy)
+    $cmd = "sudo mkdir -p '$RemoteDir/backups'; base='$RemoteDir/backups/$Date'; " +
+           'target="${base}.zip"; n=1; while [ -f "$target" ]; do target="${base}(${n}).zip"; n=$((n+1)); done; ' +
+           "if find '$RemoteDir' -mindepth 1 -maxdepth 1 ! -name backups | grep -q .; then cd '$RemoteDir' && sudo zip -r " + '"$target"' + " . --exclude 'backups/*'; fi"
+    return Invoke-Remote $cmd
+}
 
-Write-Host "`nSelect projects to deploy:" -ForegroundColor Yellow
-Write-Host "  [1] LoPartidet.API"
-Write-Host "  [2] IdentityManager"
-Write-Host "  [3] Both"
+# ── DEPLOY FUNCTIONS ──────────────────────────────────────────────────────────
+
+function Deploy-DotnetService {
+    param([hashtable]$Svc)
+
+    $name      = $Svc.Name
+    $service   = $Svc.Service
+    $buildOut  = $Svc.BuildOut
+    $remoteDir = $Svc.RemoteDir
+
+    # 1. Build locally
+    Write-Step "Building $name"
+    if (Test-Path $buildOut) { Remove-Item -Recurse -Force $buildOut }
+    dotnet publish $Svc.CsprojPath -c Release -o $buildOut --nologo
+    if ($LASTEXITCODE -ne 0) { Write-Err "$name build failed."; exit 1 }
+
+    # 2. Stop service
+    Write-Step "Stopping $service"
+    $exitCode, $out = Invoke-Remote "sudo systemctl stop $service"
+    if ($exitCode -ne 0) { Write-Err "Stop failed: $out"; Close-Sessions; exit 1 }
+
+    # 3. Backup remote
+    Write-Step "Backing up $name ($Date)"
+    $exitCode, $out = Invoke-RemoteBackup $remoteDir
+    if ($exitCode -ne 0) {
+        Write-Err "Backup failed: $out"
+        Invoke-Remote "sudo systemctl start $service" | Out-Null
+        Close-Sessions; exit 1
+    }
+
+    # 4. Clear remote (keep appsettings and backups)
+    Write-Step "Clearing $remoteDir"
+    $exitCode, $out = Invoke-Remote "sudo find '$remoteDir' -mindepth 1 -maxdepth 1 ! -name backups ! -name 'appsettings*.json' -exec rm -rf {} +"
+    if ($exitCode -ne 0) {
+        Write-Err "Clear failed: $out"
+        Invoke-Remote "sudo unzip -o '$remoteDir/backups/${Date}.zip' -d '$remoteDir'" | Out-Null
+        Invoke-Remote "sudo systemctl start $service" | Out-Null
+        Close-Sessions; exit 1
+    }
+
+    # 5. Upload build output
+    Write-Step "Uploading $name -> $remoteDir"
+    try {
+        Send-Dir -LocalDir $buildOut -RemotePath $remoteDir
+    } catch {
+        Write-Err "Upload failed: $_"
+        Invoke-Remote "sudo unzip -o '$remoteDir/backups/${Date}.zip' -d '$remoteDir'" | Out-Null
+        Invoke-Remote "sudo systemctl start $service" | Out-Null
+        Close-Sessions; exit 1
+    }
+
+    # 6. Start service and verify
+    Write-Step "Starting $service"
+    $exitCode, $out = Invoke-Remote "sudo systemctl start $service"
+    if ($exitCode -ne 0) {
+        Write-Err "Start failed: $out"
+        Write-Host "Check: sudo journalctl -u $service -n 50" -ForegroundColor Yellow
+        Close-Sessions; exit 1
+    }
+
+    Start-Sleep -Seconds 2
+    $exitCode, $status = Invoke-Remote "systemctl is-active $service"
+    Write-Host ($status -join "`n")
+}
+
+function Deploy-LoPartidetAPI {
+    Deploy-DotnetService $Cfg.LoPartidetAPI
+}
+
+function Deploy-IdentityManager {
+    Deploy-DotnetService $Cfg.IdentityManager
+}
+
+function Deploy-ExpoWeb {
+    $svc      = $Cfg.ExpoWeb
+    $tarName  = "expo-web-${Date}.tar.gz"
+    $localTar = "$env:TEMP\$tarName"
+    $remoteTar = "/tmp/$tarName"
+
+    # 1. Build locally
+    Write-Step "Building Expo Web"
+    Push-Location $svc.SourceDir
+    npx expo export -p web
+    $expoExit = $LASTEXITCODE
+    Pop-Location
+    if ($expoExit -ne 0) { Write-Err "Expo build failed."; exit 1 }
+
+    # 2. Backup remote web root
+    Write-Step "Backing up LoPartidet Web ($Date)"
+    $exitCode, $out = Invoke-RemoteBackup $svc.RemoteDir
+    if ($exitCode -ne 0) { Write-Err "Backup failed: $out"; Close-Sessions; exit 1 }
+
+    # 3. Clear remote web root
+    Write-Step "Clearing $($svc.RemoteDir)"
+    $exitCode, $out = Invoke-Remote "sudo find '$($svc.RemoteDir)' -mindepth 1 -maxdepth 1 ! -name backups -exec rm -rf {} +"
+    if ($exitCode -ne 0) { Write-Err "Clear failed: $out"; Close-Sessions; exit 1 }
+
+    # 4. Pack into tarball (avoids SFTP issues with special chars in folder names like (auth), (tabs))
+    Write-Step "Packing Expo Web build"
+    tar -czf $localTar -C $svc.BuildOut .
+    if ($LASTEXITCODE -ne 0) { Write-Err "tar pack failed."; exit 1 }
+
+    # 5. Upload tarball and extract on server
+    Write-Step "Uploading and extracting -> $($svc.RemoteDir)"
+    try {
+        Set-SFTPItem -SFTPSession $SftpSession -Path $localTar -Destination "/tmp" -Force
+    } catch {
+        Write-Err "Tarball upload failed: $_"
+        Remove-Item $localTar -ErrorAction SilentlyContinue
+        Close-Sessions; exit 1
+    }
+    Remove-Item $localTar
+
+    $exitCode, $out = Invoke-Remote "sudo tar -xzf '$remoteTar' -C '$($svc.RemoteDir)' && sudo rm '$remoteTar'"
+    if ($exitCode -ne 0) { Write-Err "Extract failed: $out"; Close-Sessions; exit 1 }
+
+    # 6. Fix permissions
+    $exitCode, $out = Invoke-Remote "sudo chown -R www-data:www-data '$($svc.RemoteDir)' && sudo chmod -R 755 '$($svc.RemoteDir)'"
+    if ($exitCode -ne 0) { Write-Err "Permissions fix failed: $out"; Close-Sessions; exit 1 }
+
+    # 7. Restart nginx
+    Write-Step "Restarting nginx"
+    $exitCode, $out = Invoke-Remote "sudo systemctl restart nginx"
+    if ($exitCode -ne 0) { Write-Err "nginx restart failed: $out"; Close-Sessions; exit 1 }
+
+    Write-Host "Expo Web deployed OK" -ForegroundColor Green
+}
+
+# ── SELECTION ─────────────────────────────────────────────────────────────────
+Write-Host "`nSelect what to deploy (space-separated):" -ForegroundColor Yellow
+Write-Host "  [1] IdentityManager"
+Write-Host "  [2] LoPartidet.API"
+Write-Host "  [3] LoPartidet Web"
 Write-Host ""
 
-do { $choice = Read-Host "Choice (1/2/3)" } while ($choice -notin @("1","2","3"))
+$validChoices = @("1","2","3")
+do {
+    $raw     = Read-Host "Choice (e.g. 1 3)"
+    $choices = $raw.Trim() -split '\s+' | Select-Object -Unique
+    $invalid = $choices | Where-Object { $_ -notin $validChoices }
+} while ($invalid.Count -gt 0 -or $choices.Count -eq 0)
 
-$selected = switch ($choice) {
-    "1" { @($projects[0]) }
-    "2" { @($projects[1]) }
-    "3" { $projects }
+$deployIdentity    = "1" -in $choices
+$deployLoPartidet  = "2" -in $choices
+$deployExpoWeb     = "3" -in $choices
+
+# ── PREFLIGHT CHECKS ──────────────────────────────────────────────────────────
+if (($deployIdentity -or $deployLoPartidet) -and -not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
+    Write-Err "'dotnet' not found in PATH."; exit 1
+}
+if ($deployExpoWeb -and -not (Get-Command npx -ErrorAction SilentlyContinue)) {
+    Write-Err "'npx' not found in PATH."; exit 1
 }
 
-Write-Host "`nDeploying: $($selected.Name -join ', ')" -ForegroundColor Green
-
-# ── CHECK DOTNET ───────────────────────────────────────────────────────────────
-if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
-    Write-Err "'dotnet' not found in PATH."
-    exit 1
-}
-
-# ── 1. BUILD ──────────────────────────────────────────────────────────────────
-foreach ($p in $selected) {
-    Write-Step "Building $($p.Name)"
-    if (Test-Path $p.BuildOut) { Remove-Item -Recurse -Force $p.BuildOut }
-    dotnet publish $p.CsprojPath -c Release -o $p.BuildOut --nologo
-    if ($LASTEXITCODE -ne 0) { Write-Err "$($p.Name) build failed."; exit 1 }
-}
-
-# ── CONNECT ───────────────────────────────────────────────────────────────────
+# ── CONNECT AND DEPLOY ────────────────────────────────────────────────────────
 Open-Sessions
-$serviceList = ($selected | ForEach-Object { $_.Service }) -join " "
 
-function Invoke-Restore {
-    foreach ($p in $selected) {
-        $dir = $p.RemoteDir
-        Invoke-Remote "sudo find '$dir' -mindepth 1 -maxdepth 1 ! -name backups -exec rm -rf {} + && sudo unzip -o '$dir/backups/${Date}.zip' -d '$dir'" | Out-Null
-    }
-    Invoke-Remote "sudo systemctl start $serviceList" | Out-Null
-}
-
-# ── 2. STOP SERVICES ──────────────────────────────────────────────────────────
-Write-Step "Stopping: $serviceList"
-$exitCode, $out = Invoke-Remote "sudo systemctl stop $serviceList"
-if ($exitCode -ne 0) { Write-Err "Stop failed: $out"; Close-Sessions; exit 1 }
-
-# ── 3. BACKUP ─────────────────────────────────────────────────────────────────
-Write-Step "Backing up ($Date)"
-$backupCmds = ($selected | ForEach-Object {
-    $dir = $_.RemoteDir
-    "mkdir -p '$dir/backups' && cd '$dir' && zip -r '$dir/backups/${Date}.zip' . --exclude 'backups/*'"
-}) -join " && "
-
-$exitCode, $out = Invoke-Remote $backupCmds
-if ($exitCode -ne 0) {
-    Write-Err "Backup failed: $out"
-    Invoke-Remote "sudo systemctl start $serviceList" | Out-Null
-    Close-Sessions; exit 1
-}
-
-# ── 4. CLEAR REMOTE ───────────────────────────────────────────────────────────
-$clearCmds = ($selected | ForEach-Object {
-    "sudo find '$($_.RemoteDir)' -mindepth 1 -maxdepth 1 ! -name backups ! -name 'appsettings*.json' -exec rm -rf {} +"
-}) -join " && "
-
-$exitCode, $out = Invoke-Remote $clearCmds
-if ($exitCode -ne 0) {
-    Write-Err "Clear failed: $out"
-    Invoke-Restore; Close-Sessions; exit 1
-}
-
-# ── 5. DEPLOY ─────────────────────────────────────────────────────────────────
-foreach ($p in $selected) {
-    Write-Step "Uploading $($p.Name) -> $($p.RemoteDir)"
-    try {
-        Send-Dir -LocalDir $p.BuildOut -RemotePath $p.RemoteDir
-    } catch {
-        Write-Err "Upload failed for $($p.Name): $_"
-        Invoke-Restore; Close-Sessions; exit 1
-    }
-}
-
-# ── 6. START SERVICES ─────────────────────────────────────────────────────────
-Write-Step "Starting: $serviceList"
-$exitCode, $out = Invoke-Remote "sudo systemctl start $serviceList"
-if ($exitCode -ne 0) {
-    Write-Err "Start failed: $out"
-    Write-Host "Check: sudo journalctl -u $serviceList -n 50" -ForegroundColor Yellow
-    Close-Sessions; exit 1
-}
-
-Start-Sleep -Seconds 2
-$exitCode, $status = Invoke-Remote "systemctl is-active $serviceList"
-Write-Host ($status -join "`n")
+if ($deployIdentity)   { Deploy-IdentityManager }
+if ($deployLoPartidet) { Deploy-LoPartidetAPI }
+if ($deployExpoWeb)    { Deploy-ExpoWeb }
 
 # ── CLEANUP ───────────────────────────────────────────────────────────────────
 Close-Sessions
+
 Write-Step "Cleaning local build artifacts"
-Remove-Item -Recurse -Force $BuildDir
+if (Test-Path $BuildDir) { Remove-Item -Recurse -Force $BuildDir }
+if ($deployExpoWeb -and (Test-Path $Cfg.ExpoWeb.BuildOut)) {
+    Remove-Item -Recurse -Force $Cfg.ExpoWeb.BuildOut
+}
 
 Write-Host "`nDeploy complete ($Date)" -ForegroundColor Green
