@@ -1,5 +1,3 @@
-using LoPartidet.API.Entities;
-
 namespace LoPartidet.API.Models;
 
-public record RegisterUserResponse(User User, string Token);
+public record RegisterUserResponse(int UserId, string Token);

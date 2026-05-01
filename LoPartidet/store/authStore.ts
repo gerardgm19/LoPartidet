@@ -44,13 +44,13 @@ export const useAuthStore = create<AuthStore>((set) => ({
   signIn: async (token, userId) => {
     await storage.set(TOKEN_KEY, token);
     // await storage.set(USER_ID_KEY, userId);
-    set({ token });
+    set({ token/*, userId*/ });
   },
 
   signOut: async () => {
     await storage.del(TOKEN_KEY);
     await storage.del(USER_ID_KEY);
-    set({ token: null });
+    set({ token: null, userId: null });
   },
 
   setUserId: (userId) => set({ userId }),

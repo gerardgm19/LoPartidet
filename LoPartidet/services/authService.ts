@@ -11,7 +11,7 @@ export type AuthResponse = {
 };
 
 type RegisterApiResponse = {
-  user: { id: number };
+  userId: number;
   token: string;
 };
 
@@ -41,7 +41,7 @@ export async function register(
       password,
       city: "",
     });
-    return { token: data.token, userId: data.user.id.toString() };
+    return { token: data.token, userId: data.userId.toString() };
   } catch (error: any) {
     const body = error.response?.data;
     throw new Error(body?.error ?? "Registration failed. Please try again.");

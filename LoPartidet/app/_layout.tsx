@@ -38,7 +38,6 @@ function RootNavigator() {
     } else if (token && inAuthGroup) {
       router.replace("/(tabs)/matches");
     }
-
     if (token && !userId) {
       getMe().then((userId) => {
         console.log(userId)

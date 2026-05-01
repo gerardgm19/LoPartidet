@@ -35,7 +35,7 @@ public class UsersController(IUsersService usersService, IUserValidationService 
     {
         var result = await usersService.RegisterUserAsync(request);
         if (result is null) return BadRequest("Registration failed.");
-        return CreatedAtAction(nameof(GetById), new { id = result.User.Id }, result);
+        return CreatedAtAction(nameof(GetById), new { id = result.UserId }, result);
     }
 
     [HttpPatch("{id}")]

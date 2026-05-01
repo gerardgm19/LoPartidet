@@ -44,7 +44,7 @@ public class UsersService(LoPartidetContext db, IIdentityManagerService identity
         db.PlayerSkills.Add(playerSkill);
         await db.SaveChangesAsync();
 
-        return new RegisterUserResponse(user, identity.Token);
+        return new RegisterUserResponse(user.Id, identity.Token);
     }
 
     public User? GetById(int id) => db.Users.Find(id);
