@@ -1,10 +1,12 @@
 using LoPartidet.API.Authentication;
 using LoPartidet.API.Data;
+using LoPartidet.API.Hubs;
 using LoPartidet.API.Services;
 using LoPartidet.API.Services.Interfaces;
 using LoPartidet.API.Services.Validators;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<LoPartidetContext>(options =>
@@ -17,6 +19,10 @@ builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<IPlayerSkillsService, PlayerSkillsService>();
 builder.Services.AddScoped<IMatchValidationService, MatchValidationService>();
 builder.Services.AddScoped<IUserValidationService, UserValidationService>();
+builder.Services.AddScoped<IFriendshipService, FriendshipService>();
+builder.Services.AddScoped<IConversationService, ConversationService>();
+builder.Services.AddScoped<IMessageService, MessageService>();
+builder.Services.AddHttpClient<IPushNotificationService, PushNotificationService>();
 
 builder.Services.AddHttpClient();
 builder.Services.AddHttpClient<IIdentityManagerService, IdentityManagerService>(client =>
@@ -29,8 +35,9 @@ builder.Services.AddAuthentication("RemoteJwt")
 
 builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
-        policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
+        policy.SetIsOriginAllowed(_ => true).AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 
+builder.Services.AddSignalR();
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
@@ -52,5 +59,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<ChatHub>("/hubs/chat");
 
 app.Run();

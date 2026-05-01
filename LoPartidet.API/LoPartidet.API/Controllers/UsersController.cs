@@ -5,6 +5,7 @@ using LoPartidet.API.Services;
 using LoPartidet.API.Services.Validators;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 
 namespace LoPartidet.API.Controllers;
 
@@ -43,6 +44,17 @@ public class UsersController(IUsersService usersService, IUserValidationService 
     {
         var user = usersService.UpdateUser(id, request);
         return user is null ? NotFound() : Ok(user);
+    }
+
+    [HttpPost("push-token")]
+    public IActionResult RegisterPushToken(RegisterExpoPushTokenDto request)
+    {
+        var identityId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (identityId is null) return Unauthorized();
+        var userId = usersService.GetUserIdByIdentityId(identityId);
+        if (userId is 0) return NotFound();
+        usersService.RegisterPushToken(userId, request.Token);
+        return NoContent();
     }
 
     [HttpPut("{id}")]

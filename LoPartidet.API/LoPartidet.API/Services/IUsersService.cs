@@ -10,4 +10,5 @@ public interface IUsersService
     Task<RegisterUserResponse?> RegisterUserAsync(RegisterUserDto request);
     User CreateUser(CreateUserRequest request);
     User? UpdateUser(int id, UpdateUserRequest request);
+    void RegisterPushToken(int userId, string token);
 }

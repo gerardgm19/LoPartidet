@@ -12,6 +12,7 @@ public class Match
     public string Location { get; init; } = string.Empty;
     public int MaxPlayers { get; init; }
     public MatchStatus Status { get; init; }
+    public string? ConversationId { get; init; }
 
     public User CreatedBy { get; init; } = null!;
 }

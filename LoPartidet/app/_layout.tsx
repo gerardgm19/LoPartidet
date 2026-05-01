@@ -3,9 +3,12 @@ import { useLangStore } from "@/store/langStore";
 import { useThemeStore } from "@/store/themeStore";
 import { setUnauthorizedHandler } from "@/services/api";
 import { getMe } from "@/services/usersService";
+import { registerPushToken } from "@/services/socialService";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import * as Notifications from "expo-notifications";
+import Constants from "expo-constants";
 
 function RootNavigator() {
   const { token, userId, isLoading, signOut, initialize, setUserId } = useAuthStore();
@@ -45,6 +48,16 @@ function RootNavigator() {
         if (userId) setUserId(userId.toString());
       });
     }
+
+    if (token && Constants.executionEnvironment !== "storeClient") {
+      Notifications.requestPermissionsAsync().then(({ status }) => {
+        if (status === "granted") {
+          Notifications.getExpoPushTokenAsync().then(({ data }) => {
+            registerPushToken(data).catch(() => {});
+          }).catch(() => {});
+        }
+      }).catch(() => {});
+    }
   }, [token, isLoading, segments]);
 
   return (
@@ -52,6 +65,7 @@ function RootNavigator() {
       <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="match/[id]" options={{ headerShown: false }} />
+      <Stack.Screen name="chat/[id]" options={{ headerShown: false }} />
       <Stack.Screen name="skills" options={{ headerShown: false }} />
       <Stack.Screen name="player-information" options={{ headerShown: false }} />
       <Stack.Screen name="about-us" options={{ headerShown: false }} />

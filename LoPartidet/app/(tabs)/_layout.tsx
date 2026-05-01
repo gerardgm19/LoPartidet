@@ -72,6 +72,17 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
+        name="social"
+        options={{
+          title: t.social,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="people-outline" size={size} color={color} />
+          ),
+          tabBarLabel: ({ color }) => <TabLabel label={t.social} color={color} />,
+        }}
+      />
+
+      <Tabs.Screen
         name="profile"
         options={{
           title: t.profile,

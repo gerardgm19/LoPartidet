@@ -11,6 +11,8 @@ public class User
     public string City { get; set; } = string.Empty;
     public DateTime? Birthday { get; set; }
 
+    public string? ExpoPushToken { get; set; }
+
     public ICollection<UserMatch> UserMatches { get; set; } = [];
     public ICollection<PlayerSkill> PlayerSkills { get; set; } = [];
 }

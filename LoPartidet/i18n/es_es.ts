@@ -21,6 +21,7 @@ const es_es = {
 
   // Tabs
   matches: "Partidos",
+  social: "Social",
   profile: "Perfil",
 
   // Matches screen
@@ -137,6 +138,21 @@ const es_es = {
     "LoPartidet conecta jugadores de fútbol para organizar y unirse a partidos locales. Tanto si buscas un partido rápido de Fútsal como un Fut 11 completo, lo tenemos.",
   version: "Versión 1.0.0",
   madeWith: "Hecho con ♥ para los amantes del fútbol",
+
+  // Social
+  friends: "Amigos",
+  groups: "Grupos",
+  noFriends: "Aún no tienes amigos",
+  noGroups: "Aún no tienes grupos",
+  addFriend: "Añadir amigo",
+  addFriendPlaceholder: "ID de usuario",
+  sendRequest: "Enviar solicitud",
+  friendRequestSent: "Solicitud enviada",
+  friendRequestError: "No se pudo enviar la solicitud",
+  accept: "Aceptar",
+  pendingRequests: "Solicitudes pendientes",
+  typeMessage: "Escribe un mensaje...",
+  chatError: "No se pudieron cargar los mensajes",
 
   // Sign out
   signOut: "Cerrar sesión",

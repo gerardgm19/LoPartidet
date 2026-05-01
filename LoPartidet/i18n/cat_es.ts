@@ -21,6 +21,7 @@ const cat_es = {
 
   // Tabs
   matches: "Partits",
+  social: "Social",
   profile: "Perfil",
 
   // Matches screen
@@ -137,6 +138,21 @@ const cat_es = {
     "LoPartidet connecta jugadors de futbol per organitzar i unir-se a partits locals. Tant si busques un partit ràpid de Futsal com un Fut 11 complet, ho tenim.",
   version: "Versió 1.0.0",
   madeWith: "Fet amb ♥ per als amants del futbol",
+
+  // Social
+  friends: "Amics",
+  groups: "Grups",
+  noFriends: "Encara no tens amics",
+  noGroups: "Encara no tens grups",
+  addFriend: "Afegir amic",
+  addFriendPlaceholder: "ID d'usuari",
+  sendRequest: "Enviar sol·licitud",
+  friendRequestSent: "Sol·licitud enviada",
+  friendRequestError: "No s'ha pogut enviar la sol·licitud",
+  accept: "Acceptar",
+  pendingRequests: "Sol·licituds pendents",
+  typeMessage: "Escriu un missatge...",
+  chatError: "No s'han pogut carregar els missatges",
 
   // Sign out
   signOut: "Tancar sessió",

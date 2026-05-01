@@ -121,4 +121,12 @@ public class UsersService(LoPartidetContext db, IIdentityManagerService identity
         db.SaveChanges();
         return user;
     }
+
+    public void RegisterPushToken(int userId, string token)
+    {
+        var user = db.Users.Find(userId);
+        if (user is null) return;
+        user.ExpoPushToken = token;
+        db.SaveChanges();
+    }
 }
