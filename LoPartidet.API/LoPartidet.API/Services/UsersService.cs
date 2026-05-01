@@ -2,6 +2,7 @@ using LoPartidet.API.Data;
 using LoPartidet.API.Entities;
 using LoPartidet.API.Models;
 using LoPartidet.API.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace LoPartidet.API.Services;
 
@@ -23,6 +24,15 @@ public class UsersService(LoPartidetContext db, IIdentityManagerService identity
             Email = request.Email,
             City = request.City,
             Birthday = request.Birthday,
+        };
+
+        db.Users.Add(user);
+        await db.SaveChangesAsync();
+
+        var playerSkill = new PlayerSkill
+        {
+            Id = Guid.NewGuid().ToString(),
+            UserId = user.Id,
             Position = request.Position,
             PreferredFoot = request.PreferredFoot,
             SkillLevel = request.SkillLevel,
@@ -31,8 +41,9 @@ public class UsersService(LoPartidetContext db, IIdentityManagerService identity
             Height = request.Height,
         };
 
-        db.Users.Add(user);
+        db.PlayerSkills.Add(playerSkill);
         await db.SaveChangesAsync();
+
         return new RegisterUserResponse(user, identity.Token);
     }
 
@@ -51,6 +62,15 @@ public class UsersService(LoPartidetContext db, IIdentityManagerService identity
             Email = request.Email,
             City = request.City,
             Birthday = request.Birthday,
+        };
+
+        db.Users.Add(user);
+        db.SaveChanges();
+
+        var playerSkill = new PlayerSkill
+        {
+            Id = Guid.NewGuid().ToString(),
+            UserId = user.Id,
             Position = request.Position,
             PreferredFoot = request.PreferredFoot,
             SkillLevel = request.SkillLevel,
@@ -59,14 +79,15 @@ public class UsersService(LoPartidetContext db, IIdentityManagerService identity
             Height = request.Height,
         };
 
-        db.Users.Add(user);
+        db.PlayerSkills.Add(playerSkill);
         db.SaveChanges();
+
         return user;
     }
 
     public User? UpdateUser(int id, UpdateUserRequest request)
     {
-        var user = db.Users.Find(id);
+        var user = db.Users.Include(u => u.PlayerSkills).FirstOrDefault(u => u.Id == id);
         if (user is null) return null;
 
         if (request.Name is not null) user.Name = request.Name;
@@ -75,12 +96,27 @@ public class UsersService(LoPartidetContext db, IIdentityManagerService identity
         if (request.Email is not null) user.Email = request.Email;
         if (request.City is not null) user.City = request.City;
         if (request.Birthday is not null) user.Birthday = request.Birthday.Value.ToDateTime(new TimeOnly(0, 0));
-        if (request.Position is not null) user.Position = request.Position;
-        if (request.PreferredFoot is not null) user.PreferredFoot = request.PreferredFoot;
-        if (request.SkillLevel is not null) user.SkillLevel = request.SkillLevel;
-        if (request.Speed is not null) user.Speed = request.Speed;
-        if (request.JerseyNumber is not null) user.JerseyNumber = request.JerseyNumber;
-        if (request.Height is not null) user.Height = request.Height;
+
+        var hasSkillFields = request.Position is not null || request.PreferredFoot is not null
+            || request.SkillLevel is not null || request.Speed is not null
+            || request.JerseyNumber is not null || request.Height is not null;
+
+        if (hasSkillFields)
+        {
+            var skill = user.PlayerSkills.FirstOrDefault();
+            if (skill is null)
+            {
+                skill = new PlayerSkill { Id = Guid.NewGuid().ToString(), UserId = user.Id };
+                db.PlayerSkills.Add(skill);
+            }
+
+            if (request.Position is not null) skill.Position = request.Position;
+            if (request.PreferredFoot is not null) skill.PreferredFoot = request.PreferredFoot;
+            if (request.SkillLevel is not null) skill.SkillLevel = request.SkillLevel;
+            if (request.Speed is not null) skill.Speed = request.Speed;
+            if (request.JerseyNumber is not null) skill.JerseyNumber = request.JerseyNumber;
+            if (request.Height is not null) skill.Height = request.Height;
+        }
 
         db.SaveChanges();
         return user;

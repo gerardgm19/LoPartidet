@@ -14,6 +14,7 @@ builder.Services.AddDbContext<LoPartidetContext>(options =>
 
 builder.Services.AddScoped<IMatchesService, MatchesService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
+builder.Services.AddScoped<IPlayerSkillsService, PlayerSkillsService>();
 builder.Services.AddScoped<IMatchValidationService, MatchValidationService>();
 builder.Services.AddScoped<IUserValidationService, UserValidationService>();
 

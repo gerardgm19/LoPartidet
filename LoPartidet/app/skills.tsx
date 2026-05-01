@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,18 +15,24 @@ import { Ionicons } from "@expo/vector-icons";
 import { useThemeStore } from "@/store/themeStore";
 import { makeStyles } from "@/utils/makeStyles";
 import { useLangStore } from "@/store/langStore";
-
-type Position = "GK" | "DEF" | "MID" | "WIN" | "FWD";
-type Foot = "Left" | "Right" | "Both";
-type SkillLevel = "Beginner" | "Intermediate" | "Advanced" | "Expert";
-type Speed = "Slow" | "Medium" | "Fast" | "Elite";
+import { useAuthStore } from "@/store/authStore";
+import { Position } from "@/types/position";
+import { PreferredFoot } from "@/types/preferredFoot";
+import { SkillLevel } from "@/types/skillLevel";
+import { PlayerSpeed } from "@/types/playerSpeed";
+import {
+  createPlayerSkill,
+  getPlayerSkillsByUser,
+  updatePlayerSkill,
+} from "@/services/playerSkillsService";
+import { Toast } from "@/components/Toast";
 
 const POSITIONS: { value: Position; label: string }[] = [
-  { value: "GK", label: "GK" },
-  { value: "DEF", label: "DEF" },
-  { value: "MID", label: "MID" },
-  { value: "WIN", label: "WIN" },
-  { value: "FWD", label: "FWD" },
+  { value: Position.GK, label: "GK" },
+  { value: Position.DEF, label: "DEF" },
+  { value: Position.MID, label: "MID" },
+  { value: Position.WIN, label: "WIN" },
+  { value: Position.FWD, label: "FWD" },
 ];
 
 const useStyles = makeStyles((colors) => StyleSheet.create({
@@ -38,8 +46,16 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
   },
   backBtn: { width: 40, height: 40, justifyContent: "center" },
   title: { color: colors.white, fontSize: 18, fontWeight: "700" },
-  saveBtn: { paddingHorizontal: 16, paddingVertical: 8, backgroundColor: colors.green, borderRadius: 20 },
-  saveBtnText: { color: colors.black, fontSize: 14, fontWeight: "700" },
+  bottomBar: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 8,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    backgroundColor: colors.black,
+  },
+  saveBtn: { paddingVertical: 14, backgroundColor: colors.green, borderRadius: 12, alignItems: "center" },
+  saveBtnText: { color: colors.black, fontSize: 16, fontWeight: "700" },
   scroll: { flex: 1 },
   scrollContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 40, gap: 24 },
   section: { gap: 10 },
@@ -78,48 +94,97 @@ export default function Skills() {
   const t = useLangStore((s) => s.t);
   const colors = useThemeStore((s) => s.colors);
   const styles = useStyles();
+  const userId = useAuthStore((s) => s.userId);
 
+  const [skillId, setSkillId] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastVisible, setToastVisible] = useState(false);
+
+  function showToast(msg: string) {
+    setToastMessage(msg);
+    setToastVisible(true);
+  }
   const [position, setPosition] = useState<Position | null>(null);
-  const [foot, setFoot] = useState<Foot | null>(null);
+  const [foot, setFoot] = useState<PreferredFoot | null>(null);
   const [skillLevel, setSkillLevel] = useState<SkillLevel | null>(null);
-  const [speed, setSpeed] = useState<Speed | null>(null);
+  const [speed, setSpeed] = useState<PlayerSpeed | null>(null);
   const [jerseyNumber, setJerseyNumber] = useState("");
   const [height, setHeight] = useState("");
 
-  const FEET: { value: Foot; label: string }[] = [
-    { value: "Left", label: t.footLeft },
-    { value: "Right", label: t.footRight },
-    { value: "Both", label: t.footBoth },
+  useEffect(() => {
+    if (!userId) return;
+    getPlayerSkillsByUser(userId).then((skills) => {
+      const skill = skills[0];
+      if (!skill) return;
+      setSkillId(skill.id);
+      if (skill.position !== null) setPosition(skill.position);
+      if (skill.preferredFoot !== null) setFoot(skill.preferredFoot);
+      if (skill.skillLevel !== null) setSkillLevel(skill.skillLevel);
+      if (skill.speed !== null) setSpeed(skill.speed);
+      if (skill.jerseyNumber !== null) setJerseyNumber(String(skill.jerseyNumber));
+      if (skill.height !== null) setHeight(String(skill.height));
+    });
+  }, [userId]);
+
+  const handleSave = async () => {
+    if (!userId) return;
+    const skillData = {
+      position,
+      preferredFoot: foot,
+      skillLevel,
+      speed,
+      jerseyNumber: jerseyNumber ? parseInt(jerseyNumber, 10) : null,
+      height: height ? parseInt(height, 10) : null,
+    };
+    try {
+      if (skillId) {
+        await updatePlayerSkill(skillId, skillData);
+      } else {
+        await createPlayerSkill({ userId: parseInt(userId, 10), ...skillData });
+      }
+      showToast(t.playerInformationSaved);
+      setTimeout(() => router.back(), 1200);
+    } catch {
+      showToast(t.playerInformationError);
+    }
+  };
+
+  const FEET: { value: PreferredFoot; label: string }[] = [
+    { value: PreferredFoot.Left, label: t.footLeft },
+    { value: PreferredFoot.Right, label: t.footRight },
+    { value: PreferredFoot.Both, label: t.footBoth },
   ];
 
   const SKILL_LEVELS: { value: SkillLevel; label: string }[] = [
-    { value: "Beginner", label: t.skillBeginner },
-    { value: "Intermediate", label: t.skillIntermediate },
-    { value: "Advanced", label: t.skillAdvanced },
-    { value: "Expert", label: t.skillExpert },
+    { value: SkillLevel.Beginner, label: t.skillBeginner },
+    { value: SkillLevel.Intermediate, label: t.skillIntermediate },
+    { value: SkillLevel.Advanced, label: t.skillAdvanced },
+    { value: SkillLevel.Expert, label: t.skillExpert },
   ];
 
-  const SPEEDS: { value: Speed; label: string }[] = [
-    { value: "Slow", label: t.speedSlow },
-    { value: "Medium", label: t.speedMedium },
-    { value: "Fast", label: t.speedFast },
-    { value: "Elite", label: t.speedElite },
+  const SPEEDS: { value: PlayerSpeed; label: string }[] = [
+    { value: PlayerSpeed.Slow, label: t.speedSlow },
+    { value: PlayerSpeed.Medium, label: t.speedMedium },
+    { value: PlayerSpeed.Fast, label: t.speedFast },
+    { value: PlayerSpeed.Elite, label: t.speedElite },
   ];
 
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+      <SafeAreaView style={styles.container} edges={["top"]}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Ionicons name="chevron-back" size={24} color={colors.white} />
           </TouchableOpacity>
           <Text style={styles.title}>{t.skillsTitle}</Text>
-          <TouchableOpacity style={styles.saveBtn}>
-            <Text style={styles.saveBtnText}>{t.save}</Text>
-          </TouchableOpacity>
+          <View style={styles.backBtn} />
         </View>
 
+        <KeyboardAvoidingView
+          style={styles.scroll}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.scrollContent}
@@ -219,7 +284,15 @@ export default function Skills() {
             />
           </View>
         </ScrollView>
+        </KeyboardAvoidingView>
+
+        <SafeAreaView edges={["bottom"]} style={styles.bottomBar}>
+          <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
+            <Text style={styles.saveBtnText}>{t.save}</Text>
+          </TouchableOpacity>
+        </SafeAreaView>
       </SafeAreaView>
+      <Toast message={toastMessage} visible={toastVisible} onHide={() => setToastVisible(false)} />
     </>
   );
 }

@@ -8,9 +8,9 @@ function resolveUrl(debug: string, prod: string): string {
   return debug;
 }
 
-const isDebug = true
-const apiIdentityCloudflareUrl: string = "https://floppy-weeks-visitors-maui.trycloudflare.com/identitymanager";
-const apiLoPartidetCloudflareUrl: string = "https://floppy-weeks-visitors-maui.trycloudflare.com/lopartidet_api";
+const isDebug = true;
+const apiIdentityCloudflareUrl: string = "https://identity.lopartidet.cat";
+const apiLoPartidetCloudflareUrl: string = "https://api.lopartidet.cat";
 const apiIdentityLocalhostUrl: string = "http://localhost:10002";
 const apiLoPartidetLocalhostUrl: string = "http://localhost:10004";
 const apiIdentityIpUrl: string = "https://178.33.119.182:10099/identitymanager";

@@ -8,6 +8,7 @@ public class LoPartidetContext(DbContextOptions<LoPartidetContext> options) : Db
     public DbSet<Match> Matches => Set<Match>();
     public DbSet<User> Users => Set<User>();
     public DbSet<UserMatch> UserMatches => Set<UserMatch>();
+    public DbSet<PlayerSkill> PlayerSkills => Set<PlayerSkill>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -32,6 +33,15 @@ public class LoPartidetContext(DbContextOptions<LoPartidetContext> options) : Db
             entity.Property(u => u.Nickname).HasMaxLength(50);
             entity.Property(u => u.Email).HasMaxLength(200);
             entity.Property(u => u.City).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<PlayerSkill>(entity =>
+        {
+            entity.HasKey(ps => ps.Id);
+
+            entity.HasOne(ps => ps.User)
+                  .WithMany(u => u.PlayerSkills)
+                  .HasForeignKey(ps => ps.UserId);
         });
 
         modelBuilder.Entity<Match>(entity =>
