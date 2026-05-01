@@ -31,7 +31,6 @@ const POSITIONS: { value: Position; label: string }[] = [
   { value: Position.GK, label: "GK" },
   { value: Position.DEF, label: "DEF" },
   { value: Position.MID, label: "MID" },
-  { value: Position.WIN, label: "WIN" },
   { value: Position.FWD, label: "FWD" },
 ];
 
@@ -185,105 +184,105 @@ export default function Skills() {
           style={styles.scroll}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-        <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>{t.position}</Text>
-            <View style={styles.pills}>
-              {POSITIONS.map((p) => (
-                <TouchableOpacity
-                  key={p.value}
-                  style={[styles.pill, position === p.value && styles.pillActive]}
-                  onPress={() => setPosition(p.value)}
-                >
-                  <Text style={[styles.pillText, position === p.value && styles.pillTextActive]}>
-                    {p.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+          <ScrollView
+            style={styles.scroll}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.section}>
+              <Text style={styles.sectionLabel}>{t.position}</Text>
+              <View style={styles.pills}>
+                {POSITIONS.map((p) => (
+                  <TouchableOpacity
+                    key={p.value}
+                    style={[styles.pill, position === p.value && styles.pillActive]}
+                    onPress={() => setPosition(p.value)}
+                  >
+                    <Text style={[styles.pillText, position === p.value && styles.pillTextActive]}>
+                      {p.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
-          </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>{t.preferredFoot}</Text>
-            <View style={styles.pills}>
-              {FEET.map((f) => (
-                <TouchableOpacity
-                  key={f.value}
-                  style={[styles.pill, foot === f.value && styles.pillActive]}
-                  onPress={() => setFoot(f.value)}
-                >
-                  <Text style={[styles.pillText, foot === f.value && styles.pillTextActive]}>
-                    {f.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+            <View style={styles.section}>
+              <Text style={styles.sectionLabel}>{t.preferredFoot}</Text>
+              <View style={styles.pills}>
+                {FEET.map((f) => (
+                  <TouchableOpacity
+                    key={f.value}
+                    style={[styles.pill, foot === f.value && styles.pillActive]}
+                    onPress={() => setFoot(f.value)}
+                  >
+                    <Text style={[styles.pillText, foot === f.value && styles.pillTextActive]}>
+                      {f.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
-          </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>{t.skillLevel}</Text>
-            <View style={styles.pills}>
-              {SKILL_LEVELS.map((s) => (
-                <TouchableOpacity
-                  key={s.value}
-                  style={[styles.pill, skillLevel === s.value && styles.pillActive]}
-                  onPress={() => setSkillLevel(s.value)}
-                >
-                  <Text style={[styles.pillText, skillLevel === s.value && styles.pillTextActive]}>
-                    {s.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+            <View style={styles.section}>
+              <Text style={styles.sectionLabel}>{t.skillLevel}</Text>
+              <View style={styles.pills}>
+                {SKILL_LEVELS.map((s) => (
+                  <TouchableOpacity
+                    key={s.value}
+                    style={[styles.pill, skillLevel === s.value && styles.pillActive]}
+                    onPress={() => setSkillLevel(s.value)}
+                  >
+                    <Text style={[styles.pillText, skillLevel === s.value && styles.pillTextActive]}>
+                      {s.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
-          </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>{t.speed}</Text>
-            <View style={styles.pills}>
-              {SPEEDS.map((s) => (
-                <TouchableOpacity
-                  key={s.value}
-                  style={[styles.pill, speed === s.value && styles.pillActive]}
-                  onPress={() => setSpeed(s.value)}
-                >
-                  <Text style={[styles.pillText, speed === s.value && styles.pillTextActive]}>
-                    {s.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+            <View style={styles.section}>
+              <Text style={styles.sectionLabel}>{t.speed}</Text>
+              <View style={styles.pills}>
+                {SPEEDS.map((s) => (
+                  <TouchableOpacity
+                    key={s.value}
+                    style={[styles.pill, speed === s.value && styles.pillActive]}
+                    onPress={() => setSpeed(s.value)}
+                  >
+                    <Text style={[styles.pillText, speed === s.value && styles.pillTextActive]}>
+                      {s.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
-          </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>{t.jerseyNumber}</Text>
-            <TextInput
-              style={styles.input}
-              value={jerseyNumber}
-              onChangeText={setJerseyNumber}
-              placeholder={t.jerseyPlaceholder}
-              placeholderTextColor={colors.muted}
-              keyboardType="number-pad"
-              maxLength={2}
-            />
-          </View>
+            <View style={styles.section}>
+              <Text style={styles.sectionLabel}>{t.jerseyNumber}</Text>
+              <TextInput
+                style={styles.input}
+                value={jerseyNumber}
+                onChangeText={setJerseyNumber}
+                placeholder={t.jerseyPlaceholder}
+                placeholderTextColor={colors.muted}
+                keyboardType="number-pad"
+                maxLength={2}
+              />
+            </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>{t.height}</Text>
-            <TextInput
-              style={styles.input}
-              value={height}
-              onChangeText={setHeight}
-              placeholder={t.heightPlaceholder}
-              placeholderTextColor={colors.muted}
-              keyboardType="number-pad"
-              maxLength={3}
-            />
-          </View>
-        </ScrollView>
+            <View style={styles.section}>
+              <Text style={styles.sectionLabel}>{t.height}</Text>
+              <TextInput
+                style={styles.input}
+                value={height}
+                onChangeText={setHeight}
+                placeholder={t.heightPlaceholder}
+                placeholderTextColor={colors.muted}
+                keyboardType="number-pad"
+                maxLength={3}
+              />
+            </View>
+          </ScrollView>
         </KeyboardAvoidingView>
 
         <SafeAreaView edges={["bottom"]} style={styles.bottomBar}>
