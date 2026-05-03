@@ -4,7 +4,7 @@ import { useThemeStore } from "@/store/themeStore";
 import { makeStyles } from "@/utils/makeStyles";
 import { register } from "@/services/authService";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -36,7 +36,7 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
     marginBottom: 40,
   },
   form: { gap: 12 },
-  label: { fontSize: 13, color: colors.muted, marginBottom: -4 },
+  label: { fontSize: 13, color: colors.muted, marginBottom: 4 },
   input: {
     backgroundColor: colors.surface,
     borderWidth: 1,
@@ -67,6 +67,19 @@ export default function RegisterScreen() {
   const colors = useThemeStore((s) => s.colors);
   const styles = useStyles();
   const router = useRouter();
+
+  const scrollRef = useRef<ScrollView>(null);
+  const fieldY = useRef<Record<string, number>>({});
+
+  const surnameRef = useRef<TextInput>(null);
+  const nicknameRef = useRef<TextInput>(null);
+  const emailRef = useRef<TextInput>(null);
+  const passwordRef = useRef<TextInput>(null);
+
+  function focusScroll(key: string) {
+    const y = fieldY.current[key];
+    if (y !== undefined) scrollRef.current?.scrollTo({ y: Math.max(0, y - 120), animated: true });
+  }
 
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
@@ -99,61 +112,108 @@ export default function RegisterScreen() {
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
       <KeyboardAvoidingView
         style={styles.flex}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior="padding"
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 24}
       >
-        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <ScrollView ref={scrollRef} contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
           <Text style={styles.title}>{t.createAccount}</Text>
           <Text style={styles.subtitle}>{t.joinTagline}</Text>
 
           <View style={styles.form}>
-            <Text style={styles.label}>{t.name}</Text>
-            <TextInput
-              style={styles.input}
-              placeholder={t.namePlaceholder}
-              placeholderTextColor={colors.muted}
-              value={name}
-              onChangeText={setName}
-            />
+            <View onLayout={(e) => { fieldY.current.name = e.nativeEvent.layout.y; }}>
+              <Text style={styles.label}>{t.name}</Text>
+              <TextInput
+                style={styles.input}
+                placeholder={t.namePlaceholder}
+                placeholderTextColor={colors.muted}
+                autoCapitalize="words"
+                textContentType="givenName"
+                autoComplete="given-name"
+                returnKeyType="next"
+                onFocus={() => focusScroll("name")}
+                onSubmitEditing={() => surnameRef.current?.focus()}
+                blurOnSubmit={false}
+                value={name}
+                onChangeText={setName}
+              />
+            </View>
 
-            <Text style={styles.label}>{t.surname}</Text>
-            <TextInput
-              style={styles.input}
-              placeholder={t.surnamePlaceholder}
-              placeholderTextColor={colors.muted}
-              value={surname}
-              onChangeText={setSurname}
-            />
+            <View onLayout={(e) => { fieldY.current.surname = e.nativeEvent.layout.y; }}>
+              <Text style={styles.label}>{t.surname}</Text>
+              <TextInput
+                ref={surnameRef}
+                style={styles.input}
+                placeholder={t.surnamePlaceholder}
+                placeholderTextColor={colors.muted}
+                autoCapitalize="words"
+                textContentType="familyName"
+                autoComplete="family-name"
+                returnKeyType="next"
+                onFocus={() => focusScroll("surname")}
+                onSubmitEditing={() => nicknameRef.current?.focus()}
+                blurOnSubmit={false}
+                value={surname}
+                onChangeText={setSurname}
+              />
+            </View>
 
-            <Text style={styles.label}>{t.nickname}</Text>
-            <TextInput
-              style={styles.input}
-              placeholder={t.nicknamePlaceholder}
-              placeholderTextColor={colors.muted}
-              autoCapitalize="none"
-              value={nickname}
-              onChangeText={setNickname}
-            />
+            <View onLayout={(e) => { fieldY.current.nickname = e.nativeEvent.layout.y; }}>
+              <Text style={styles.label}>{t.nickname}</Text>
+              <TextInput
+                ref={nicknameRef}
+                style={styles.input}
+                placeholder={t.nicknamePlaceholder}
+                placeholderTextColor={colors.muted}
+                autoCapitalize="none"
+                textContentType="username"
+                autoComplete="username"
+                returnKeyType="next"
+                onFocus={() => focusScroll("nickname")}
+                onSubmitEditing={() => emailRef.current?.focus()}
+                blurOnSubmit={false}
+                value={nickname}
+                onChangeText={setNickname}
+              />
+            </View>
 
-            <Text style={styles.label}>{t.email}</Text>
-            <TextInput
-              style={styles.input}
-              placeholder={t.emailPlaceholder}
-              placeholderTextColor={colors.muted}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              value={email}
-              onChangeText={setEmail}
-            />
+            <View onLayout={(e) => { fieldY.current.email = e.nativeEvent.layout.y; }}>
+              <Text style={styles.label}>{t.email}</Text>
+              <TextInput
+                ref={emailRef}
+                style={styles.input}
+                placeholder={t.emailPlaceholder}
+                placeholderTextColor={colors.muted}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                textContentType="emailAddress"
+                autoComplete="email"
+                returnKeyType="next"
+                onFocus={() => focusScroll("email")}
+                onSubmitEditing={() => passwordRef.current?.focus()}
+                blurOnSubmit={false}
+                value={email}
+                onChangeText={setEmail}
+              />
+            </View>
 
-            <Text style={styles.label}>{t.password}</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="••••••••"
-              placeholderTextColor={colors.muted}
-              secureTextEntry
-              value={password}
-              onChangeText={setPassword}
-            />
+            <View onLayout={(e) => { fieldY.current.password = e.nativeEvent.layout.y; }}>
+              <Text style={styles.label}>{t.password}</Text>
+              <TextInput
+                ref={passwordRef}
+                style={styles.input}
+                placeholder="••••••••"
+                placeholderTextColor={colors.muted}
+                secureTextEntry
+                autoCapitalize="none"
+                textContentType="newPassword"
+                autoComplete="new-password"
+                returnKeyType="go"
+                onFocus={() => focusScroll("password")}
+                onSubmitEditing={handleRegister}
+                value={password}
+                onChangeText={setPassword}
+              />
+            </View>
 
             {error && <Text style={styles.error}>{error}</Text>}
 

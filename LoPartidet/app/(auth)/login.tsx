@@ -4,7 +4,7 @@ import { useThemeStore } from "@/store/themeStore";
 import { makeStyles } from "@/utils/makeStyles";
 import { login } from "@/services/authService";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -36,7 +36,7 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
     marginBottom: 40,
   },
   form: { gap: 12 },
-  label: { fontSize: 13, color: colors.muted, marginBottom: -4 },
+  label: { fontSize: 13, color: colors.muted, marginBottom: 4 },
   input: {
     backgroundColor: colors.surface,
     borderWidth: 1,
@@ -68,6 +68,15 @@ export default function LoginScreen() {
   const styles = useStyles();
   const router = useRouter();
 
+  const scrollRef = useRef<ScrollView>(null);
+  const fieldY = useRef<Record<string, number>>({});
+  const passwordRef = useRef<TextInput>(null);
+
+  function focusScroll(key: string) {
+    const y = fieldY.current[key];
+    if (y !== undefined) scrollRef.current?.scrollTo({ y: Math.max(0, y - 120), animated: true });
+  }
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -91,33 +100,51 @@ export default function LoginScreen() {
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
       <KeyboardAvoidingView
         style={styles.flex}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : "padding"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 24}
       >
-        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <ScrollView ref={scrollRef} contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
           <Text style={styles.title}>{t.signInTitle}</Text>
           <Text style={styles.subtitle}>{t.appTagline}</Text>
 
           <View style={styles.form}>
-            <Text style={styles.label}>{t.email}</Text>
-            <TextInput
-              style={styles.input}
-              placeholder={t.emailPlaceholder}
-              placeholderTextColor={colors.muted}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              value={email}
-              onChangeText={setEmail}
-            />
+            <View onLayout={(e) => { fieldY.current.email = e.nativeEvent.layout.y; }}>
+              <Text style={styles.label}>{t.email}</Text>
+              <TextInput
+                style={styles.input}
+                placeholder={t.emailPlaceholder}
+                placeholderTextColor={colors.muted}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                textContentType="emailAddress"
+                autoComplete="email"
+                returnKeyType="next"
+                onFocus={() => focusScroll("email")}
+                onSubmitEditing={() => passwordRef.current?.focus()}
+                blurOnSubmit={false}
+                value={email}
+                onChangeText={setEmail}
+              />
+            </View>
 
-            <Text style={styles.label}>{t.password}</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="••••••••"
-              placeholderTextColor={colors.muted}
-              secureTextEntry
-              value={password}
-              onChangeText={setPassword}
-            />
+            <View onLayout={(e) => { fieldY.current.password = e.nativeEvent.layout.y; }}>
+              <Text style={styles.label}>{t.password}</Text>
+              <TextInput
+                ref={passwordRef}
+                style={styles.input}
+                placeholder="••••••••"
+                placeholderTextColor={colors.muted}
+                secureTextEntry
+                autoCapitalize="none"
+                textContentType="password"
+                autoComplete="password"
+                returnKeyType="go"
+                onFocus={() => focusScroll("password")}
+                onSubmitEditing={handleLogin}
+                value={password}
+                onChangeText={setPassword}
+              />
+            </View>
 
             {error && <Text style={styles.error}>{error}</Text>}
 
