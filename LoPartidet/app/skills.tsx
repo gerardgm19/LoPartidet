@@ -143,7 +143,7 @@ export default function Skills() {
         await createPlayerSkill({ userId: parseInt(userId, 10), ...skillData });
       }
       showToast(t.playerInformationSaved);
-      setTimeout(() => router.back(), 1200);
+      setTimeout(() => router.replace("/(tabs)/profile"), 1200);
     } catch {
       showToast(t.playerInformationError);
     }
@@ -174,7 +174,7 @@ export default function Skills() {
       <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView style={styles.container} edges={["top"]}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <TouchableOpacity onPress={() => router.replace("/(tabs)/profile")} style={styles.backBtn}>
             <Ionicons name="chevron-back" size={24} color={colors.white} />
           </TouchableOpacity>
           <Text style={styles.title}>{t.skillsTitle}</Text>
