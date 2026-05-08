@@ -23,6 +23,7 @@ See each sub-project's `CLAUDE.md` for detailed conventions.
 - `Entities/` — EF Core entity classes (one per file)
 - `Models/` — enums and request/response records (one per file)
 - One type per file — every class, record, enum, and interface in its own `.cs` file
+- Entity primary keys are always `int` auto-incremental (EF identity). Never assign Ids manually
 - Services registered as `Scoped`; screens call services, never raw DB logic
 
 ## Running
