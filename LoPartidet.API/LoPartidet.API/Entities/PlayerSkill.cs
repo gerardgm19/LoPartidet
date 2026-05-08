@@ -4,7 +4,7 @@ namespace LoPartidet.API.Entities;
 
 public class PlayerSkill
 {
-    public string Id { get; init; } = string.Empty;
+    public int Id { get; init; }
     public int UserId { get; init; }
     public User User { get; init; } = null!;
     public Position? Position { get; set; }

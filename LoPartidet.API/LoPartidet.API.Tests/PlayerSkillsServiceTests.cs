@@ -27,7 +27,7 @@ public class PlayerSkillsServiceTests
         City = "Barcelona",
     };
 
-    private static PlayerSkill MakeSkill(string id, int userId) => new()
+    private static PlayerSkill MakeSkill(int id, int userId) => new()
     {
         Id = id,
         UserId = userId,
@@ -59,9 +59,9 @@ public class PlayerSkillsServiceTests
         db.Users.Add(MakeUser(1));
         db.Users.Add(MakeUser(2));
         db.SaveChanges();
-        db.PlayerSkills.Add(MakeSkill("skill-1", 1));
-        db.PlayerSkills.Add(MakeSkill("skill-2", 1));
-        db.PlayerSkills.Add(MakeSkill("skill-3", 2));
+        db.PlayerSkills.Add(MakeSkill(1, 1));
+        db.PlayerSkills.Add(MakeSkill(2, 1));
+        db.PlayerSkills.Add(MakeSkill(3, 2));
         db.SaveChanges();
         var svc = new PlayerSkillsService(db);
 
@@ -80,7 +80,7 @@ public class PlayerSkillsServiceTests
         var svc = new PlayerSkillsService(db);
         var request = new UpdatePlayerSkillRequest(Position.GK, null, null, null, null, null);
 
-        var result = svc.Update("nonexistent-id", request);
+        var result = svc.Update(999, request);
 
         Assert.Null(result);
     }
@@ -91,13 +91,13 @@ public class PlayerSkillsServiceTests
         using var db = CreateContext();
         db.Users.Add(MakeUser(1));
         db.SaveChanges();
-        db.PlayerSkills.Add(MakeSkill("skill-1", 1));
+        db.PlayerSkills.Add(MakeSkill(1, 1));
         db.SaveChanges();
         var svc = new PlayerSkillsService(db);
         var request = new UpdatePlayerSkillRequest(
             Position.GK, PreferredFoot.Left, SkillLevel.Expert, PlayerSpeed.Elite, 1, 190);
 
-        var result = svc.Update("skill-1", request);
+        var result = svc.Update(1, request);
 
         Assert.NotNull(result);
         Assert.Equal(Position.GK, result.Position);
@@ -114,12 +114,12 @@ public class PlayerSkillsServiceTests
         using var db = CreateContext();
         db.Users.Add(MakeUser(1));
         db.SaveChanges();
-        db.PlayerSkills.Add(MakeSkill("skill-1", 1));
+        db.PlayerSkills.Add(MakeSkill(1, 1));
         db.SaveChanges();
         var svc = new PlayerSkillsService(db);
         var request = new UpdatePlayerSkillRequest(Position.DEF, null, null, null, null, null);
 
-        var result = svc.Update("skill-1", request);
+        var result = svc.Update(1, request);
 
         Assert.NotNull(result);
         Assert.Equal(Position.DEF, result.Position);
@@ -136,14 +136,14 @@ public class PlayerSkillsServiceTests
         using var db = CreateContext();
         db.Users.Add(MakeUser(1));
         db.SaveChanges();
-        db.PlayerSkills.Add(MakeSkill("skill-1", 1));
+        db.PlayerSkills.Add(MakeSkill(1, 1));
         db.SaveChanges();
         var svc = new PlayerSkillsService(db);
         var request = new UpdatePlayerSkillRequest(null, null, SkillLevel.Expert, null, null, 195);
 
-        svc.Update("skill-1", request);
+        svc.Update(1, request);
 
-        var persisted = db.PlayerSkills.Find("skill-1");
+        var persisted = db.PlayerSkills.Find(1);
         Assert.Equal(SkillLevel.Expert, persisted!.SkillLevel);
         Assert.Equal(195, persisted.Height);
     }

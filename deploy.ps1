@@ -214,10 +214,14 @@ function Deploy-ExpoWeb {
     $exitCode, $out = Invoke-Remote "sudo chown -R www-data:www-data '$($svc.RemoteDir)' && sudo chmod -R 755 '$($svc.RemoteDir)'"
     if ($exitCode -ne 0) { Write-Err "Permissions fix failed: $out"; Close-Sessions; exit 1 }
 
-    # 7. Restart nginx
+    # 7. Restart nginx and caddy
     Write-Step "Restarting nginx"
     $exitCode, $out = Invoke-Remote "sudo systemctl restart nginx"
     if ($exitCode -ne 0) { Write-Err "nginx restart failed: $out"; Close-Sessions; exit 1 }
+
+    Write-Step "Restarting caddy"
+    $exitCode, $out = Invoke-Remote "sudo systemctl restart caddy"
+    if ($exitCode -ne 0) { Write-Err "caddy restart failed: $out"; Close-Sessions; exit 1 }
 
     Write-Host "Expo Web deployed OK" -ForegroundColor Green
 }

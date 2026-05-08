@@ -23,7 +23,7 @@ public class PlayerSkillsController(IPlayerSkillsService playerSkillsService) : 
     }
 
     [HttpPut("{id}")]
-    public ActionResult<PlayerSkill> Update(string id, UpdatePlayerSkillRequest request)
+    public ActionResult<PlayerSkill> Update(int id, UpdatePlayerSkillRequest request)
     {
         var skill = playerSkillsService.Update(id, request);
         return skill is null ? NotFound() : Ok(skill);

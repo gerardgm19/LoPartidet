@@ -6,7 +6,7 @@ import { PlayerSpeed } from "@/types/playerSpeed";
 import { apiClient } from "./api";
 
 export type PlayerSkill = {
-  id: string;
+  id: number;
   userId: number;
   position: Position | null;
   preferredFoot: PreferredFoot | null;
@@ -53,7 +53,7 @@ export async function createPlayerSkill(
 }
 
 export async function updatePlayerSkill(
-  id: string,
+  id: number,
   request: UpdatePlayerSkillRequest
 ): Promise<PlayerSkill> {
   const { data } = await apiClient.put<PlayerSkill>(

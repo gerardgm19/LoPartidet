@@ -17,7 +17,6 @@ public class PlayerSkillsService(LoPartidetContext db) : IPlayerSkillsService
 
         var skill = new PlayerSkill
         {
-            Id = Guid.NewGuid().ToString(),
             UserId = request.UserId,
             Position = request.Position,
             PreferredFoot = request.PreferredFoot,
@@ -32,7 +31,7 @@ public class PlayerSkillsService(LoPartidetContext db) : IPlayerSkillsService
         return skill;
     }
 
-    public PlayerSkill? Update(string id, UpdatePlayerSkillRequest request)
+    public PlayerSkill? Update(int id, UpdatePlayerSkillRequest request)
     {
         var skill = db.PlayerSkills.Find(id);
         if (skill is null) return null;

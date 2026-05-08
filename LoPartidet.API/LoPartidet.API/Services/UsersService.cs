@@ -31,7 +31,6 @@ public class UsersService(LoPartidetContext db, IIdentityManagerService identity
 
         var playerSkill = new PlayerSkill
         {
-            Id = Guid.NewGuid().ToString(),
             UserId = user.Id,
             Position = request.Position,
             PreferredFoot = request.PreferredFoot,
@@ -69,7 +68,6 @@ public class UsersService(LoPartidetContext db, IIdentityManagerService identity
 
         var playerSkill = new PlayerSkill
         {
-            Id = Guid.NewGuid().ToString(),
             UserId = user.Id,
             Position = request.Position,
             PreferredFoot = request.PreferredFoot,
@@ -106,7 +104,7 @@ public class UsersService(LoPartidetContext db, IIdentityManagerService identity
             var skill = user.PlayerSkills.FirstOrDefault();
             if (skill is null)
             {
-                skill = new PlayerSkill { Id = Guid.NewGuid().ToString(), UserId = user.Id };
+                skill = new PlayerSkill { UserId = user.Id };
                 db.PlayerSkills.Add(skill);
             }
 

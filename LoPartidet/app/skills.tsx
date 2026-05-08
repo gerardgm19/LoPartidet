@@ -41,23 +41,24 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 8,
   },
   backBtn: { width: 40, height: 40, justifyContent: "center" },
   title: { color: colors.white, fontSize: 18, fontWeight: "700" },
   bottomBar: {
     paddingHorizontal: 20,
-    paddingTop: 12,
+    paddingTop: 8,
     paddingBottom: 8,
     borderTopWidth: 1,
     borderTopColor: colors.border,
     backgroundColor: colors.black,
   },
-  saveBtn: { paddingVertical: 14, backgroundColor: colors.green, borderRadius: 12, alignItems: "center" },
+  saveBtn: { paddingVertical: 12, backgroundColor: colors.green, borderRadius: 12, alignItems: "center" },
   saveBtnText: { color: colors.black, fontSize: 16, fontWeight: "700" },
   scroll: { flex: 1 },
-  scrollContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 40, gap: 24 },
-  section: { gap: 10 },
+  scrollContent: { paddingHorizontal: 20, paddingTop: 4, paddingBottom: 20, gap: 16 },
+  section: { gap: 8 },
+  row: { flexDirection: "row", gap: 12 },
   sectionLabel: {
     color: colors.muted,
     fontSize: 12,
@@ -65,10 +66,10 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
     letterSpacing: 0.8,
     textTransform: "uppercase",
   },
-  pills: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  pills: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
   pill: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     borderRadius: 20,
     backgroundColor: colors.card,
     borderWidth: 1,
@@ -83,7 +84,7 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
     borderColor: colors.border,
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 12,
     color: colors.white,
     fontSize: 16,
   },
@@ -95,7 +96,7 @@ export default function Skills() {
   const styles = useStyles();
   const userId = useAuthStore((s) => s.userId);
 
-  const [skillId, setSkillId] = useState<string | null>(null);
+  const [skillId, setSkillId] = useState<number | null>(null);
   const [toastMessage, setToastMessage] = useState("");
   const [toastVisible, setToastVisible] = useState(false);
 
@@ -257,30 +258,32 @@ export default function Skills() {
               </View>
             </View>
 
-            <View style={styles.section}>
-              <Text style={styles.sectionLabel}>{t.jerseyNumber}</Text>
-              <TextInput
-                style={styles.input}
-                value={jerseyNumber}
-                onChangeText={setJerseyNumber}
-                placeholder={t.jerseyPlaceholder}
-                placeholderTextColor={colors.muted}
-                keyboardType="number-pad"
-                maxLength={2}
-              />
-            </View>
+            <View style={styles.row}>
+              <View style={[styles.section, { flex: 1 }]}>
+                <Text style={styles.sectionLabel}>{t.jerseyNumber}</Text>
+                <TextInput
+                  style={styles.input}
+                  value={jerseyNumber}
+                  onChangeText={(v) => setJerseyNumber(v.replace(/[^0-9]/g, ""))}
+                  placeholder={t.jerseyPlaceholder}
+                  placeholderTextColor={colors.muted}
+                  keyboardType="number-pad"
+                  maxLength={2}
+                />
+              </View>
 
-            <View style={styles.section}>
-              <Text style={styles.sectionLabel}>{t.height}</Text>
-              <TextInput
-                style={styles.input}
-                value={height}
-                onChangeText={setHeight}
-                placeholder={t.heightPlaceholder}
-                placeholderTextColor={colors.muted}
-                keyboardType="number-pad"
-                maxLength={3}
-              />
+              <View style={[styles.section, { flex: 1 }]}>
+                <Text style={styles.sectionLabel}>{t.height}</Text>
+                <TextInput
+                  style={styles.input}
+                  value={height}
+                  onChangeText={(v) => setHeight(v.replace(/[^0-9]/g, ""))}
+                  placeholder={t.heightPlaceholder}
+                  placeholderTextColor={colors.muted}
+                  keyboardType="number-pad"
+                  maxLength={3}
+                />
+              </View>
             </View>
           </ScrollView>
         </KeyboardAvoidingView>

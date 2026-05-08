@@ -7,5 +7,5 @@ public interface IPlayerSkillsService
 {
     IEnumerable<PlayerSkill> GetByUserId(int userId);
     PlayerSkill Create(CreatePlayerSkillRequest request);
-    PlayerSkill? Update(string id, UpdatePlayerSkillRequest request);
+    PlayerSkill? Update(int id, UpdatePlayerSkillRequest request);
 }
