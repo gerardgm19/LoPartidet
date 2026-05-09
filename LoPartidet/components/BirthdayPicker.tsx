@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FlatList,
   Modal,
@@ -205,6 +205,17 @@ export default function BirthdayPicker({
   const t = useLangStore((s) => s.t);
 
   const [state, setState] = useState(() => parseValue(value));
+
+  // Sync local state when `value` prop changes (e.g. async user load).
+  useEffect(() => {
+    const parsed = parseValue(value);
+    setState((prev) => {
+      if (prev.day === parsed.day && prev.month === parsed.month && prev.year === parsed.year) {
+        return prev;
+      }
+      return parsed;
+    });
+  }, [value]);
 
   function emit(next: { day?: number; month?: number; year?: number }) {
     if (next.day && next.month && next.year) {
