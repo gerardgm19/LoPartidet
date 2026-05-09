@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -19,6 +19,7 @@ import { useLangStore } from "@/store/langStore";
 import { useAuthStore } from "@/store/authStore";
 import { getUserById, updateUser } from "@/services/usersService";
 import { Toast } from "@/components/Toast";
+import BirthdayPicker from "@/components/BirthdayPicker";
 
 const useStyles = makeStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
@@ -50,23 +51,6 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
   divider: { height: 1, backgroundColor: colors.border, marginLeft: 16 },
 }));
 
-function isoToDisplay(iso: string): string {
-  const [y, m, d] = iso.slice(0, 10).split("-");
-  return `${d}/${m}/${y}`;
-}
-
-function displayToIso(display: string): string {
-  const [d, m, y] = display.split("/");
-  return `${y}-${m}-${d}`;
-}
-
-function isValidDisplayDate(value: string): boolean {
-  if (!/^\d{2}\/\d{2}\/\d{4}$/.test(value)) return false;
-  const [d, m, y] = value.split("/").map(Number);
-  const date = new Date(y, m - 1, d);
-  return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d;
-}
-
 function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
@@ -77,12 +61,20 @@ export default function PlayerInformation() {
   const styles = useStyles();
   const { userId } = useAuthStore();
 
+  const scrollRef = useRef<ScrollView>(null);
+  const fieldY = useRef<Record<string, number>>({});
+
+  function focusScroll(key: string) {
+    const y = fieldY.current[key];
+    if (y !== undefined) scrollRef.current?.scrollTo({ y: Math.max(0, y - 120), animated: true });
+  }
+
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
   const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
   const [city, setCity] = useState("");
-  const [birthday, setBirthday] = useState("");
+  const [birthday, setBirthday] = useState<string | undefined>(undefined);
   const [toastMessage, setToastMessage] = useState("");
   const [toastVisible, setToastVisible] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -96,8 +88,8 @@ export default function PlayerInformation() {
       setNickname(user.nickname);
       setEmail(user.email);
       setCity(user.city);
-      if (user.birthday) setBirthday(isoToDisplay(user.birthday));
-    }).catch(() => {});
+      if (user.birthday) setBirthday(user.birthday);
+    }).catch(() => { });
   }, [userId]);
 
   async function handleSave() {
@@ -109,13 +101,12 @@ export default function PlayerInformation() {
     if (!nickname.trim()) nextErrors.nickname = t.validationRequired;
     if (!email.trim()) nextErrors.email = t.validationRequired;
     else if (!isValidEmail(email)) nextErrors.email = t.validationEmail;
-    if (birthday && !isValidDisplayDate(birthday)) nextErrors.birthday = t.validationBirthday;
 
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
     try {
-      await updateUser(Number(userId), { name, surname, nickname, email, city, birthday: birthday ? displayToIso(birthday) : undefined });
+      await updateUser(Number(userId), { name, surname, nickname, email, city, birthday });
       setToastMessage(t.playerInformationSaved);
       setToastVisible(true);
     } catch {
@@ -140,28 +131,34 @@ export default function PlayerInformation() {
 
         <KeyboardAvoidingView
           style={styles.flex}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          behavior={Platform.OS === "ios" ? "padding" : "padding"}
         >
           <ScrollView
+            ref={scrollRef}
             style={styles.scroll}
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
             <View style={styles.card}>
-              <Field styles={styles} colors={colors} label={t.name} value={name} onChangeText={setName} placeholder={t.enterName} autoCapitalize="words" error={errors.name} />
+              <Field styles={styles} colors={colors} label={t.name} value={name} onChangeText={setName} placeholder={t.enterName} autoCapitalize="words" error={errors.name} onLayout={(e) => { fieldY.current.name = e.nativeEvent.layout.y; }} onFocus={() => focusScroll("name")} />
               <View style={styles.divider} />
-              <Field styles={styles} colors={colors} label={t.surname} value={surname} onChangeText={setSurname} placeholder={t.enterSurname} autoCapitalize="words" error={errors.surname} />
+              <Field styles={styles} colors={colors} label={t.surname} value={surname} onChangeText={setSurname} placeholder={t.enterSurname} autoCapitalize="words" error={errors.surname} onLayout={(e) => { fieldY.current.surname = e.nativeEvent.layout.y; }} onFocus={() => focusScroll("surname")} />
               <View style={styles.divider} />
-              <Field styles={styles} colors={colors} label={t.nickname} value={nickname} onChangeText={setNickname} placeholder={t.enterNickname} autoCapitalize="none" error={errors.nickname} />
+              <Field styles={styles} colors={colors} label={t.nickname} value={nickname} onChangeText={setNickname} placeholder={t.enterNickname} autoCapitalize="none" error={errors.nickname} onLayout={(e) => { fieldY.current.nickname = e.nativeEvent.layout.y; }} onFocus={() => focusScroll("nickname")} />
             </View>
 
             <View style={styles.card}>
-              <Field styles={styles} colors={colors} label={t.email} value={email} onChangeText={setEmail} placeholder={t.enterEmail} keyboardType="email-address" autoCapitalize="none" error={errors.email} />
+              <Field styles={styles} colors={colors} label={t.email} value={email} onChangeText={setEmail} placeholder={t.enterEmail} keyboardType="email-address" autoCapitalize="none" error={errors.email} onLayout={(e) => { fieldY.current.email = e.nativeEvent.layout.y; }} onFocus={() => focusScroll("email")} />
               <View style={styles.divider} />
-              <Field styles={styles} colors={colors} label={t.city} value={city} onChangeText={setCity} placeholder={t.enterCity} autoCapitalize="words" />
+              <Field styles={styles} colors={colors} label={t.city} value={city} onChangeText={setCity} placeholder={t.enterCity} autoCapitalize="words" onLayout={(e) => { fieldY.current.city = e.nativeEvent.layout.y; }} onFocus={() => focusScroll("city")} />
               <View style={styles.divider} />
-              <Field styles={styles} colors={colors} label={t.birthday} value={birthday} onChangeText={setBirthday} placeholder={t.birthdayPlaceholder} keyboardType="numeric" maxLength={10} error={errors.birthday} />
+              <BirthdayPicker
+                label={t.birthday}
+                value={birthday}
+                onChange={setBirthday}
+                onLayout={(e) => { fieldY.current.birthday = e.nativeEvent.layout.y; }}
+                onFocus={() => focusScroll("birthday")} />
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -179,7 +176,7 @@ type FieldStyles = {
 };
 
 function Field({
-  styles, colors, label, value, onChangeText, placeholder, keyboardType, autoCapitalize, maxLength, error,
+  styles, colors, label, value, onChangeText, placeholder, keyboardType, autoCapitalize, maxLength, error, onFocus, onLayout,
 }: {
   styles: FieldStyles;
   colors: ColorPalette;
@@ -191,9 +188,11 @@ function Field({
   autoCapitalize?: TextInput["props"]["autoCapitalize"];
   maxLength?: number;
   error?: string;
+  onFocus?: () => void;
+  onLayout?: (e: any) => void;
 }) {
   return (
-    <View style={styles.field}>
+    <View style={styles.field} onLayout={onLayout}>
       <Text style={styles.fieldLabel}>{label}</Text>
       <TextInput
         style={styles.fieldInput}
@@ -204,6 +203,7 @@ function Field({
         keyboardType={keyboardType}
         autoCapitalize={autoCapitalize ?? "sentences"}
         maxLength={maxLength}
+        onFocus={onFocus}
       />
       {error ? <Text style={styles.fieldError}>{error}</Text> : null}
     </View>

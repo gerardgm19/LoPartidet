@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -96,6 +96,14 @@ export default function Skills() {
   const styles = useStyles();
   const userId = useAuthStore((s) => s.userId);
 
+  const scrollRef = useRef<ScrollView>(null);
+  const fieldY = useRef<Record<string, number>>({});
+
+  function focusScroll(key: string) {
+    const y = fieldY.current[key];
+    if (y !== undefined) scrollRef.current?.scrollTo({ y: Math.max(0, y - 120), animated: true });
+  }
+
   const [skillId, setSkillId] = useState<number | null>(null);
   const [toastMessage, setToastMessage] = useState("");
   const [toastVisible, setToastVisible] = useState(false);
@@ -183,12 +191,14 @@ export default function Skills() {
 
         <KeyboardAvoidingView
           style={styles.scroll}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          behavior={Platform.OS === "ios" ? "padding" : "padding"}
         >
           <ScrollView
+            ref={scrollRef}
             style={styles.scroll}
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
           >
             <View style={styles.section}>
               <Text style={styles.sectionLabel}>{t.position}</Text>
@@ -259,7 +269,7 @@ export default function Skills() {
             </View>
 
             <View style={styles.row}>
-              <View style={[styles.section, { flex: 1 }]}>
+              <View style={[styles.section, { flex: 1 }]} onLayout={(e) => { fieldY.current.jersey = e.nativeEvent.layout.y; }}>
                 <Text style={styles.sectionLabel}>{t.jerseyNumber}</Text>
                 <TextInput
                   style={styles.input}
@@ -269,10 +279,11 @@ export default function Skills() {
                   placeholderTextColor={colors.muted}
                   keyboardType="number-pad"
                   maxLength={2}
+                  onFocus={() => focusScroll("jersey")}
                 />
               </View>
 
-              <View style={[styles.section, { flex: 1 }]}>
+              <View style={[styles.section, { flex: 1 }]} onLayout={(e) => { fieldY.current.height = e.nativeEvent.layout.y; }}>
                 <Text style={styles.sectionLabel}>{t.height}</Text>
                 <TextInput
                   style={styles.input}
@@ -282,6 +293,7 @@ export default function Skills() {
                   placeholderTextColor={colors.muted}
                   keyboardType="number-pad"
                   maxLength={3}
+                  onFocus={() => focusScroll("height")}
                 />
               </View>
             </View>

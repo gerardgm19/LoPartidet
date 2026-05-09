@@ -114,6 +114,20 @@ const cat_es = {
   height: "Alçada (cm)",
   heightPlaceholder: "p.ex. 178",
 
+  // Month names
+  monthJanuary: "Gener",
+  monthFebruary: "Febrer",
+  monthMarch: "Març",
+  monthApril: "Abril",
+  monthMay: "Maig",
+  monthJune: "Juny",
+  monthJuly: "Juliol",
+  monthAugust: "Agost",
+  monthSeptember: "Setembre",
+  monthOctober: "Octubre",
+  monthNovember: "Novembre",
+  monthDecember: "Desembre",
+
   // Player information
   playerInformationTitle: "Informació del jugador",
   enterName: "Introdueix el teu nom",

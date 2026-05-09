@@ -114,6 +114,20 @@ const es_es = {
   height: "Altura (cm)",
   heightPlaceholder: "p.ej. 178",
 
+  // Month names
+  monthJanuary: "Enero",
+  monthFebruary: "Febrero",
+  monthMarch: "Marzo",
+  monthApril: "Abril",
+  monthMay: "Mayo",
+  monthJune: "Junio",
+  monthJuly: "Julio",
+  monthAugust: "Agosto",
+  monthSeptember: "Septiembre",
+  monthOctober: "Octubre",
+  monthNovember: "Noviembre",
+  monthDecember: "Diciembre",
+
   // Player information
   playerInformationTitle: "Información del jugador",
   enterName: "Introduce tu nombre",

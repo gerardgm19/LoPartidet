@@ -8,20 +8,20 @@ function resolveUrl(debug: string, prod: string): string {
   return debug;
 }
 
-const isDebug = true;
+const isDebug = false;
 const apiIdentityCloudflareUrl: string = "https://identity.lopartidet.cat";
 const apiLoPartidetCloudflareUrl: string = "https://api.lopartidet.cat";
 const apiIdentityLocalhostUrl: string = "http://localhost:10002";
 const apiLoPartidetLocalhostUrl: string = "http://localhost:10004";
-const apiIdentityIpUrl: string = "https://178.33.119.182:10099/identitymanager";
-const apiLoPartidetIprl: string = "https://178.33.119.182:10099/lopartidet_api";
+const apiAndroidIdentityIpUrl: string = "http://127.0.0.1:10001";
+const apiAndroidLoPartidetIprl: string = "http://127.0.0.1:10003";
 
 export const AUTH_BASE_URL: string = resolveUrl(
-  apiIdentityLocalhostUrl,
+  apiAndroidIdentityIpUrl, //apiIdentityLocalhostUrl,
   apiIdentityCloudflareUrl,
 );
 
 export const API_BASE_URL: string = resolveUrl(
-  apiLoPartidetLocalhostUrl,
+  apiAndroidLoPartidetIprl, // apiLoPartidetLocalhostUrl,
   apiLoPartidetCloudflareUrl,
 );
