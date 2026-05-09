@@ -24,6 +24,7 @@ See each sub-project's `CLAUDE.md` for detailed conventions.
 - `Models/` — enums and request/response records (one per file)
 - One type per file — every class, record, enum, and interface in its own `.cs` file
 - Entity primary keys are always `int` auto-incremental (EF identity). Never assign Ids manually
+- Never return entity objects from controllers/services. Define a response DTO in `Models/`, map entity → DTO, return the DTO
 - Services registered as `Scoped`; screens call services, never raw DB logic
 
 ## Running

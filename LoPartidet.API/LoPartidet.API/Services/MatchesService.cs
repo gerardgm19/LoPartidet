@@ -7,7 +7,11 @@ namespace LoPartidet.API.Services;
 
 public class MatchesService(LoPartidetContext db, IMatchValidationService validationService) : IMatchesService
 {
-    public IEnumerable<Match> GetAll() => db.Matches.ToList();
+    public IEnumerable<MatchDto> GetAll() =>
+        db.Matches
+            .Select(m => new MatchDto(
+                m.Id, m.CreatedById, m.CreatedAt, m.Type, m.Date, m.Location, m.MaxPlayers, m.Status))
+            .ToList();
 
     public MatchDetailDto? GetById(int id)
     {
@@ -32,7 +36,7 @@ public class MatchesService(LoPartidetContext db, IMatchValidationService valida
         );
     }
 
-    public async Task<Match> CreateMatch(CreateMatchDto request)
+    public async Task<MatchDto> CreateMatch(CreateMatchDto request)
     {
         var validation = await validationService.ValidateCreateMatchAsync(request);
         if (!validation.IsValid)
@@ -52,15 +56,17 @@ public class MatchesService(LoPartidetContext db, IMatchValidationService valida
         db.Matches.Add(match);
         await db.SaveChangesAsync();
 
-        return match;
+        return new MatchDto(
+            match.Id, match.CreatedById, match.CreatedAt, match.Type,
+            match.Date, match.Location, match.MaxPlayers, match.Status);
     }
 
-    public async Task<UserMatch> JoinMatchAsync(int matchId, int userId)
+    public async Task<UserMatchDto> JoinMatchAsync(int matchId, int userId)
     {
         var userMatch = new UserMatch { MatchId = matchId, UserId = userId };
         db.UserMatches.Add(userMatch);
         await db.SaveChangesAsync();
-        return userMatch;
+        return new UserMatchDto(userMatch.UserId, userMatch.MatchId);
     }
 
     public async Task UnjoinMatchAsync(int matchId, int userId)

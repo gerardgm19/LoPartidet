@@ -1,13 +1,12 @@
-using LoPartidet.API.Entities;
 using LoPartidet.API.Models;
 
 namespace LoPartidet.API.Services;
 
 public interface IMatchesService
 {
-    IEnumerable<Match> GetAll();
+    IEnumerable<MatchDto> GetAll();
     MatchDetailDto? GetById(int id);
-    Task<Match> CreateMatch(CreateMatchDto request);
-    Task<UserMatch> JoinMatchAsync(int matchId, int userId);
+    Task<MatchDto> CreateMatch(CreateMatchDto request);
+    Task<UserMatchDto> JoinMatchAsync(int matchId, int userId);
     Task UnjoinMatchAsync(int matchId, int userId);
 }

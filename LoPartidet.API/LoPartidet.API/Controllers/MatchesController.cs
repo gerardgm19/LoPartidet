@@ -1,4 +1,3 @@
-using LoPartidet.API.Entities;
 using LoPartidet.API.Models;
 using LoPartidet.API.Services;
 using LoPartidet.API.Services.Validators;
@@ -13,7 +12,7 @@ namespace LoPartidet.API.Controllers;
 public class MatchesController(IMatchesService matchesService, IMatchValidationService validationService) : ControllerBase
 {
     [HttpGet]
-    public ActionResult<IEnumerable<Match>> GetAll() => Ok(matchesService.GetAll());
+    public ActionResult<IEnumerable<MatchDto>> GetAll() => Ok(matchesService.GetAll());
 
     [HttpGet("{id}")]
     public ActionResult<MatchDetailDto> GetById(int id)
@@ -23,7 +22,7 @@ public class MatchesController(IMatchesService matchesService, IMatchValidationS
     }
 
     [HttpPost]
-    public async Task<ActionResult<Match>> CreateMatch(CreateMatchDto request)
+    public async Task<ActionResult<MatchDto>> CreateMatch(CreateMatchDto request)
     {
         try
         {
@@ -37,7 +36,7 @@ public class MatchesController(IMatchesService matchesService, IMatchValidationS
     }
 
     [HttpPost("{id}/join")]
-    public async Task<ActionResult<UserMatch>> JoinMatch(int id, JoinMatchDto request)
+    public async Task<ActionResult<UserMatchDto>> JoinMatch(int id, JoinMatchDto request)
     {
         var validationRequest = new JoinMatchValidationRequest(id, request.UserId);
         var validation = await validationService.ValidateJoinMatchAsync(validationRequest);

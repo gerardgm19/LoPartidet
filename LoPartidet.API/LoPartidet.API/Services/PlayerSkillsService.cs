@@ -7,13 +7,18 @@ namespace LoPartidet.API.Services;
 
 public class PlayerSkillsService(LoPartidetContext db) : IPlayerSkillsService
 {
-    public IEnumerable<PlayerSkill> GetByUserId(int userId) =>
-        db.PlayerSkills.Where(ps => ps.UserId == userId).ToList();
+    public IEnumerable<PlayerSkillDto> GetByUserId(int userId) =>
+        db.PlayerSkills
+            .Where(ps => ps.UserId == userId)
+            .Select(ps => new PlayerSkillDto(
+                ps.Id, ps.UserId, ps.Position, ps.PreferredFoot,
+                ps.SkillLevel, ps.Speed, ps.JerseyNumber, ps.Height))
+            .ToList();
 
-    public PlayerSkill Create(CreatePlayerSkillRequest request)
+    public PlayerSkillDto Create(CreatePlayerSkillRequest request)
     {
         var existing = db.PlayerSkills.FirstOrDefault(ps => ps.UserId == request.UserId);
-        if (existing is not null) return existing;
+        if (existing is not null) return ToDto(existing);
 
         var skill = new PlayerSkill
         {
@@ -28,10 +33,10 @@ public class PlayerSkillsService(LoPartidetContext db) : IPlayerSkillsService
 
         db.PlayerSkills.Add(skill);
         db.SaveChanges();
-        return skill;
+        return ToDto(skill);
     }
 
-    public PlayerSkill? Update(int id, UpdatePlayerSkillRequest request)
+    public PlayerSkillDto? Update(int id, UpdatePlayerSkillRequest request)
     {
         var skill = db.PlayerSkills.Find(id);
         if (skill is null) return null;
@@ -44,6 +49,9 @@ public class PlayerSkillsService(LoPartidetContext db) : IPlayerSkillsService
         if (request.Height is not null) skill.Height = request.Height;
 
         db.SaveChanges();
-        return skill;
+        return ToDto(skill);
     }
+
+    private static PlayerSkillDto ToDto(PlayerSkill s) =>
+        new(s.Id, s.UserId, s.Position, s.PreferredFoot, s.SkillLevel, s.Speed, s.JerseyNumber, s.Height);
 }

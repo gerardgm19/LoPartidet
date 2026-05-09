@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using LoPartidet.API.Entities;
 using LoPartidet.API.Models;
 using LoPartidet.API.Services;
 using LoPartidet.API.Services.Validators;
@@ -14,7 +13,7 @@ namespace LoPartidet.API.Controllers;
 public class UsersController(IUsersService usersService, IUserValidationService userValidationService) : ControllerBase
 {
     [HttpGet("me")]
-    public ActionResult<User> GetMe()
+    public ActionResult<int> GetMe()
     {
         var identityId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (identityId is null) return Unauthorized();
@@ -23,7 +22,7 @@ public class UsersController(IUsersService usersService, IUserValidationService 
     }
 
     [HttpGet("{id}")]
-    public ActionResult<User> GetById(int id)
+    public ActionResult<UserDto> GetById(int id)
     {
         var user = usersService.GetById(id);
         return user is null ? NotFound() : Ok(user);
@@ -39,14 +38,14 @@ public class UsersController(IUsersService usersService, IUserValidationService 
     }
 
     [HttpPatch("{id}")]
-    public ActionResult<User> UpdateUser(int id, UpdateUserRequest request)
+    public ActionResult<UserDto> UpdateUser(int id, UpdateUserRequest request)
     {
         var user = usersService.UpdateUser(id, request);
         return user is null ? NotFound() : Ok(user);
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<User>> PutUser(int id, UpdateUserRequest request)
+    public async Task<ActionResult<UserDto>> PutUser(int id, UpdateUserRequest request)
     {
         var validation = await userValidationService.ValidateUpdateUserAsync(
             new UpdateUserValidationRequest(id, request.Name, request.Surname, request.Nickname, request.Email));

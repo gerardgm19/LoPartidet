@@ -1,0 +1,12 @@
+namespace LoPartidet.API.Models;
+
+public record PlayerSkillDto(
+    int Id,
+    int UserId,
+    Position? Position,
+    PreferredFoot? PreferredFoot,
+    SkillLevel? SkillLevel,
+    PlayerSpeed? Speed,
+    int? JerseyNumber,
+    int? Height
+);

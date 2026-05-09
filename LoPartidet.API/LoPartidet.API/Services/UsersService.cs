@@ -46,12 +46,16 @@ public class UsersService(LoPartidetContext db, IIdentityManagerService identity
         return new RegisterUserResponse(user.Id, identity.Token);
     }
 
-    public User? GetById(int id) => db.Users.Find(id);
+    public UserDto? GetById(int id)
+    {
+        var user = db.Users.Find(id);
+        return user is null ? null : ToDto(user);
+    }
 
     public int GetUserIdByIdentityId(string identityId) =>
         db.Users.Where(u => u.IdentityId == identityId).Select(u => u.Id).FirstOrDefault();
 
-    public User CreateUser(CreateUserRequest request)
+    public UserDto CreateUser(CreateUserRequest request)
     {
         var user = new User
         {
@@ -80,10 +84,10 @@ public class UsersService(LoPartidetContext db, IIdentityManagerService identity
         db.PlayerSkills.Add(playerSkill);
         db.SaveChanges();
 
-        return user;
+        return ToDto(user);
     }
 
-    public User? UpdateUser(int id, UpdateUserRequest request)
+    public UserDto? UpdateUser(int id, UpdateUserRequest request)
     {
         var user = db.Users.Include(u => u.PlayerSkills).FirstOrDefault(u => u.Id == id);
         if (user is null) return null;
@@ -117,6 +121,9 @@ public class UsersService(LoPartidetContext db, IIdentityManagerService identity
         }
 
         db.SaveChanges();
-        return user;
+        return ToDto(user);
     }
+
+    private static UserDto ToDto(User u) =>
+        new(u.Id, u.Name, u.Surname, u.Nickname, u.Email, u.City, u.Birthday);
 }
