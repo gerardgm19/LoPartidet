@@ -14,8 +14,8 @@ module.exports = {
     android: {
       adaptiveIcon: {
         backgroundColor: "#1C1C1C",
-        foregroundImage: "./assets/images/android-icon-foreground.png",
-        monochromeImage: "./assets/images/android-icon-monochrome.png",
+        foregroundImage: "./assets/images/icon.png",
+        monochromeImage: "./assets/images/icon.png",
       },
       usesCleartextTraffic: true,
       edgeToEdgeEnabled: true,
@@ -25,14 +25,14 @@ module.exports = {
     web: {
       bundler: "metro",
       output: "static",
-      favicon: "./assets/images/favicon.png",
+      favicon: "./assets/images/icon.png",
     },
     plugins: [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          image: "./assets/images/splash-icon.png",
+          image: "./assets/images/icon.png",
           imageWidth: 200,
           resizeMode: "contain",
           backgroundColor: "#1C1C1C",

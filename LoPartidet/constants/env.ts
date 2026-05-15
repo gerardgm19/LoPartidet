@@ -8,7 +8,7 @@ function resolveUrl(debug: string, prod: string): string {
   return debug;
 }
 
-const isDebug = true;
+const isDebug = false;
 
 const apiIdentityCloudflareUrl: string = "https://identity.lopartidet.cat";
 const apiLoPartidetCloudflareUrl: string = "https://api.lopartidet.cat";
