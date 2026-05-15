@@ -33,8 +33,16 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
   },
   backBtn: { width: 40, height: 40, justifyContent: "center" },
   title: { color: colors.white, fontSize: 18, fontWeight: "700" },
-  saveBtn: { paddingHorizontal: 16, paddingVertical: 8, backgroundColor: colors.green, borderRadius: 20 },
-  saveBtnText: { color: colors.black, fontSize: 14, fontWeight: "700" },
+  bottomBar: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 8,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    backgroundColor: colors.black,
+  },
+  saveBtn: { paddingVertical: 12, backgroundColor: colors.green, borderRadius: 12, alignItems: "center" },
+  saveBtnText: { color: colors.black, fontSize: 16, fontWeight: "700" },
   scroll: { flex: 1 },
   scrollContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 40, gap: 24 },
   card: { backgroundColor: colors.card, borderRadius: 16, overflow: "hidden" },
@@ -118,20 +126,18 @@ export default function PlayerInformation() {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+      <SafeAreaView style={styles.container} edges={["top"]}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.replace("/(tabs)/profile")} style={styles.backBtn}>
             <Ionicons name="chevron-back" size={24} color={colors.white} />
           </TouchableOpacity>
           <Text style={styles.title}>{t.playerInformationTitle}</Text>
-          <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-            <Text style={styles.saveBtnText}>{t.save}</Text>
-          </TouchableOpacity>
+          <View style={styles.backBtn} />
         </View>
 
         <KeyboardAvoidingView
           style={styles.flex}
-          behavior={Platform.OS === "ios" ? "padding" : "padding"}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
           <ScrollView
             ref={scrollRef}
@@ -162,8 +168,14 @@ export default function PlayerInformation() {
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
-        <Toast message={toastMessage} visible={toastVisible} onHide={() => setToastVisible(false)} />
+
+        <SafeAreaView edges={["bottom"]} style={styles.bottomBar}>
+          <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
+            <Text style={styles.saveBtnText}>{t.save}</Text>
+          </TouchableOpacity>
+        </SafeAreaView>
       </SafeAreaView>
+      <Toast message={toastMessage} visible={toastVisible} onHide={() => setToastVisible(false)} />
     </>
   );
 }

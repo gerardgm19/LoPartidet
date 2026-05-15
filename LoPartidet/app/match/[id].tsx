@@ -199,7 +199,7 @@ export default function MatchDetailPage() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container} edges={["top"]}>
+      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
         <View style={styles.centered}>
           <ActivityIndicator color={colors.green} size="large" />
         </View>
@@ -209,7 +209,7 @@ export default function MatchDetailPage() {
 
   if (!match) {
     return (
-      <SafeAreaView style={styles.container} edges={["top"]}>
+      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
         <Pressable style={styles.backButton} onPress={() => router.replace("/(tabs)/matches")}>
           <Ionicons name="arrow-back" size={22} color={colors.white} />
         </Pressable>
@@ -244,7 +244,7 @@ export default function MatchDetailPage() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
 
       <View style={styles.navbar}>
         <Pressable
@@ -301,24 +301,24 @@ export default function MatchDetailPage() {
           }
         </View>
 
-      </ScrollView>
 
-      <Pressable
-        style={({ pressed }) => [
-          styles.joinButton,
-          joined && styles.joinButtonJoined,
-          pressed && { opacity: 0.8 },
-        ]}
-        onPress={joined ? handleUnjoin : handleJoin}
-        disabled={joining}
-      >
-        {joining
-          ? <ActivityIndicator color={joined ? colors.white : colors.black} size="small" />
-          : <Text style={[styles.joinButtonText, joined && styles.joinButtonTextJoined]}>
-            {joined ? t.unjoinMatch : t.joinMatch}
-          </Text>
-        }
-      </Pressable>
+        <Pressable
+          style={({ pressed }) => [
+            styles.joinButton,
+            joined && styles.joinButtonJoined,
+            pressed && { opacity: 0.8 },
+          ]}
+          onPress={joined ? handleUnjoin : handleJoin}
+          disabled={joining}
+        >
+          {joining
+            ? <ActivityIndicator color={joined ? colors.white : colors.black} size="small" />
+            : <Text style={[styles.joinButtonText, joined && styles.joinButtonTextJoined]}>
+              {joined ? t.unjoinMatch : t.joinMatch}
+            </Text>
+          }
+        </Pressable>
+      </ScrollView>
 
       <Toast message={toastMessage} visible={toastVisible} onHide={() => setToastVisible(false)} />
 

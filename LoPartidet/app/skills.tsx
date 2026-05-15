@@ -191,7 +191,7 @@ export default function Skills() {
 
         <KeyboardAvoidingView
           style={styles.scroll}
-          behavior={Platform.OS === "ios" ? "padding" : "padding"}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
           <ScrollView
             ref={scrollRef}
