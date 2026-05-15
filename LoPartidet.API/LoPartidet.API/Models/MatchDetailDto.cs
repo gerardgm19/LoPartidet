@@ -8,6 +8,7 @@ public record MatchDetailDto(
     DateTime Date,
     string Location,
     int MaxPlayers,
+    int DurationInMinutes,
     MatchStatus Status,
     List<MatchPlayerDto> Players
 );

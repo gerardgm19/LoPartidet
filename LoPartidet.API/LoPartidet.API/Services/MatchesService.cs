@@ -10,7 +10,7 @@ public class MatchesService(LoPartidetContext db, IMatchValidationService valida
     public IEnumerable<MatchDto> GetAll() =>
         db.Matches
             .Select(m => new MatchDto(
-                m.Id, m.CreatedById, m.CreatedAt, m.Type, m.Date, m.Location, m.MaxPlayers, m.Status))
+                m.Id, m.CreatedById, m.CreatedAt, m.Type, m.Date, m.Location, m.MaxPlayers, m.DurationInMinutes, m.Status))
             .ToList();
 
     public MatchDetailDto? GetById(int id)
@@ -31,6 +31,7 @@ public class MatchesService(LoPartidetContext db, IMatchValidationService valida
             match.Date,
             match.Location,
             match.MaxPlayers,
+            match.DurationInMinutes,
             match.Status,
             players
         );
@@ -50,6 +51,7 @@ public class MatchesService(LoPartidetContext db, IMatchValidationService valida
             CreatedById = int.Parse(request.CreatedBy),
             CreatedAt = DateTime.UtcNow,
             MaxPlayers = request.MaxPlayers,
+            DurationInMinutes = request.DurationInMinutes,
             Status = MatchStatus.Scheduled,
         };
 
@@ -58,7 +60,7 @@ public class MatchesService(LoPartidetContext db, IMatchValidationService valida
 
         return new MatchDto(
             match.Id, match.CreatedById, match.CreatedAt, match.Type,
-            match.Date, match.Location, match.MaxPlayers, match.Status);
+            match.Date, match.Location, match.MaxPlayers, match.DurationInMinutes, match.Status);
     }
 
     public async Task<UserMatchDto> JoinMatchAsync(int matchId, int userId)

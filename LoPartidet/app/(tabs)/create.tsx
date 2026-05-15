@@ -21,6 +21,9 @@ import { useLangStore } from "@/store/langStore";
 import { Toast } from "@/components/Toast";
 import TimePicker from "@/components/TimePicker";
 import BirthdayPicker from "@/components/BirthdayPicker";
+import DurationPicker from "@/components/DurationPicker";
+
+const DURATION_OPTIONS = [30, 45, 60, 75, 90, 105, 120];
 
 const SPORT_TYPES = [
   SportType.Fut5,
@@ -120,6 +123,7 @@ export default function Create() {
   const [datetime, setDatetime] = useState<Date>(new Date());
   const [location, setLocation] = useState("");
   const [maxPlayers, setMaxPlayers] = useState(10);
+  const [durationInMinutes, setDurationInMinutes] = useState(90);
   const [loading, setLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastVisible, setToastVisible] = useState(false);
@@ -138,7 +142,7 @@ export default function Create() {
 
     setLoading(true);
     try {
-      const match = await createMatch({ type: selectedType, date: datetime.toISOString(), location: location.trim(), maxPlayers });
+      const match = await createMatch({ type: selectedType, date: datetime.toISOString(), location: location.trim(), maxPlayers, durationInMinutes });
       showToast(t.matchCreated);
       setTimeout(() => router.replace(`/match/${match.id}`), 1200);
     } catch {
@@ -195,20 +199,31 @@ export default function Create() {
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>{t.time}</Text>
-          <TimePicker
-            label={t.time}
-            value={`${String(datetime.getHours()).padStart(2, "0")}:${String(datetime.getMinutes()).padStart(2, "0")}`}
-            minuteInterval={15}
-            onChange={(hhmm) => {
-              if (!hhmm) return;
-              const [h, m] = hhmm.split(":").map(Number);
-              const next = new Date(datetime);
-              next.setHours(h, m, 0, 0);
-              setDatetime(next);
-            }}
-          />
+        <View style={styles.dateTimeRow}>
+          <View style={styles.section}>
+            <Text style={styles.label}>{t.time}</Text>
+            <TimePicker
+              label={t.time}
+              value={`${String(datetime.getHours()).padStart(2, "0")}:${String(datetime.getMinutes()).padStart(2, "0")}`}
+              minuteInterval={15}
+              onChange={(hhmm) => {
+                if (!hhmm) return;
+                const [h, m] = hhmm.split(":").map(Number);
+                const next = new Date(datetime);
+                next.setHours(h, m, 0, 0);
+                setDatetime(next);
+              }}
+            />
+          </View>
+          <View style={styles.section}>
+            <Text style={styles.label}>{t.duration}</Text>
+            <DurationPicker
+              label={t.duration}
+              value={durationInMinutes}
+              options={DURATION_OPTIONS}
+              onChange={setDurationInMinutes}
+            />
+          </View>
         </View>
 
         <View style={styles.section}>

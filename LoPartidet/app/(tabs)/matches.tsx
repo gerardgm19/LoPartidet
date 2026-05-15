@@ -149,21 +149,22 @@ export default function Matches() {
         <View>
           {Array.from({ length: 5 }).map((_, i) => <MatchCardSkeleton key={i} />)}
         </View>
-      ) : matches.length === 0 ? (
-        <View style={styles.centered}>
-          <Text style={styles.emptyIcon}>⚽</Text>
-          <Text style={styles.emptyText}>{t.noMatchesTitle}</Text>
-          <Text style={styles.emptySubtext}>{t.noMatchesSubtitle}</Text>
-        </View>
       ) : (
         <FlatList
           data={matches}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => <MatchCard match={item} onPress={() => router.push(`/match/${item.id}`)} />}
-          contentContainerStyle={styles.list}
+          contentContainerStyle={matches.length === 0 ? { flexGrow: 1 } : styles.list}
           showsVerticalScrollIndicator={false}
           refreshing={false}
           onRefresh={Platform.OS !== "web" ? handleRefresh : undefined}
+          ListEmptyComponent={
+            <View style={styles.centered}>
+              <Text style={styles.emptyIcon}>⚽</Text>
+              <Text style={styles.emptyText}>{t.noMatchesTitle}</Text>
+              <Text style={styles.emptySubtext}>{t.noMatchesSubtitle}</Text>
+            </View>
+          }
         />
       )}
       <Toast

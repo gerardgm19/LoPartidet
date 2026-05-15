@@ -14,6 +14,7 @@ export type Match = {
   date: string;
   location: string;
   maxPlayers: number;
+  durationInMinutes: number;
   status: MatchStatus;
 };
 
@@ -33,6 +34,7 @@ export type CreateMatchRequest = {
   date: string;
   location: string;
   maxPlayers: number;
+  durationInMinutes: number;
 };
 
 // ---------------------------------------------------------------------------
@@ -87,6 +89,7 @@ export async function createMatch(request: CreateMatchRequest): Promise<Match> {
     location: request.location,
     createdBy,
     maxPlayers: request.maxPlayers,
+    durationInMinutes: request.durationInMinutes,
   });
   return normalizeMatch(data);
 }

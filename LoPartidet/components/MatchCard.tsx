@@ -85,6 +85,11 @@ export default function MatchCard({ match, onPress }: Props) {
           <Ionicons name="time-outline" size={14} color={colors.white} />
           <Text style={styles.dateText}>{time}</Text>
         </View>
+        <View style={styles.dateSep} />
+        <View style={styles.dateBlock}>
+          <Ionicons name="hourglass-outline" size={14} color={colors.white} />
+          <Text style={styles.dateText}>{match.durationInMinutes} min</Text>
+        </View>
       </View>
 
       <View style={styles.divider} />

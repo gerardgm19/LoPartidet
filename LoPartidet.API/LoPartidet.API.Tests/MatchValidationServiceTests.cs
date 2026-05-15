@@ -50,7 +50,7 @@ public class MatchValidationServiceTests
     {
         using var db = CreateContext();
         var svc = new MatchValidationService(db);
-        var request = new CreateMatchDto(SportType.Fut5, DateTime.UtcNow.AddDays(1), "Field A", "999", 10);
+        var request = new CreateMatchDto(SportType.Fut5, DateTime.UtcNow.AddDays(1), "Field A", "999", 10, 90);
 
         var result = await svc.ValidateCreateMatchAsync(request);
 
@@ -65,7 +65,7 @@ public class MatchValidationServiceTests
         db.Users.Add(MakeUser(1));
         await db.SaveChangesAsync();
         var svc = new MatchValidationService(db);
-        var request = new CreateMatchDto(SportType.Fut5, DateTime.UtcNow.AddDays(-1), "Field A", "1", 10);
+        var request = new CreateMatchDto(SportType.Fut5, DateTime.UtcNow.AddDays(-1), "Field A", "1", 10, 90);
 
         var result = await svc.ValidateCreateMatchAsync(request);
 
@@ -80,7 +80,7 @@ public class MatchValidationServiceTests
         db.Users.Add(MakeUser(1));
         await db.SaveChangesAsync();
         var svc = new MatchValidationService(db);
-        var request = new CreateMatchDto(SportType.Fut5, DateTime.UtcNow.AddDays(1), "   ", "1", 10);
+        var request = new CreateMatchDto(SportType.Fut5, DateTime.UtcNow.AddDays(1), "   ", "1", 10, 90);
 
         var result = await svc.ValidateCreateMatchAsync(request);
 
@@ -95,7 +95,7 @@ public class MatchValidationServiceTests
         db.Users.Add(MakeUser(1));
         await db.SaveChangesAsync();
         var svc = new MatchValidationService(db);
-        var request = new CreateMatchDto(SportType.Fut5, DateTime.UtcNow.AddDays(1), "Field A", "1", 1);
+        var request = new CreateMatchDto(SportType.Fut5, DateTime.UtcNow.AddDays(1), "Field A", "1", 1, 90);
 
         var result = await svc.ValidateCreateMatchAsync(request);
 
@@ -110,7 +110,7 @@ public class MatchValidationServiceTests
         db.Users.Add(MakeUser(1));
         await db.SaveChangesAsync();
         var svc = new MatchValidationService(db);
-        var request = new CreateMatchDto(SportType.Fut5, DateTime.UtcNow.AddDays(1), "Field A", "1", 10);
+        var request = new CreateMatchDto(SportType.Fut5, DateTime.UtcNow.AddDays(1), "Field A", "1", 10, 90);
 
         var result = await svc.ValidateCreateMatchAsync(request);
 

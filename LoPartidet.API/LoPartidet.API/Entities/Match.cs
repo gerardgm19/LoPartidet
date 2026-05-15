@@ -11,6 +11,7 @@ public class Match
     public DateTime Date { get; init; }
     public string Location { get; init; } = string.Empty;
     public int MaxPlayers { get; init; }
+    public int DurationInMinutes { get; init; }
     public MatchStatus Status { get; init; }
 
     public User CreatedBy { get; init; } = null!;

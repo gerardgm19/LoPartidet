@@ -62,6 +62,8 @@ export default function MatchCardSkeleton() {
         <Bone width={80} style={styles.line} />
         <Bone width={1} style={{ height: 14 }} />
         <Bone width={60} style={styles.line} />
+        <Bone width={1} style={{ height: 14 }} />
+        <Bone width={50} style={styles.line} />
       </View>
 
       <View style={styles.divider} />

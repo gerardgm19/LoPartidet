@@ -287,6 +287,7 @@ export default function MatchDetailPage() {
           <DetailRow icon="location-sharp" label={t.location} value={match.location} accent />
           <DetailRow icon="calendar-outline" label={t.date} value={day} />
           <DetailRow icon="time-outline" label={t.time} value={time} />
+          <DetailRow icon="hourglass-outline" label={t.duration} value={`${match.durationInMinutes} min`} />
           <DetailRow icon="football-outline" label={t.format} value={sportTypeLabel[match.type]} />
         </View>
 

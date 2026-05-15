@@ -48,6 +48,7 @@ const cat_es = {
   createMatchBtn: "Crear partit",
   sportType: "Tipus d'esport",
   maxPlayers: "Jugadors màxims",
+  duration: "Durada",
   matchCreated: "Partit creat!",
   createMatchError: "No s'ha pogut crear el partit.",
 

@@ -48,6 +48,7 @@ const es_es = {
   createMatchBtn: "Crear partido",
   sportType: "Tipo de deporte",
   maxPlayers: "Jugadores máximos",
+  duration: "Duración",
   matchCreated: "¡Partido creado!",
   createMatchError: "No se pudo crear el partido.",
 

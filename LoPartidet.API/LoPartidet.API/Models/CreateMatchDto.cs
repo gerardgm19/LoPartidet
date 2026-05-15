@@ -5,5 +5,6 @@ public record CreateMatchDto(
     DateTime Date,
     string Location,
     string CreatedBy,
-    int MaxPlayers
+    int MaxPlayers,
+    int DurationInMinutes
 );

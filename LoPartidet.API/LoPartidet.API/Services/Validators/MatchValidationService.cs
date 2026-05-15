@@ -21,6 +21,9 @@ public class MatchValidationService(LoPartidetContext db) : IMatchValidationServ
         if (request.MaxPlayers < 2)
             return Task.FromResult(ValidationResult.Fail("A match requires at least 2 players."));
 
+        if (request.DurationInMinutes <= 0)
+            return Task.FromResult(ValidationResult.Fail("Duration must be greater than 0."));
+
         return Task.FromResult(ValidationResult.Ok());
     }
 
