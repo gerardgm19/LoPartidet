@@ -19,7 +19,8 @@ import { createMatch } from "@/services/matchesService";
 import { SportType } from "@/types/sportType";
 import { useLangStore } from "@/store/langStore";
 import { Toast } from "@/components/Toast";
-import DateTimePickerField from "@/components/DateTimePickerField";
+import TimePicker from "@/components/TimePicker";
+import BirthdayPicker from "@/components/BirthdayPicker";
 
 const SPORT_TYPES = [
   SportType.Fut5,
@@ -178,16 +179,36 @@ export default function Create() {
         </View>
 
         <View style={styles.section}>
-          <View style={styles.dateTimeRow}>
-            <View style={styles.dateTimeField}>
-              <Text style={styles.label}>{t.date}</Text>
-              <DateTimePickerField mode="date" value={datetime} onChange={setDatetime} />
-            </View>
-            <View style={styles.dateTimeField}>
-              <Text style={styles.label}>{t.time}</Text>
-              <DateTimePickerField mode="time" value={datetime} onChange={setDatetime} />
-            </View>
-          </View>
+          <Text style={styles.label}>{t.date}</Text>
+          <BirthdayPicker
+            label={t.date}
+            compact
+            yearOptions={Array.from({ length: 6 }, (_, i) => new Date().getFullYear() + i)}
+            value={`${datetime.getFullYear()}-${String(datetime.getMonth() + 1).padStart(2, "0")}-${String(datetime.getDate()).padStart(2, "0")}`}
+            onChange={(iso) => {
+              if (!iso) return;
+              const [y, m, d] = iso.split("-").map(Number);
+              const next = new Date(datetime);
+              next.setFullYear(y, m - 1, d);
+              setDatetime(next);
+            }}
+          />
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.label}>{t.time}</Text>
+          <TimePicker
+            label={t.time}
+            value={`${String(datetime.getHours()).padStart(2, "0")}:${String(datetime.getMinutes()).padStart(2, "0")}`}
+            minuteInterval={15}
+            onChange={(hhmm) => {
+              if (!hhmm) return;
+              const [h, m] = hhmm.split(":").map(Number);
+              const next = new Date(datetime);
+              next.setHours(h, m, 0, 0);
+              setDatetime(next);
+            }}
+          />
         </View>
 
         <View style={styles.section}>

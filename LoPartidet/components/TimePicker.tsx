@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   FlatList,
   Modal,
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -9,46 +10,34 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useThemeStore } from "@/store/themeStore";
-import { useLangStore } from "@/store/langStore";
 import { makeStyles } from "@/utils/makeStyles";
-import type { Translations } from "@/i18n";
 
-const CURRENT_YEAR = new Date().getFullYear();
-const ALL_MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
-const YEARS = Array.from({ length: 101 }, (_, i) => CURRENT_YEAR - i);
+const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
-function daysInMonth(month: number, year: number): number {
-  return new Date(year, month, 0).getDate();
+function pad(n: number): string {
+  return String(n).padStart(2, "0");
 }
 
-function validDays(month: number | undefined, year: number | undefined): number[] {
-  const max = month && year ? daysInMonth(month, year) : 31;
-  return Array.from({ length: max }, (_, i) => i + 1);
+function toHHmm(hour: number, minute: number): string {
+  return `${pad(hour)}:${pad(minute)}`;
 }
 
-function monthLabel(month: number, t: Translations): string {
-  return [
-    t.monthJanuary, t.monthFebruary, t.monthMarch, t.monthApril,
-    t.monthMay, t.monthJune, t.monthJuly, t.monthAugust,
-    t.monthSeptember, t.monthOctober, t.monthNovember, t.monthDecember,
-  ][month - 1];
-}
-
-function toIso(day: number, month: number, year: number): string {
-  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-}
-
-function parseValue(v: string | undefined): { day?: number; month?: number; year?: number } {
+function parseValue(v: string | undefined): { hour?: number; minute?: number } {
   if (!v) return {};
-  // Accept both "yyyy-MM-dd" (DateOnly) and "yyyy-MM-ddTHH:mm:ss" (DateTime).
-  const [y, m, d] = v.slice(0, 10).split("-").map(Number);
-  if (!y || !m || !d) return {};
-  return { day: d, month: m, year: y };
+  const [h, m] = v.slice(0, 5).split(":").map(Number);
+  if (Number.isNaN(h) || Number.isNaN(m)) return {};
+  return { hour: h, minute: m };
+}
+
+function buildMinutes(interval: number): number[] {
+  const step = Math.max(1, Math.min(60, Math.floor(interval)));
+  const minutes: number[] = [];
+  for (let m = 0; m < 60; m += step) minutes.push(m);
+  return minutes;
 }
 
 const useStyles = makeStyles((colors) => StyleSheet.create({
-  field: { paddingHorizontal: 16, paddingVertical: 14, gap: 6 },
-  fieldCompact: { gap: 6 },
+  field: { gap: 6 },
   fieldLabel: {
     color: colors.muted,
     fontSize: 11,
@@ -57,28 +46,34 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
     textTransform: "uppercase",
   },
   fieldError: { color: "#FF5252", fontSize: 12, marginTop: 2 },
-  row: { flexDirection: "row", gap: 8 },
-  rowCompact: { flexDirection: "row", gap: 8, alignSelf: "flex-start" },
-  dropdownDayCompact: { minWidth: 60 },
-  dropdownMonthCompact: { minWidth: 140 },
-  dropdownYearCompact: { minWidth: 90 },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: 10,
+    paddingVertical: Platform.OS === "web" ? 4 : 2,
+  },
+  sep: {
+    color: colors.muted,
+    fontSize: 16,
+    fontWeight: "600",
+    paddingHorizontal: 2,
+  },
   dropdown: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    paddingHorizontal: 12,
+    justifyContent: "center",
+    gap: 6,
     paddingVertical: 10,
+    minWidth: 56,
   },
-  dropdownDay: { flex: 1 },
-  dropdownMonth: { flex: 2 },
-  dropdownYear: { flex: 1.3 },
+  dropdownHalf: { flex: 1 },
   dropdownText: { color: colors.white, fontSize: 15 },
   dropdownPlaceholder: { color: colors.muted, fontSize: 15 },
-  // Modal
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.6)",
@@ -115,8 +110,6 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
   itemText: { color: colors.white, fontSize: 16 },
   itemTextSelected: { color: colors.green, fontSize: 16, fontWeight: "700" },
 }));
-
-// ─── Dropdown ─────────────────────────────────────────────────────────────────
 
 type DropdownProps = {
   title: string;
@@ -163,14 +156,14 @@ function Dropdown({
           activeOpacity={1}
           onPress={() => setOpen(false)}
         >
-          <TouchableOpacity style={styles.sheet} activeOpacity={1} onPress={() => {}}>
+          <TouchableOpacity style={styles.sheet} activeOpacity={1} onPress={() => { }}>
             <View style={styles.sheetHeader}>
               <Text style={styles.sheetTitle}>{title}</Text>
             </View>
             <FlatList
               data={options}
               keyExtractor={(item) => String(item)}
-              initialScrollIndex={value !== undefined ? Math.max(0, options.indexOf(value)) : 0}
+              initialNumToRender={options.length}
               getItemLayout={(_, index) => ({ length: 48, offset: 48 * index, index })}
               renderItem={({ item }) => {
                 const isSelected = item === value;
@@ -196,90 +189,68 @@ function Dropdown({
   );
 }
 
-// ─── BirthdayPicker ───────────────────────────────────────────────────────────
-
 type Props = {
   label: string;
   value: string | undefined;
-  onChange: (iso: string | undefined) => void;
+  onChange: (hhmm: string | undefined) => void;
+  minuteInterval: number;
   error?: string;
   onLayout?: (e: any) => void;
   onFocus?: () => void;
-  compact?: boolean;
-  yearOptions?: number[];
 };
 
-export default function BirthdayPicker({
-  label, value, onChange, error, onLayout, onFocus, compact, yearOptions,
+export default function TimePicker({
+  label, value, onChange, minuteInterval, error, onLayout, onFocus,
 }: Props) {
   const styles = useStyles();
-  const t = useLangStore((s) => s.t);
+  const minutes = buildMinutes(minuteInterval);
 
   const [state, setState] = useState(() => parseValue(value));
 
-  // Sync local state when `value` prop changes (e.g. async user load).
   useEffect(() => {
     const parsed = parseValue(value);
     setState((prev) => {
-      if (prev.day === parsed.day && prev.month === parsed.month && prev.year === parsed.year) {
-        return prev;
-      }
+      if (prev.hour === parsed.hour && prev.minute === parsed.minute) return prev;
       return parsed;
     });
   }, [value]);
 
-  function emit(next: { day?: number; month?: number; year?: number }) {
-    if (next.day && next.month && next.year) {
-      onChange(toIso(next.day, next.month, next.year));
+  function emit(next: { hour?: number; minute?: number }) {
+    if (next.hour !== undefined && next.minute !== undefined) {
+      onChange(toHHmm(next.hour, next.minute));
     } else {
       onChange(undefined);
     }
   }
 
-  function pick(part: "day" | "month" | "year", v: number) {
+  function pick(part: "hour" | "minute", v: number) {
     onFocus?.();
     const next = { ...state, [part]: v };
-    if (next.month && next.year && next.day) {
-      const max = daysInMonth(next.month, next.year);
-      if (next.day > max) next.day = max;
-    }
     setState(next);
     emit(next);
   }
 
-  const days = validDays(state.month, state.year);
-  const years = yearOptions ?? YEARS;
-
   return (
-    <View style={compact ? styles.fieldCompact : styles.field} onLayout={onLayout}>
-      {!compact && <Text style={styles.fieldLabel}>{label}</Text>}
-      <View style={compact ? styles.rowCompact : styles.row}>
+    <View style={styles.field} onLayout={onLayout}>
+      <View style={styles.row}>
         <Dropdown
-          title={t.birthday}
-          value={state.day}
-          options={days}
-          placeholder="DD"
-          onSelect={(v) => pick("day", v)}
-          renderLabel={(v) => String(v)}
-          containerStyle={compact ? styles.dropdownDayCompact : styles.dropdownDay}
+          title={label}
+          value={state.hour}
+          options={HOURS}
+          placeholder="HH"
+          onSelect={(v) => pick("hour", v)}
+          renderLabel={(v) => pad(v)}
+          containerStyle={styles.dropdown}
         />
+        <Text style={styles.sep}>:</Text>
         <Dropdown
-          title={t.birthday}
-          value={state.month}
-          options={ALL_MONTHS}
+          title={label}
+          value={state.minute}
+          options={minutes}
           placeholder="MM"
-          onSelect={(v) => pick("month", v)}
-          renderLabel={(v) => monthLabel(v, t)}
-          containerStyle={compact ? styles.dropdownMonthCompact : styles.dropdownMonth}
-        />
-        <Dropdown
-          title={t.birthday}
-          value={state.year}
-          options={years}
-          placeholder="YYYY"
-          onSelect={(v) => pick("year", v)}
-          renderLabel={(v) => String(v)}
-          containerStyle={compact ? styles.dropdownYearCompact : styles.dropdownYear}
+          onSelect={(v) => pick("minute", v)}
+          renderLabel={(v) => pad(v)}
+          containerStyle={styles.dropdown}
         />
       </View>
       {error ? <Text style={styles.fieldError}>{error}</Text> : null}
