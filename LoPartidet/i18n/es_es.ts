@@ -170,6 +170,12 @@ const es_es = {
   langCatalan: "Català",
   langSpanish: "Castellano",
 
+  // User matches
+  myMatches: "Mis partidos",
+  myMatchesError: "No se pudieron cargar tus partidos.",
+  noJoinedMatchesTitle: "Sin partidos",
+  noJoinedMatchesSubtitle: "Aún no te has apuntado a ningún partido",
+
   // Filters
   filters: "Filtros",
   filterLocation: "Ubicación",

@@ -167,6 +167,7 @@ export default function Profile() {
   ];
 
   const menuItems = [
+    { label: t.myMatches, route: "/user-matches" },
     { label: t.skills, route: "/skills" },
     { label: t.playerInformation, route: "/player-information" },
     { label: t.aboutUs, route: "/about-us" },
