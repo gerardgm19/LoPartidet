@@ -38,6 +38,15 @@ export type CreateMatchRequest = {
   durationInMinutes: number;
 };
 
+export type MatchFilter = {
+  location?: string;
+  joined?: boolean;
+  minDate?: string;
+  maxDate?: string;
+  minTime?: string;
+  maxTime?: string;
+};
+
 // ---------------------------------------------------------------------------
 // Normalization — API may return enums as strings or numbers
 // ---------------------------------------------------------------------------
@@ -67,8 +76,15 @@ function normalizeMatchDetail(raw: any): MatchDetail {
 // Public service
 // ---------------------------------------------------------------------------
 
-export async function getMatches(): Promise<Match[]> {
-  const { data } = await apiClient.get<any[]>(`${API_BASE_URL}/matches`);
+export async function getMatches(filter: MatchFilter = {}): Promise<Match[]> {
+  const params: Record<string, string> = {};
+  if (filter.location) params.location = filter.location;
+  if (filter.joined !== undefined) params.joined = String(filter.joined);
+  if (filter.minDate) params.minDate = filter.minDate;
+  if (filter.maxDate) params.maxDate = filter.maxDate;
+  if (filter.minTime) params.minTime = filter.minTime;
+  if (filter.maxTime) params.maxTime = filter.maxTime;
+  const { data } = await apiClient.get<any[]>(`${API_BASE_URL}/matches`, { params });
   return data.map(normalizeMatch);
 }
 

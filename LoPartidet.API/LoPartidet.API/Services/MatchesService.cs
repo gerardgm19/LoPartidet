@@ -8,15 +8,45 @@ namespace LoPartidet.API.Services;
 
 public class MatchesService(LoPartidetContext db, IMatchValidationService validationService) : IMatchesService
 {
-    public async Task<IEnumerable<MatchDto>> GetAllAsync(string identityId)
+    public async Task<IEnumerable<MatchDto>> GetAllAsync(string identityId, MatchFilterDto filter)
     {
         var userId = await db.Users.Where(u => u.IdentityId == identityId).Select(u => u.Id).FirstOrDefaultAsync();
-        var matches =  await db.Matches
-            .Where(m => m.Date >= DateTime.UtcNow)
+
+        var query = db.Matches.Where(m => m.Date >= DateTime.UtcNow);
+
+        if (!string.IsNullOrWhiteSpace(filter.Location))
+            query = query.Where(m => m.Location.Contains(filter.Location));
+
+        if (filter.MinDate.HasValue)
+            query = query.Where(m => m.Date >= filter.MinDate.Value);
+
+        if (filter.MaxDate.HasValue)
+            query = query.Where(m => m.Date <= filter.MaxDate.Value);
+
+        if (filter.MinTime.HasValue)
+        {
+            var minMinutes = filter.MinTime.Value.Hour * 60 + filter.MinTime.Value.Minute;
+            query = query.Where(m => m.Date.Hour * 60 + m.Date.Minute >= minMinutes);
+        }
+
+        if (filter.MaxTime.HasValue)
+        {
+            var maxMinutes = filter.MaxTime.Value.Hour * 60 + filter.MaxTime.Value.Minute;
+            query = query.Where(m => m.Date.Hour * 60 + m.Date.Minute <= maxMinutes);
+        }
+
+        if (filter.Joined.HasValue)
+        {
+            query = filter.Joined.Value
+                ? query.Where(m => m.JoinedUsers.Any(um => um.UserId == userId))
+                : query.Where(m => !m.JoinedUsers.Any(um => um.UserId == userId));
+        }
+
+        return await query
             .Select(m => new MatchDto(
                 m.Id,
                 m.CreatedById,
-                m.CreatedAt, 
+                m.CreatedAt,
                 m.Type,
                 m.Date,
                 m.Location,
@@ -26,8 +56,6 @@ public class MatchesService(LoPartidetContext db, IMatchValidationService valida
                 m.JoinedUsers.Any(um => um.UserId == userId)
             ))
             .ToListAsync();
-
-        return matches;
     }
 
     public async Task<MatchDetailDto?> GetByIdAsync(int id)

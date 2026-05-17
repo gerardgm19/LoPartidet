@@ -169,6 +169,20 @@ const es_es = {
   selectLanguage: "Seleccionar idioma",
   langCatalan: "Català",
   langSpanish: "Castellano",
+
+  // Filters
+  filters: "Filtros",
+  filterLocation: "Ubicación",
+  filterJoined: "Apuntado",
+  filterMinDate: "Fecha desde",
+  filterMaxDate: "Fecha hasta",
+  filterMinTime: "Hora desde",
+  filterMaxTime: "Hora hasta",
+  applyFilters: "Aplicar",
+  clearFilters: "Limpiar",
+  any: "Cualquiera",
+  yes: "Sí",
+  no: "No",
 };
 
 export default es_es;

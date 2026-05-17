@@ -6,9 +6,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useThemeStore } from "@/store/themeStore";
 import { makeStyles } from "@/utils/makeStyles";
 import { getMatches } from "@/services/matchesService";
-import { Match } from "@/services/matchesService";
+import { Match, MatchFilter } from "@/services/matchesService";
 import MatchCard from "@/components/MatchCard";
 import MatchCardSkeleton from "@/components/MatchCardSkeleton";
+import MatchFilters from "@/components/MatchFilters";
 import { Toast } from "@/components/Toast";
 import { useLangStore } from "@/store/langStore";
 import { MatchStatus } from "@/types/matchStatus";
@@ -88,18 +89,20 @@ export default function Matches() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
+  const [filter, setFilter] = useState<MatchFilter>({});
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const spinAnim = useRef(new Animated.Value(0)).current;
 
-  const fetchMatches = useCallback((isRefresh = false) => {
+  const fetchMatches = useCallback((isRefresh = false, override?: MatchFilter) => {
     if (isRefresh) setRefreshing(true);
-    getMatches()
+    getMatches(override ?? filter)
       .then(setMatches)
       .catch(() => setToastVisible(true))
       .finally(() => {
         setLoading(false);
         setRefreshing(false);
       });
-  }, []);
+  }, [filter]);
 
   useEffect(() => { fetchMatches(); }, [fetchMatches]);
 
@@ -135,6 +138,13 @@ export default function Matches() {
               <Text style={styles.livePillText}>{liveCount} {t.live}</Text>
             </View>
           )}
+          <Pressable
+            style={styles.refreshBtn}
+            onPress={() => setFiltersOpen((v) => !v)}
+            accessibilityLabel={t.filters}
+          >
+            <Ionicons name="options-outline" size={22} color={colors.white} />
+          </Pressable>
           {Platform.OS === "web" && (
             <Pressable style={styles.refreshBtn} onPress={handleRefresh} accessibilityLabel={t.refresh}>
               <Animated.View style={{ transform: [{ rotate: spin }] }}>
@@ -144,6 +154,22 @@ export default function Matches() {
           )}
         </View>
       </View>
+
+      {filtersOpen && (
+        <MatchFilters
+          value={filter}
+          onApply={(next) => {
+            setFilter(next);
+            setLoading(true);
+            fetchMatches(false, next);
+          }}
+          onClear={() => {
+            setFilter({});
+            setLoading(true);
+            fetchMatches(false, {});
+          }}
+        />
+      )}
 
       {loading || refreshing ? (
         <View>

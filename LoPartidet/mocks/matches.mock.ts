@@ -11,7 +11,9 @@ export const MOCK_MATCHES: Match[] = [
     date: "2026-04-10T20:00:00Z",
     location: "Poliesportiu Les Corts, Barcelona",
     maxPlayers: 14,
+    durationInMinutes: 60,
     status: MatchStatus.Scheduled,
+    isUserJoined: false,
   },
   {
     id: "2",
@@ -21,7 +23,9 @@ export const MOCK_MATCHES: Match[] = [
     date: "2026-04-08T19:45:00Z",
     location: "Pista Municipal Nord, Madrid",
     maxPlayers: 10,
+    durationInMinutes: 60,
     status: MatchStatus.Live,
+    isUserJoined: false,
   },
   {
     id: "3",
@@ -31,7 +35,9 @@ export const MOCK_MATCHES: Match[] = [
     date: "2026-04-06T17:30:00Z",
     location: "Pavelló Can Zam, Santa Coloma",
     maxPlayers: 12,
+    durationInMinutes: 60,
     status: MatchStatus.Finished,
+    isUserJoined: false,
   },
   {
     id: "4",
@@ -41,7 +47,9 @@ export const MOCK_MATCHES: Match[] = [
     date: "2026-04-12T11:00:00Z",
     location: "Camp Municipal de Futbol, Badalona",
     maxPlayers: 22,
+    durationInMinutes: 90,
     status: MatchStatus.Scheduled,
+    isUserJoined: false,
   },
   {
     id: "5",
@@ -51,6 +59,8 @@ export const MOCK_MATCHES: Match[] = [
     date: "2026-04-13T10:30:00Z",
     location: "Platja de la Barceloneta, Barcelona",
     maxPlayers: 10,
+    durationInMinutes: 60,
     status: MatchStatus.Scheduled,
+    isUserJoined: false,
   },
 ];

@@ -13,10 +13,10 @@ namespace LoPartidet.API.Controllers;
 public class MatchesController(IMatchesService matchesService, IMatchValidationService validationService) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<MatchDto>>> GetAll()
+    public async Task<ActionResult<IEnumerable<MatchDto>>> GetAll([FromQuery] MatchFilterDto filter)
     {
         var identityId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        return Ok(await matchesService.GetAllAsync(identityId));
+        return Ok(await matchesService.GetAllAsync(identityId!, filter));
     }
 
     [HttpGet("{id}")]
