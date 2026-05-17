@@ -15,4 +15,5 @@ public class Match
     public MatchStatus Status { get; init; }
 
     public User CreatedBy { get; init; } = null!;
+    public ICollection<UserMatch> JoinedUsers { get; set; } = [];
 }

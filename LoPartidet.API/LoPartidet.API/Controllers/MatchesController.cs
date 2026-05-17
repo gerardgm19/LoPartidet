@@ -3,6 +3,7 @@ using LoPartidet.API.Services;
 using LoPartidet.API.Services.Validators;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace LoPartidet.API.Controllers;
 
@@ -12,12 +13,16 @@ namespace LoPartidet.API.Controllers;
 public class MatchesController(IMatchesService matchesService, IMatchValidationService validationService) : ControllerBase
 {
     [HttpGet]
-    public ActionResult<IEnumerable<MatchDto>> GetAll() => Ok(matchesService.GetAll());
+    public async Task<ActionResult<IEnumerable<MatchDto>>> GetAll()
+    {
+        var identityId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return Ok(await matchesService.GetAllAsync(identityId));
+    }
 
     [HttpGet("{id}")]
-    public ActionResult<MatchDetailDto> GetById(int id)
+    public async Task<ActionResult<MatchDetailDto>> GetById(int id)
     {
-        var match = matchesService.GetById(id);
+        var match = await matchesService.GetByIdAsync(id);
         return match is null ? NotFound() : Ok(match);
     }
 
@@ -26,7 +31,7 @@ public class MatchesController(IMatchesService matchesService, IMatchValidationS
     {
         try
         {
-            var match = await matchesService.CreateMatch(request);
+            var match = await matchesService.CreateMatchAsync(request);
             return CreatedAtAction(nameof(GetById), new { id = match.Id }, match);
         }
         catch (InvalidOperationException ex)

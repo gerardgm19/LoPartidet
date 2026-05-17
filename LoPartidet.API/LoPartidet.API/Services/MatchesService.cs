@@ -2,26 +2,43 @@ using LoPartidet.API.Data;
 using LoPartidet.API.Entities;
 using LoPartidet.API.Models;
 using LoPartidet.API.Services.Validators;
+using Microsoft.EntityFrameworkCore;
 
 namespace LoPartidet.API.Services;
 
 public class MatchesService(LoPartidetContext db, IMatchValidationService validationService) : IMatchesService
 {
-    public IEnumerable<MatchDto> GetAll() =>
-        db.Matches
-            .Select(m => new MatchDto(
-                m.Id, m.CreatedById, m.CreatedAt, m.Type, m.Date, m.Location, m.MaxPlayers, m.DurationInMinutes, m.Status))
-            .ToList();
-
-    public MatchDetailDto? GetById(int id)
+    public async Task<IEnumerable<MatchDto>> GetAllAsync(string identityId)
     {
-        var match = db.Matches.Find(id);
+        var userId = await db.Users.Where(u => u.IdentityId == identityId).Select(u => u.Id).FirstOrDefaultAsync();
+        var matches =  await db.Matches
+            .Where(m => m.Date >= DateTime.UtcNow)
+            .Select(m => new MatchDto(
+                m.Id,
+                m.CreatedById,
+                m.CreatedAt, 
+                m.Type,
+                m.Date,
+                m.Location,
+                m.MaxPlayers,
+                m.DurationInMinutes,
+                m.Status,
+                false //m.JoinedUsers.Any(um => um.UserId == userId)
+                      ))
+            .ToListAsync();
+
+        return matches;
+    }
+
+    public async Task<MatchDetailDto?> GetByIdAsync(int id)
+    {
+        var match = await db.Matches.FindAsync(id);
         if (match is null) return null;
 
-        var players = db.UserMatches
+        var players = await db.UserMatches
             .Where(um => um.MatchId == id)
             .Select(um => new MatchPlayerDto(um.User.Id, um.User.Name, um.User.Surname, um.User.Nickname))
-            .ToList();
+            .ToListAsync();
 
         return new MatchDetailDto(
             match.Id,
@@ -37,7 +54,7 @@ public class MatchesService(LoPartidetContext db, IMatchValidationService valida
         );
     }
 
-    public async Task<MatchDto> CreateMatch(CreateMatchDto request)
+    public async Task<MatchDto> CreateMatchAsync(CreateMatchDto request)
     {
         var validation = await validationService.ValidateCreateMatchAsync(request);
         if (!validation.IsValid)
@@ -60,7 +77,8 @@ public class MatchesService(LoPartidetContext db, IMatchValidationService valida
 
         return new MatchDto(
             match.Id, match.CreatedById, match.CreatedAt, match.Type,
-            match.Date, match.Location, match.MaxPlayers, match.DurationInMinutes, match.Status);
+            match.Date, match.Location, match.MaxPlayers, match.DurationInMinutes, match.Status,
+            false);
     }
 
     public async Task<UserMatchDto> JoinMatchAsync(int matchId, int userId)
@@ -73,7 +91,7 @@ public class MatchesService(LoPartidetContext db, IMatchValidationService valida
 
     public async Task UnjoinMatchAsync(int matchId, int userId)
     {
-        var userMatch = db.UserMatches.First(um => um.MatchId == matchId && um.UserId == userId);
+        var userMatch = await db.UserMatches.FirstAsync(um => um.MatchId == matchId && um.UserId == userId);
         db.UserMatches.Remove(userMatch);
         await db.SaveChangesAsync();
     }

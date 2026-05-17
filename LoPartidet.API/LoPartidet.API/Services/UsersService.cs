@@ -46,16 +46,16 @@ public class UsersService(LoPartidetContext db, IIdentityManagerService identity
         return new RegisterUserResponse(user.Id, identity.Token);
     }
 
-    public UserDto? GetById(int id)
+    public async Task<UserDto?> GetByIdAsync(int id)
     {
-        var user = db.Users.Find(id);
+        var user = await db.Users.FindAsync(id);
         return user is null ? null : ToDto(user);
     }
 
-    public int GetUserIdByIdentityId(string identityId) =>
-        db.Users.Where(u => u.IdentityId == identityId).Select(u => u.Id).FirstOrDefault();
+    public async Task<int> GetUserIdByIdentityIdAsync(string identityId) =>
+        await db.Users.Where(u => u.IdentityId == identityId).Select(u => u.Id).FirstOrDefaultAsync();
 
-    public UserDto CreateUser(CreateUserRequest request)
+    public async Task<UserDto> CreateUserAsync(CreateUserRequest request)
     {
         var user = new User
         {
@@ -68,7 +68,7 @@ public class UsersService(LoPartidetContext db, IIdentityManagerService identity
         };
 
         db.Users.Add(user);
-        db.SaveChanges();
+        await db.SaveChangesAsync();
 
         var playerSkill = new PlayerSkill
         {
@@ -82,14 +82,14 @@ public class UsersService(LoPartidetContext db, IIdentityManagerService identity
         };
 
         db.PlayerSkills.Add(playerSkill);
-        db.SaveChanges();
+        await db.SaveChangesAsync();
 
         return ToDto(user);
     }
 
-    public UserDto? UpdateUser(int id, UpdateUserRequest request)
+    public async Task<UserDto?> UpdateUserAsync(int id, UpdateUserRequest request)
     {
-        var user = db.Users.Include(u => u.PlayerSkills).FirstOrDefault(u => u.Id == id);
+        var user = await db.Users.Include(u => u.PlayerSkills).FirstOrDefaultAsync(u => u.Id == id);
         if (user is null) return null;
 
         if (request.Name is not null) user.Name = request.Name;
@@ -120,7 +120,7 @@ public class UsersService(LoPartidetContext db, IIdentityManagerService identity
             if (request.Height is not null) skill.Height = request.Height;
         }
 
-        db.SaveChanges();
+        await db.SaveChangesAsync();
         return ToDto(user);
     }
 

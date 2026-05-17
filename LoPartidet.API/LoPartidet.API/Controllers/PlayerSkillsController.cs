@@ -11,20 +11,20 @@ namespace LoPartidet.API.Controllers;
 public class PlayerSkillsController(IPlayerSkillsService playerSkillsService) : ControllerBase
 {
     [HttpGet("user/{userId}")]
-    public ActionResult<IEnumerable<PlayerSkillDto>> GetByUser(int userId) =>
-        Ok(playerSkillsService.GetByUserId(userId));
+    public async Task<ActionResult<IEnumerable<PlayerSkillDto>>> GetByUser(int userId) =>
+        Ok(await playerSkillsService.GetByUserIdAsync(userId));
 
     [HttpPost]
-    public ActionResult<PlayerSkillDto> Create(CreatePlayerSkillRequest request)
+    public async Task<ActionResult<PlayerSkillDto>> Create(CreatePlayerSkillRequest request)
     {
-        var skill = playerSkillsService.Create(request);
+        var skill = await playerSkillsService.CreateAsync(request);
         return CreatedAtAction(nameof(GetByUser), new { userId = skill.UserId }, skill);
     }
 
     [HttpPut("{id}")]
-    public ActionResult<PlayerSkillDto> Update(int id, UpdatePlayerSkillRequest request)
+    public async Task<ActionResult<PlayerSkillDto>> Update(int id, UpdatePlayerSkillRequest request)
     {
-        var skill = playerSkillsService.Update(id, request);
+        var skill = await playerSkillsService.UpdateAsync(id, request);
         return skill is null ? NotFound() : Ok(skill);
     }
 }

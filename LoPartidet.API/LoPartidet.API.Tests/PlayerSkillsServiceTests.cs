@@ -42,30 +42,30 @@ public class PlayerSkillsServiceTests
     // GetByUserId
 
     [Fact]
-    public void GetByUserId_NoSkills_ReturnsEmpty()
+    public async Task GetByUserId_NoSkills_ReturnsEmpty()
     {
         using var db = CreateContext();
         var svc = new PlayerSkillsService(db);
 
-        var result = svc.GetByUserId(1);
+        var result = await svc.GetByUserIdAsync(1);
 
         Assert.Empty(result);
     }
 
     [Fact]
-    public void GetByUserId_HasSkills_ReturnsSkillsForUser()
+    public async Task GetByUserId_HasSkills_ReturnsSkillsForUser()
     {
         using var db = CreateContext();
         db.Users.Add(MakeUser(1));
         db.Users.Add(MakeUser(2));
-        db.SaveChanges();
+        await db.SaveChangesAsync();
         db.PlayerSkills.Add(MakeSkill(1, 1));
         db.PlayerSkills.Add(MakeSkill(2, 1));
         db.PlayerSkills.Add(MakeSkill(3, 2));
-        db.SaveChanges();
+        await db.SaveChangesAsync();
         var svc = new PlayerSkillsService(db);
 
-        var result = svc.GetByUserId(1).ToList();
+        var result = (await svc.GetByUserIdAsync(1)).ToList();
 
         Assert.Equal(2, result.Count);
         Assert.All(result, s => Assert.Equal(1, s.UserId));
@@ -74,30 +74,30 @@ public class PlayerSkillsServiceTests
     // Update
 
     [Fact]
-    public void Update_SkillNotFound_ReturnsNull()
+    public async Task Update_SkillNotFound_ReturnsNull()
     {
         using var db = CreateContext();
         var svc = new PlayerSkillsService(db);
         var request = new UpdatePlayerSkillRequest(Position.GK, null, null, null, null, null);
 
-        var result = svc.Update(999, request);
+        var result = await svc.UpdateAsync(999, request);
 
         Assert.Null(result);
     }
 
     [Fact]
-    public void Update_AllFields_UpdatesAll()
+    public async Task Update_AllFields_UpdatesAll()
     {
         using var db = CreateContext();
         db.Users.Add(MakeUser(1));
-        db.SaveChanges();
+        await db.SaveChangesAsync();
         db.PlayerSkills.Add(MakeSkill(1, 1));
-        db.SaveChanges();
+        await db.SaveChangesAsync();
         var svc = new PlayerSkillsService(db);
         var request = new UpdatePlayerSkillRequest(
             Position.GK, PreferredFoot.Left, SkillLevel.Expert, PlayerSpeed.Elite, 1, 190);
 
-        var result = svc.Update(1, request);
+        var result = await svc.UpdateAsync(1, request);
 
         Assert.NotNull(result);
         Assert.Equal(Position.GK, result.Position);
@@ -109,17 +109,17 @@ public class PlayerSkillsServiceTests
     }
 
     [Fact]
-    public void Update_PartialFields_OnlyUpdatesProvidedFields()
+    public async Task Update_PartialFields_OnlyUpdatesProvidedFields()
     {
         using var db = CreateContext();
         db.Users.Add(MakeUser(1));
-        db.SaveChanges();
+        await db.SaveChangesAsync();
         db.PlayerSkills.Add(MakeSkill(1, 1));
-        db.SaveChanges();
+        await db.SaveChangesAsync();
         var svc = new PlayerSkillsService(db);
         var request = new UpdatePlayerSkillRequest(Position.DEF, null, null, null, null, null);
 
-        var result = svc.Update(1, request);
+        var result = await svc.UpdateAsync(1, request);
 
         Assert.NotNull(result);
         Assert.Equal(Position.DEF, result.Position);
@@ -131,19 +131,19 @@ public class PlayerSkillsServiceTests
     }
 
     [Fact]
-    public void Update_PersistsChangesToDb()
+    public async Task Update_PersistsChangesToDb()
     {
         using var db = CreateContext();
         db.Users.Add(MakeUser(1));
-        db.SaveChanges();
+        await db.SaveChangesAsync();
         db.PlayerSkills.Add(MakeSkill(1, 1));
-        db.SaveChanges();
+        await db.SaveChangesAsync();
         var svc = new PlayerSkillsService(db);
         var request = new UpdatePlayerSkillRequest(null, null, SkillLevel.Expert, null, null, 195);
 
-        svc.Update(1, request);
+        await svc.UpdateAsync(1, request);
 
-        var persisted = db.PlayerSkills.Find(1);
+        var persisted = await db.PlayerSkills.FindAsync(1);
         Assert.Equal(SkillLevel.Expert, persisted!.SkillLevel);
         Assert.Equal(195, persisted.Height);
     }

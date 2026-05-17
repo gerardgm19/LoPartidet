@@ -2,22 +2,23 @@ using LoPartidet.API.Data;
 using LoPartidet.API.Entities;
 using LoPartidet.API.Models;
 using LoPartidet.API.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace LoPartidet.API.Services;
 
 public class PlayerSkillsService(LoPartidetContext db) : IPlayerSkillsService
 {
-    public IEnumerable<PlayerSkillDto> GetByUserId(int userId) =>
-        db.PlayerSkills
+    public async Task<IEnumerable<PlayerSkillDto>> GetByUserIdAsync(int userId) =>
+        await db.PlayerSkills
             .Where(ps => ps.UserId == userId)
             .Select(ps => new PlayerSkillDto(
                 ps.Id, ps.UserId, ps.Position, ps.PreferredFoot,
                 ps.SkillLevel, ps.Speed, ps.JerseyNumber, ps.Height))
-            .ToList();
+            .ToListAsync();
 
-    public PlayerSkillDto Create(CreatePlayerSkillRequest request)
+    public async Task<PlayerSkillDto> CreateAsync(CreatePlayerSkillRequest request)
     {
-        var existing = db.PlayerSkills.FirstOrDefault(ps => ps.UserId == request.UserId);
+        var existing = await db.PlayerSkills.FirstOrDefaultAsync(ps => ps.UserId == request.UserId);
         if (existing is not null) return ToDto(existing);
 
         var skill = new PlayerSkill
@@ -32,13 +33,13 @@ public class PlayerSkillsService(LoPartidetContext db) : IPlayerSkillsService
         };
 
         db.PlayerSkills.Add(skill);
-        db.SaveChanges();
+        await db.SaveChangesAsync();
         return ToDto(skill);
     }
 
-    public PlayerSkillDto? Update(int id, UpdatePlayerSkillRequest request)
+    public async Task<PlayerSkillDto?> UpdateAsync(int id, UpdatePlayerSkillRequest request)
     {
-        var skill = db.PlayerSkills.Find(id);
+        var skill = await db.PlayerSkills.FindAsync(id);
         if (skill is null) return null;
 
         if (request.Position is not null) skill.Position = request.Position;
@@ -48,7 +49,7 @@ public class PlayerSkillsService(LoPartidetContext db) : IPlayerSkillsService
         if (request.JerseyNumber is not null) skill.JerseyNumber = request.JerseyNumber;
         if (request.Height is not null) skill.Height = request.Height;
 
-        db.SaveChanges();
+        await db.SaveChangesAsync();
         return ToDto(skill);
     }
 

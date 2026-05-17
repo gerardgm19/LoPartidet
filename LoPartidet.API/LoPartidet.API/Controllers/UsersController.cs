@@ -13,18 +13,18 @@ namespace LoPartidet.API.Controllers;
 public class UsersController(IUsersService usersService, IUserValidationService userValidationService) : ControllerBase
 {
     [HttpGet("me")]
-    public ActionResult<int> GetMe()
+    public async Task<ActionResult<int>> GetMe()
     {
         var identityId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (identityId is null) return Unauthorized();
-        var userId = usersService.GetUserIdByIdentityId(identityId);
+        var userId = await usersService.GetUserIdByIdentityIdAsync(identityId);
         return userId is 0 ? NotFound() : Ok(userId);
     }
 
     [HttpGet("{id}")]
-    public ActionResult<UserDto> GetById(int id)
+    public async Task<ActionResult<UserDto>> GetById(int id)
     {
-        var user = usersService.GetById(id);
+        var user = await usersService.GetByIdAsync(id);
         return user is null ? NotFound() : Ok(user);
     }
 
@@ -38,9 +38,9 @@ public class UsersController(IUsersService usersService, IUserValidationService 
     }
 
     [HttpPatch("{id}")]
-    public ActionResult<UserDto> UpdateUser(int id, UpdateUserRequest request)
+    public async Task<ActionResult<UserDto>> UpdateUser(int id, UpdateUserRequest request)
     {
-        var user = usersService.UpdateUser(id, request);
+        var user = await usersService.UpdateUserAsync(id, request);
         return user is null ? NotFound() : Ok(user);
     }
 
@@ -52,7 +52,7 @@ public class UsersController(IUsersService usersService, IUserValidationService 
         if (!validation.IsValid)
             return BadRequest(validation.Error);
 
-        var user = usersService.UpdateUser(id, request);
+        var user = await usersService.UpdateUserAsync(id, request);
         return user is null ? NotFound() : Ok(user);
     }
 }

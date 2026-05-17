@@ -9,5 +9,6 @@ public record MatchDto(
     string Location,
     int MaxPlayers,
     int DurationInMinutes,
-    MatchStatus Status
+    MatchStatus Status,
+    bool IsUserJoined
 );

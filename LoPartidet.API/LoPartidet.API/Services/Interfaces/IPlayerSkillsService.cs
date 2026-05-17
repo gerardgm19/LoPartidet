@@ -4,7 +4,7 @@ namespace LoPartidet.API.Services.Interfaces;
 
 public interface IPlayerSkillsService
 {
-    IEnumerable<PlayerSkillDto> GetByUserId(int userId);
-    PlayerSkillDto Create(CreatePlayerSkillRequest request);
-    PlayerSkillDto? Update(int id, UpdatePlayerSkillRequest request);
+    Task<IEnumerable<PlayerSkillDto>> GetByUserIdAsync(int userId);
+    Task<PlayerSkillDto> CreateAsync(CreatePlayerSkillRequest request);
+    Task<PlayerSkillDto?> UpdateAsync(int id, UpdatePlayerSkillRequest request);
 }
