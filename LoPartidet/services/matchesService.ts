@@ -16,6 +16,7 @@ export type Match = {
   maxPlayers: number;
   durationInMinutes: number;
   status: MatchStatus;
+  isUserJoined: boolean;
 };
 
 export type MatchPlayer = {

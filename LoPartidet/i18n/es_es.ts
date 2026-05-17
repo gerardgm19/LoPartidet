@@ -66,7 +66,7 @@ const es_es = {
   time: "Hora",
   organizer: "Organizador",
   format: "Formato",
-  joinedStatus: "Estás apuntado a este partido",
+  joinedStatus: "Inscrito",
   notJoinedStatus: "No estás apuntado a este partido",
   joinMatch: "Apuntarse al partido",
   joinMatchSuccess: "¡Te has apuntado al partido!",

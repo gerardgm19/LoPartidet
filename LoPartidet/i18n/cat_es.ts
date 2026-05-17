@@ -66,7 +66,7 @@ const cat_es = {
   time: "Hora",
   organizer: "Organitzador",
   format: "Format",
-  joinedStatus: "Estàs apuntat a aquest partit",
+  joinedStatus: "Inscrit",
   notJoinedStatus: "No estàs apuntat a aquest partit",
   joinMatch: "Apuntar-se al partit",
   joinMatchSuccess: "T'has apuntat al partit!",

@@ -45,6 +45,22 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
   typeText: { color: colors.muted, fontSize: 11, fontWeight: "700", letterSpacing: 0.3 },
   playersRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   playersText: { color: colors.muted, fontSize: 12 },
+  joinedBadge: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.green,
+    zIndex: 1,
+  },
+  joinedText: { color: colors.green, fontSize: 10, fontWeight: "700", letterSpacing: 0.4 },
   statusBadge: {
     flexDirection: "row",
     alignItems: "center",
@@ -70,6 +86,12 @@ export default function MatchCard({ match, onPress }: Props) {
       style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
       onPress={onPress}
     >
+      {match.isUserJoined && (
+        <View style={styles.joinedBadge}>
+          <Ionicons name="checkmark-circle" size={12} color={colors.green} />
+          <Text style={styles.joinedText}>{t.joinedStatus}</Text>
+        </View>
+      )}
       <View style={styles.locationRow}>
         <Ionicons name="location-sharp" size={16} color={colors.green} />
         <Text style={styles.locationText} numberOfLines={1}>{match.location}</Text>
