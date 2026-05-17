@@ -21,7 +21,7 @@ public class LoPartidetContext(DbContextOptions<LoPartidetContext> options) : Db
                   .HasForeignKey(um => um.UserId);
 
             entity.HasOne(um => um.Match)
-                  .WithMany()
+                  .WithMany(m => m.JoinedUsers)
                   .HasForeignKey(um => um.MatchId);
         });
 

@@ -23,8 +23,8 @@ public class MatchesService(LoPartidetContext db, IMatchValidationService valida
                 m.MaxPlayers,
                 m.DurationInMinutes,
                 m.Status,
-                false //m.JoinedUsers.Any(um => um.UserId == userId)
-                      ))
+                m.JoinedUsers.Any(um => um.UserId == userId)
+            ))
             .ToListAsync();
 
         return matches;
