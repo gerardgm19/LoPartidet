@@ -4,8 +4,9 @@ import { useThemeStore } from "@/store/themeStore";
 import { setUnauthorizedHandler } from "@/services/api";
 import { getMe } from "@/services/usersService";
 import { Stack, useRouter, useSegments } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import LoadingScreen from "@/components/LoadingScreen";
 
 function RootNavigator() {
   const { token, userId, isLoading, signOut, initialize, setUserId } = useAuthStore();
@@ -14,11 +15,14 @@ function RootNavigator() {
 
   const initLang = useLangStore((s) => s.initialize);
   const initTheme = useThemeStore((s) => s.initialize);
+  const [bootstrapped, setBootstrapped] = useState(false);
 
   useEffect(() => {
-    initialize();
-    initLang();
-    initTheme();
+    Promise.all([
+      Promise.resolve(initialize()),
+      Promise.resolve(initLang()),
+      Promise.resolve(initTheme()),
+    ]).finally(() => setBootstrapped(true));
   }, []);
 
   useEffect(() => {
@@ -45,6 +49,8 @@ function RootNavigator() {
       });
     }
   }, [token, isLoading, segments]);
+
+  if (!bootstrapped || isLoading) return <LoadingScreen />;
 
   return (
     <Stack>
