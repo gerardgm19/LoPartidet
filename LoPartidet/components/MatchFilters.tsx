@@ -3,7 +3,8 @@ import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { useThemeStore } from "@/store/themeStore";
 import { useLangStore } from "@/store/langStore";
 import { makeStyles } from "@/utils/makeStyles";
-import DateTimePickerField from "@/components/DateTimePickerField";
+import BirthdayPicker from "@/components/BirthdayPicker";
+import TimePicker from "@/components/TimePicker";
 import { MatchFilter } from "@/services/matchesService";
 
 type Props = {
@@ -11,6 +12,9 @@ type Props = {
   onApply: (next: MatchFilter) => void;
   onClear: () => void;
 };
+
+const CURRENT_YEAR = new Date().getFullYear();
+const DATE_YEARS = Array.from({ length: 6 }, (_, i) => CURRENT_YEAR + i);
 
 const useStyles = makeStyles((colors) => StyleSheet.create({
   panel: {
@@ -33,7 +37,8 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
     color: colors.white,
     fontSize: 14,
   },
-  row: { flexDirection: "row", gap: 8 },
+  field: { gap: 6 },
+  row: { flexDirection: "row", gap: 12 },
   half: { flex: 1, gap: 6 },
   joinedRow: { flexDirection: "row", gap: 8 },
   chip: {
@@ -55,31 +60,6 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
   btnText: { fontSize: 14, fontWeight: "700" },
 }));
 
-function toDateString(d?: Date): string | undefined {
-  if (!d) return undefined;
-  return d.toISOString().slice(0, 10); // YYYY-MM-DD
-}
-
-function toTimeString(d?: Date): string | undefined {
-  if (!d) return undefined;
-  const hh = String(d.getHours()).padStart(2, "0");
-  const mm = String(d.getMinutes()).padStart(2, "0");
-  return `${hh}:${mm}`;
-}
-
-function parseDate(s?: string): Date {
-  return s ? new Date(s) : new Date();
-}
-
-function parseTime(s?: string): Date {
-  const d = new Date();
-  if (s) {
-    const [hh, mm] = s.split(":").map(Number);
-    d.setHours(hh, mm, 0, 0);
-  }
-  return d;
-}
-
 export default function MatchFilters({ value, onApply, onClear }: Props) {
   const styles = useStyles();
   const colors = useThemeStore((s) => s.colors);
@@ -87,19 +67,19 @@ export default function MatchFilters({ value, onApply, onClear }: Props) {
 
   const [location, setLocation] = useState(value.location ?? "");
   const [joined, setJoined] = useState<boolean | undefined>(value.joined);
-  const [minDate, setMinDate] = useState<Date | undefined>(value.minDate ? parseDate(value.minDate) : undefined);
-  const [maxDate, setMaxDate] = useState<Date | undefined>(value.maxDate ? parseDate(value.maxDate) : undefined);
-  const [minTime, setMinTime] = useState<Date | undefined>(value.minTime ? parseTime(value.minTime) : undefined);
-  const [maxTime, setMaxTime] = useState<Date | undefined>(value.maxTime ? parseTime(value.maxTime) : undefined);
+  const [minDate, setMinDate] = useState<string | undefined>(value.minDate);
+  const [maxDate, setMaxDate] = useState<string | undefined>(value.maxDate);
+  const [minTime, setMinTime] = useState<string | undefined>(value.minTime);
+  const [maxTime, setMaxTime] = useState<string | undefined>(value.maxTime);
 
   function apply() {
     onApply({
       location: location.trim() || undefined,
       joined,
-      minDate: toDateString(minDate),
-      maxDate: toDateString(maxDate),
-      minTime: toTimeString(minTime),
-      maxTime: toTimeString(maxTime),
+      minDate,
+      maxDate,
+      minTime,
+      maxTime,
     });
   }
 
@@ -115,7 +95,7 @@ export default function MatchFilters({ value, onApply, onClear }: Props) {
 
   return (
     <View style={styles.panel}>
-      <View style={styles.half}>
+      <View style={styles.field}>
         <Text style={styles.label}>{t.filterLocation}</Text>
         <TextInput
           style={styles.input}
@@ -126,7 +106,7 @@ export default function MatchFilters({ value, onApply, onClear }: Props) {
         />
       </View>
 
-      <View style={styles.half}>
+      <View style={styles.field}>
         <Text style={styles.label}>{t.filterJoined}</Text>
         <View style={styles.joinedRow}>
           <Pressable
@@ -150,25 +130,46 @@ export default function MatchFilters({ value, onApply, onClear }: Props) {
         </View>
       </View>
 
-      <View style={styles.row}>
-        <View style={styles.half}>
-          <Text style={styles.label}>{t.filterMinDate}</Text>
-          <DateTimePickerField mode="date" value={minDate ?? new Date()} onChange={setMinDate} />
-        </View>
-        <View style={styles.half}>
-          <Text style={styles.label}>{t.filterMaxDate}</Text>
-          <DateTimePickerField mode="date" value={maxDate ?? new Date()} onChange={setMaxDate} />
-        </View>
+      <View style={styles.field}>
+        <Text style={styles.label}>{t.filterMinDate}</Text>
+        <BirthdayPicker
+          label={t.filterMinDate}
+          value={minDate}
+          onChange={setMinDate}
+          compact
+          yearOptions={DATE_YEARS}
+        />
+      </View>
+
+      <View style={styles.field}>
+        <Text style={styles.label}>{t.filterMaxDate}</Text>
+        <BirthdayPicker
+          label={t.filterMaxDate}
+          value={maxDate}
+          onChange={setMaxDate}
+          compact
+          yearOptions={DATE_YEARS}
+        />
       </View>
 
       <View style={styles.row}>
         <View style={styles.half}>
           <Text style={styles.label}>{t.filterMinTime}</Text>
-          <DateTimePickerField mode="time" value={minTime ?? new Date()} onChange={setMinTime} />
+          <TimePicker
+            label={t.filterMinTime}
+            value={minTime}
+            onChange={setMinTime}
+            minuteInterval={15}
+          />
         </View>
         <View style={styles.half}>
           <Text style={styles.label}>{t.filterMaxTime}</Text>
-          <DateTimePickerField mode="time" value={maxTime ?? new Date()} onChange={setMaxTime} />
+          <TimePicker
+            label={t.filterMaxTime}
+            value={maxTime}
+            onChange={setMaxTime}
+            minuteInterval={15}
+          />
         </View>
       </View>
 

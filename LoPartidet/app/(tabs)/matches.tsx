@@ -36,6 +36,21 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
   refreshBtn: {
     padding: 6,
   },
+  filterBtn: {
+    padding: 6,
+    position: "relative",
+  },
+  filterDot: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.green,
+    borderWidth: 1,
+    borderColor: colors.black,
+  },
   livePill: {
     flexDirection: "row",
     alignItems: "center",
@@ -126,6 +141,7 @@ export default function Matches() {
   const spin = spinAnim.interpolate({ inputRange: [0, 1], outputRange: ["0deg", "360deg"] });
 
   const liveCount = matches.filter((m) => m.status === MatchStatus.Live).length;
+  const hasActiveFilters = Object.values(filter).some((v) => v !== undefined && v !== "");
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -139,11 +155,16 @@ export default function Matches() {
             </View>
           )}
           <Pressable
-            style={styles.refreshBtn}
+            style={styles.filterBtn}
             onPress={() => setFiltersOpen((v) => !v)}
             accessibilityLabel={t.filters}
           >
-            <Ionicons name="options-outline" size={22} color={colors.white} />
+            <Ionicons
+              name="options-outline"
+              size={22}
+              color={hasActiveFilters ? colors.green : colors.white}
+            />
+            {hasActiveFilters && <View style={styles.filterDot} />}
           </Pressable>
           {Platform.OS === "web" && (
             <Pressable style={styles.refreshBtn} onPress={handleRefresh} accessibilityLabel={t.refresh}>
@@ -161,11 +182,13 @@ export default function Matches() {
           onApply={(next) => {
             setFilter(next);
             setLoading(true);
+            setFiltersOpen(false);
             fetchMatches(false, next);
           }}
           onClear={() => {
             setFilter({});
             setLoading(true);
+            setFiltersOpen(false);
             fetchMatches(false, {});
           }}
         />

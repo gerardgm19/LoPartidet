@@ -12,13 +12,11 @@ public class MatchesService(LoPartidetContext db, IMatchValidationService valida
     {
         var userId = await db.Users.Where(u => u.IdentityId == identityId).Select(u => u.Id).FirstOrDefaultAsync();
 
-        var query = db.Matches.Where(m => m.Date >= DateTime.UtcNow);
+        var minDate = filter.MinDate ?? DateTime.UtcNow;
+        var query = db.Matches.Where(m => m.Date >= minDate);
 
         if (!string.IsNullOrWhiteSpace(filter.Location))
             query = query.Where(m => m.Location.Contains(filter.Location));
-
-        if (filter.MinDate.HasValue)
-            query = query.Where(m => m.Date >= filter.MinDate.Value);
 
         if (filter.MaxDate.HasValue)
             query = query.Where(m => m.Date <= filter.MaxDate.Value);
