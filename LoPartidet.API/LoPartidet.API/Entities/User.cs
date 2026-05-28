@@ -1,3 +1,5 @@
+using LoPartidet.API.Models;
+
 namespace LoPartidet.API.Entities;
 
 public class User
@@ -11,6 +13,7 @@ public class User
     public string City { get; set; } = string.Empty;
     public DateTime? Birthday { get; set; }
 
+    public ICollection<UserRole> UserRoles { get; set; } = [];
     public ICollection<UserMatch> UserMatches { get; set; } = [];
     public ICollection<PlayerSkill> PlayerSkills { get; set; } = [];
 }
