@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LoPartidet.API.Services;
 
-public class UsersService(LoPartidetContext db, IIdentityManagerService identityManagerService) : IUsersService
+public class UsersService(LoPartidetContext db, IIdentityManagerService identityManagerService, IRequestInformation requestInformation) : IUsersService
 {
     public async Task<RegisterUserResponse?> RegisterUserAsync(RegisterUserDto request)
     {
@@ -52,10 +52,13 @@ public class UsersService(LoPartidetContext db, IIdentityManagerService identity
         return user is null ? null : ToDto(user);
     }
 
-    public async Task<UserMeDto?> GetMeByIdentityIdAsync(string identityId)
+    public async Task<UserMeDto?> GetMeByIdentityIdAsync()
     {
+        var userId = requestInformation.UserId;
+        if (userId is null) return null;
+
         var user = await db.Users
-            .Where(u => u.IdentityId == identityId)
+            .Where(u => u.Id == userId)
             .Select(u => new { u.Id, Roles = u.UserRoles.Select(ur => ur.Role).ToList() })
             .FirstOrDefaultAsync();
 

@@ -15,9 +15,7 @@ public class UsersController(IUsersService usersService, IUserValidationService 
     [HttpGet("me")]
     public async Task<ActionResult<UserMeDto>> GetMe()
     {
-        var identityId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (identityId is null) return Unauthorized();
-        var me = await usersService.GetMeByIdentityIdAsync(identityId);
+        var me = await usersService.GetMeByIdentityIdAsync();
         return me is null ? NotFound() : Ok(me);
     }
 
