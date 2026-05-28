@@ -4,6 +4,12 @@ import { Position } from "@/types/position";
 import { PreferredFoot } from "@/types/preferredFoot";
 import { SkillLevel } from "@/types/skillLevel";
 import { PlayerSpeed } from "@/types/playerSpeed";
+import { Role } from "@/types/role";
+
+export type UserMe = {
+  userId: number;
+  roles: Role[];
+};
 
 export type User = {
   id: number;
@@ -36,9 +42,9 @@ export type UpdateUserRequest = {
   height?: number;
 };
 
-export async function getMe(): Promise<User | undefined> {
+export async function getMe(): Promise<UserMe | undefined> {
   try {
-    const { data } = await apiClient.get<User>(`${API_BASE_URL}/users/me`);
+    const { data } = await apiClient.get<UserMe>(`${API_BASE_URL}/users/me`);
     return data;
   } catch (error: any) {
     if (error.response?.status === 404) return undefined;

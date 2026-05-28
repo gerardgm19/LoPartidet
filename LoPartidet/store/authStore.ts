@@ -43,8 +43,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
   signIn: async (token, userId) => {
     await storage.set(TOKEN_KEY, token);
-    // await storage.set(USER_ID_KEY, userId);
-    set({ token/*, userId*/ });
+    set({ token });
   },
 
   signOut: async () => {

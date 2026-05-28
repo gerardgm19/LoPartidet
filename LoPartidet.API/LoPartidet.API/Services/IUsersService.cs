@@ -5,7 +5,7 @@ namespace LoPartidet.API.Services;
 public interface IUsersService
 {
     Task<UserDto?> GetByIdAsync(int id);
-    Task<int> GetUserIdByIdentityIdAsync(string identityId);
+    Task<UserMeDto?> GetMeByIdentityIdAsync(string identityId);
     Task<RegisterUserResponse?> RegisterUserAsync(RegisterUserDto request);
     Task<UserDto> CreateUserAsync(CreateUserRequest request);
     Task<UserDto?> UpdateUserAsync(int id, UpdateUserRequest request);

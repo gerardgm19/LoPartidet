@@ -43,10 +43,19 @@ function RootNavigator() {
       router.replace("/(tabs)/matches");
     }
     if (token && !userId) {
-      getMe().then((userId) => {
-        console.log(userId)
-        if (userId) setUserId(userId.toString());
-      });
+      getMe()
+        .then(async (me) => {
+          if (me) {
+            setUserId(me.userId.toString());
+          } else {
+            await signOut();
+            router.replace("/(auth)/login");
+          }
+        })
+        .catch(async () => {
+          await signOut();
+          router.replace("/(auth)/login");
+        });
     }
   }, [token, isLoading, segments]);
 

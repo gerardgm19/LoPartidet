@@ -52,8 +52,15 @@ public class UsersService(LoPartidetContext db, IIdentityManagerService identity
         return user is null ? null : ToDto(user);
     }
 
-    public async Task<int> GetUserIdByIdentityIdAsync(string identityId) =>
-        await db.Users.Where(u => u.IdentityId == identityId).Select(u => u.Id).FirstOrDefaultAsync();
+    public async Task<UserMeDto?> GetMeByIdentityIdAsync(string identityId)
+    {
+        var user = await db.Users
+            .Where(u => u.IdentityId == identityId)
+            .Select(u => new { u.Id, Roles = u.UserRoles.Select(ur => ur.Role).ToList() })
+            .FirstOrDefaultAsync();
+
+        return user is null ? null : new UserMeDto(user.Id, user.Roles);
+    }
 
     public async Task<UserDto> CreateUserAsync(CreateUserRequest request)
     {
