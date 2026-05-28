@@ -9,7 +9,7 @@ namespace LoPartidet.API.Controllers;
 
 [ApiController]
 [Route("users")]
-[Authorize]
+[Authorize(Roles = nameof(Role.Player))]
 public class UsersController(IUsersService usersService, IUserValidationService userValidationService) : ControllerBase
 {
     [HttpGet("me")]

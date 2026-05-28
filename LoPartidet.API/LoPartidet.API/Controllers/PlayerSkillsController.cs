@@ -7,7 +7,7 @@ namespace LoPartidet.API.Controllers;
 
 [ApiController]
 [Route("player-skills")]
-[Authorize]
+[Authorize(Roles = nameof(Role.Player))]
 public class PlayerSkillsController(IPlayerSkillsService playerSkillsService) : ControllerBase
 {
     [HttpGet("user/{userId}")]

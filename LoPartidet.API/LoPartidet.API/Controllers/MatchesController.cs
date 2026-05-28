@@ -9,7 +9,7 @@ namespace LoPartidet.API.Controllers;
 
 [ApiController]
 [Route("matches")]
-[Authorize]
+[Authorize(Roles = nameof(Role.Player))]
 public class MatchesController(IMatchesService matchesService, IMatchValidationService validationService) : ControllerBase
 {
     [HttpGet]

@@ -26,6 +26,7 @@ See each sub-project's `CLAUDE.md` for detailed conventions.
 - Entity primary keys are always `int` auto-incremental (EF identity). Never assign Ids manually
 - Never return entity objects from controllers/services. Define a response DTO in `Models/`, map entity → DTO, return the DTO
 - Services registered as `Scoped`; screens call services, never raw DB logic
+- Authorization: `RemoteJwtAuthHandler` adds one `ClaimTypes.Role` claim per role from the user's `UserRoles`. Guard endpoints with `[Authorize(Roles = nameof(Role.X))]` (e.g. `nameof(Role.Player)`). For multiple roles: `[Authorize(Roles = nameof(Role.Admin) + "," + nameof(Role.Referee))]` (OR semantics). Do not introduce named policies for plain role checks
 
 ## Running
 

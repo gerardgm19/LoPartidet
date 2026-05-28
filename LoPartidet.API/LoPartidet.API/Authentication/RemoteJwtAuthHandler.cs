@@ -1,8 +1,10 @@
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
+using LoPartidet.API.Data;
 using LoPartidet.API.Models;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace LoPartidet.API.Authentication;
@@ -12,7 +14,8 @@ public class RemoteJwtAuthHandler(
     ILoggerFactory logger,
     UrlEncoder encoder,
     IHttpClientFactory httpClientFactory,
-    IConfiguration config)
+    IConfiguration config,
+    LoPartidetContext db)
     : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -46,11 +49,18 @@ public class RemoteJwtAuthHandler(
         if (result is null)
             return AuthenticateResult.Fail("Invalid response from IdentityManager");
 
-        var claims = new[]
+        var roles = await db.Users
+            .Where(u => u.IdentityId == result.UserId)
+            .Select(u => u.UserRoles.Select(ur => ur.Role).ToList())
+            .FirstOrDefaultAsync() ?? new List<Role>();
+
+        var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, result.UserId),
-            new Claim(ClaimTypes.Email, result.Email),
+            new(ClaimTypes.NameIdentifier, result.UserId),
+            new(ClaimTypes.Email, result.Email),
         };
+        claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r.ToString())));
+
         var ticket = new AuthenticationTicket(
             new ClaimsPrincipal(new ClaimsIdentity(claims, Scheme.Name)),
             Scheme.Name);
