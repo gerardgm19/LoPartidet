@@ -12,9 +12,6 @@ builder.Services.AddDbContext<LoPartidetContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection"),
         new MySqlServerVersion(new Version(8, 0))));
 
-builder.Services.AddHttpContextAccessor();
-
-builder.Services.AddScoped<IRequestInformation, RequestInformation>();
 builder.Services.AddScoped<IMatchesService, MatchesService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<IPlayerSkillsService, PlayerSkillsService>();
