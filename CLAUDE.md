@@ -27,6 +27,7 @@ See each sub-project's `CLAUDE.md` for detailed conventions.
 - Never return entity objects from controllers/services. Define a response DTO in `Models/`, map entity → DTO, return the DTO
 - Services registered as `Scoped`; screens call services, never raw DB logic
 - Authorization: `RemoteJwtAuthHandler` adds one `ClaimTypes.Role` claim per role from the user's `UserRoles`. Guard endpoints with `[Authorize(Roles = nameof(Role.X))]` (e.g. `nameof(Role.Player)`). For multiple roles: `[Authorize(Roles = nameof(Role.Admin) + "," + nameof(Role.Referee))]` (OR semantics). Do not introduce named policies for plain role checks
+- Logging: NLog wired in `Program.cs` via `nlog.config` (console + `logs/lopartidet-*.log` general + `logs/lopartidet-errors-*.log` errors-only). Inject `ILogger<T>` via primary constructor in controllers and services. **Always log errors** in `catch` blocks with `logger.LogError(ex, "...")` — never swallow exceptions silently. **Always log relevant information**: state-changing operations (create/update/delete), external calls (HTTP, IdentityManager), validation failures (`LogWarning`), and significant business events. Use structured logging with named placeholders (`logger.LogInformation("Match {MatchId} created by {UserId}", id, userId)`) — never string interpolation
 
 ## Running
 

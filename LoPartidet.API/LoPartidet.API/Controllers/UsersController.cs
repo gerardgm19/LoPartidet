@@ -37,12 +37,12 @@ public class UsersController(IUsersService usersService, IUserValidationService 
         return CreatedAtAction(nameof(GetById), new { id = result.UserId }, result);
     }
 
-    [HttpPatch("{id}")]
-    public async Task<ActionResult<UserDto>> UpdateUser(int id, UpdateUserRequest request)
-    {
-        var user = await usersService.UpdateUserAsync(id, request);
-        return user is null ? NotFound() : Ok(user);
-    }
+    //[HttpPatch("{id}")]
+    //public async Task<ActionResult<UserDto>> UpdateUser(int id, UpdateUserRequest request)
+    //{
+    //    var user = await usersService.UpdateUserAsync(id, request);
+    //    return user is null ? NotFound() : Ok(user);
+    //}
 
     [HttpPut("{id}")]
     public async Task<ActionResult<UserDto>> PutUser(int id, UpdateUserRequest request)
