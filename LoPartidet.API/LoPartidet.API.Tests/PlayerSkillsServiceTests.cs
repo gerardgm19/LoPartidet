@@ -1,6 +1,7 @@
 using LoPartidet.API.Data;
 using LoPartidet.API.Entities;
 using LoPartidet.API.Models;
+using LoPartidet.API.Models.Enums;
 using LoPartidet.API.Services;
 using Microsoft.EntityFrameworkCore;
 using Xunit;

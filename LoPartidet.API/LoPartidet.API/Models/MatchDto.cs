@@ -1,3 +1,5 @@
+using LoPartidet.API.Models.Enums;
+
 namespace LoPartidet.API.Models;
 
 public record MatchDto(

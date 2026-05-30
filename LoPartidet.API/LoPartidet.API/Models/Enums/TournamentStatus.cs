@@ -1,4 +1,4 @@
-namespace LoPartidet.API.Models;
+namespace LoPartidet.API.Models.Enums;
 
 public enum TournamentStatus
 {

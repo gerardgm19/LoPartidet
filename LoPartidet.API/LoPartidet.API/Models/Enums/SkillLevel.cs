@@ -1,3 +1,3 @@
-namespace LoPartidet.API.Models;
+namespace LoPartidet.API.Models.Enums;
 
 public enum SkillLevel { Beginner, Intermediate, Advanced, Expert }

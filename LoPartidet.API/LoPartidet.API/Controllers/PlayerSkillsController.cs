@@ -1,4 +1,5 @@
 using LoPartidet.API.Models;
+using LoPartidet.API.Models.Enums;
 using LoPartidet.API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

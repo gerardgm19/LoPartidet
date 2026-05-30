@@ -1,4 +1,4 @@
-﻿using LoPartidet.API.Models;
+﻿using LoPartidet.API.Models.Enums;
 
 namespace LoPartidet.API.Entities
 {

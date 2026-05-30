@@ -4,6 +4,7 @@ using LoPartidet.API.Entities;
 using LoPartidet.API.Models;
 using LoPartidet.API.Services.Validators;
 using Microsoft.EntityFrameworkCore;
+using LoPartidet.API.Models.Enums;
 
 namespace LoPartidet.API.Tests;
 
