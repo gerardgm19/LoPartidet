@@ -1,6 +1,7 @@
 using LoPartidet.API.Data;
 using LoPartidet.API.Entities;
 using LoPartidet.API.Models;
+using LoPartidet.API.Services.Interfaces;
 using LoPartidet.API.Services.Validators;
 using Microsoft.EntityFrameworkCore;
 

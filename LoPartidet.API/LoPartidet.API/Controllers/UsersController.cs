@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using LoPartidet.API.Models;
-using LoPartidet.API.Services;
+using LoPartidet.API.Services.Interfaces;
 using LoPartidet.API.Services.Validators;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

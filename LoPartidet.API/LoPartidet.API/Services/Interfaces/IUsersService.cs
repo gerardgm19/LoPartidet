@@ -1,6 +1,6 @@
 using LoPartidet.API.Models;
 
-namespace LoPartidet.API.Services;
+namespace LoPartidet.API.Services.Interfaces;
 
 public interface IUsersService
 {
