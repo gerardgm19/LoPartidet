@@ -87,7 +87,7 @@ public class LoPartidetContext(DbContextOptions<LoPartidetContext> options) : Db
             entity.Property(g => g.Name).HasMaxLength(50);
 
             entity.HasOne(g => g.Tournament)
-                  .WithMany()
+                  .WithMany(t => t.Groups)
                   .HasForeignKey(g => g.TournamentId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
@@ -103,7 +103,7 @@ public class LoPartidetContext(DbContextOptions<LoPartidetContext> options) : Db
                   .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(tm => tm.Tournament)
-                  .WithMany()
+                  .WithMany(t => t.Matches)
                   .HasForeignKey(tm => tm.TournamentId)
                   .OnDelete(DeleteBehavior.Cascade);
 
@@ -134,7 +134,7 @@ public class LoPartidetContext(DbContextOptions<LoPartidetContext> options) : Db
             entity.Property(t => t.Name).HasMaxLength(100);
 
             entity.HasOne(t => t.Tournament)
-                  .WithMany()
+                  .WithMany(tour => tour.Teams)
                   .HasForeignKey(t => t.TournamentId)
                   .OnDelete(DeleteBehavior.Cascade);
 

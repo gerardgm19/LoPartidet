@@ -15,4 +15,7 @@ public class Tournament
     public int QualifiedPerGroup { get; init; }
 
     public User CreatedBy { get; init; } = null!;
+    public ICollection<Team> Teams { get; set; } = [];
+    public ICollection<TournamentGroup> Groups { get; set; } = [];
+    public ICollection<TournamentMatch> Matches { get; set; } = [];
 }
