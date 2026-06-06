@@ -21,7 +21,10 @@ See each sub-project's `CLAUDE.md` for detailed conventions.
 - .NET 10 · Entity Framework Core 9 · MySQL 8
 - Layered: Controllers → Services (interface + impl) → DbContext
 - `Entities/` — EF Core entity classes (one per file)
-- `Models/` — enums and request/response records (one per file)
+- `Models/` — request/response records (one per file)
+- `Models/Enums/` — enums (one per file)
+- `Services/` — service implementations
+- `Services/Interfaces/` — service interfaces (one per file)
 - One type per file — every class, record, enum, and interface in its own `.cs` file
 - Entity primary keys are always `int` auto-incremental (EF identity). Never assign Ids manually
 - Never return entity objects from controllers/services. Define a response DTO in `Models/`, map entity → DTO, return the DTO
