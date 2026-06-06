@@ -1,8 +1,10 @@
+using LoPartidet.API.Models;
+
 namespace LoPartidet.API.Services.Interfaces;
 
 public interface ITournamentService
 {
-    Task CreateAsync();
+    Task<TournamentDto> CreateAsync(CreateTournamentDto request);
     Task AddTeamAsync(int tournamentId, int teamId);
     Task AssignTeamsToGroupsAsync(int tournamentId);
     Task StartTournamentAsync(int tournamentId);

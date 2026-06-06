@@ -30,6 +30,7 @@ try
     builder.Services.AddScoped<IUsersService, UsersService>();
     builder.Services.AddScoped<IPlayerSkillsService, PlayerSkillsService>();
     builder.Services.AddScoped<ITournamentService, TournamentService>();
+    builder.Services.AddScoped<ITournamentValidationService, TournamentValidationService>();
     builder.Services.AddScoped<IMatchValidationService, MatchValidationService>();
     builder.Services.AddScoped<IUserValidationService, UserValidationService>();
 
