@@ -18,7 +18,7 @@ public class MatchesService(LoPartidetContext db, IMatchValidationService valida
         var query = db.Matches.Where(m => m.Date >= minDate);
 
         if (!string.IsNullOrWhiteSpace(filter.Location))
-            query = query.Where(m => m.Location.Contains(filter.Location));
+            query = query.Where(m => m.Location.Name.Contains(filter.Location));
 
         if (filter.MaxDate.HasValue)
             query = query.Where(m => m.Date <= filter.MaxDate.Value);
@@ -49,7 +49,7 @@ public class MatchesService(LoPartidetContext db, IMatchValidationService valida
                 m.CreatedAt,
                 m.Type,
                 m.Date,
-                m.Location,
+                m.Location.Name,
                 m.MaxPlayers,
                 m.DurationInMinutes,
                 m.Status,
@@ -60,7 +60,9 @@ public class MatchesService(LoPartidetContext db, IMatchValidationService valida
 
     public async Task<MatchDetailDto?> GetByIdAsync(int id)
     {
-        var match = await db.Matches.FindAsync(id);
+        var match = await db.Matches
+            .Include(m => m.Location)
+            .FirstOrDefaultAsync(m => m.Id == id);
         if (match is null) return null;
 
         var players = await db.UserMatches
@@ -74,7 +76,7 @@ public class MatchesService(LoPartidetContext db, IMatchValidationService valida
             match.CreatedAt,
             match.Type,
             match.Date,
-            match.Location,
+            match.Location.Name,
             match.MaxPlayers,
             match.DurationInMinutes,
             match.Status,
@@ -88,11 +90,14 @@ public class MatchesService(LoPartidetContext db, IMatchValidationService valida
         if (!validation.IsValid)
             throw new InvalidOperationException(validation.Error);
 
+        // ToDo: select available Location from frontend
+        var locationId = await GetOrCreateLocationIdAsync(request.Location);
+
         var match = new Match
         {
             Type = request.Type,
             Date = request.Date,
-            Location = request.Location,
+            LocationId = locationId,
             CreatedById = int.Parse(request.CreatedBy),
             CreatedAt = DateTime.UtcNow,
             MaxPlayers = request.MaxPlayers,
@@ -105,8 +110,23 @@ public class MatchesService(LoPartidetContext db, IMatchValidationService valida
 
         return new MatchDto(
             match.Id, match.CreatedById, match.CreatedAt, match.Type,
-            match.Date, match.Location, match.MaxPlayers, match.DurationInMinutes, match.Status,
+            match.Date, request.Location, match.MaxPlayers, match.DurationInMinutes, match.Status,
             false);
+    }
+
+    private async Task<int> GetOrCreateLocationIdAsync(string name)
+    {
+        var trimmed = name.Trim();
+        var existing = await db.Locations
+            .Where(l => l.Name == trimmed)
+            .Select(l => (int?)l.Id)
+            .FirstOrDefaultAsync();
+        if (existing.HasValue) return existing.Value;
+
+        var location = new Location { Name = trimmed };
+        db.Locations.Add(location);
+        await db.SaveChangesAsync();
+        return location.Id;
     }
 
     public async Task<UserMatchDto> JoinMatchAsync(int matchId, int userId)

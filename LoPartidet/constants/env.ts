@@ -18,13 +18,13 @@ const apiAndroidIdentityIpUrl: string = "http://192.168.0.13:10002";
 const apiAndroidLoPartidetIprl: string = "http://192.168.0.13:10004";
 
 export const AUTH_BASE_URL: string = resolveUrl(
-  //apiIdentityLocalhostUrl,
-  apiAndroidIdentityIpUrl,
+  apiIdentityLocalhostUrl,
+  //apiAndroidIdentityIpUrl,
   apiIdentityCloudflareUrl,
 );
 
 export const API_BASE_URL: string = resolveUrl(
-  //apiLoPartidetLocalhostUrl,
-  apiAndroidLoPartidetIprl,
+  apiLoPartidetLocalhostUrl,
+  //apiAndroidLoPartidetIprl,
   apiLoPartidetCloudflareUrl,
 );

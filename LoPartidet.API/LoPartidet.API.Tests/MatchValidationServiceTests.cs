@@ -38,7 +38,7 @@ public class MatchValidationServiceTests
         Id = id,
         CreatedById = createdById,
         Date = DateTime.UtcNow.AddDays(1),
-        Location = "Field A",
+        LocationId = 1,
         Type = SportType.Fut5,
         MaxPlayers = maxPlayers,
         Status = status,

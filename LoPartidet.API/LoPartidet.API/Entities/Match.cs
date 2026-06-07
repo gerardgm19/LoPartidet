@@ -10,11 +10,12 @@ public class Match
     public DateTime CreatedAt { get; init; }
     public SportType Type { get; init; }
     public DateTime Date { get; init; }
-    public string Location { get; init; } = string.Empty;
+    public int LocationId { get; init; }
     public int MaxPlayers { get; init; }
     public int DurationInMinutes { get; init; }
     public MatchStatus Status { get; init; }
 
     public User CreatedBy { get; init; } = null!;
+    public Location Location { get; init; } = null!;
     public ICollection<UserMatch> JoinedUsers { get; set; } = [];
 }

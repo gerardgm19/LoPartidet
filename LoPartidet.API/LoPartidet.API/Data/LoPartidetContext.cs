@@ -16,6 +16,7 @@ public class LoPartidetContext(DbContextOptions<LoPartidetContext> options) : Db
     public DbSet<Team> Teams => Set<Team>();
     public DbSet<TeamMember> TeamMembers => Set<TeamMember>();
     public DbSet<MatchEvent> MatchEvents => Set<MatchEvent>();
+    public DbSet<Location> Locations => Set<Location>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -60,14 +61,24 @@ public class LoPartidetContext(DbContextOptions<LoPartidetContext> options) : Db
                   .HasForeignKey(ps => ps.UserId);
         });
 
+        modelBuilder.Entity<Location>(entity =>
+        {
+            entity.HasKey(l => l.Id);
+            entity.Property(l => l.Name).HasMaxLength(200);
+        });
+
         modelBuilder.Entity<Match>(entity =>
         {
             entity.HasKey(m => m.Id);
-            entity.Property(m => m.Location).HasMaxLength(200);
 
             entity.HasOne(m => m.CreatedBy)
                   .WithMany()
                   .HasForeignKey(m => m.CreatedById);
+
+            entity.HasOne(m => m.Location)
+                  .WithMany()
+                  .HasForeignKey(m => m.LocationId)
+                  .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Tournament>(entity =>
@@ -95,7 +106,11 @@ public class LoPartidetContext(DbContextOptions<LoPartidetContext> options) : Db
         modelBuilder.Entity<TournamentMatch>(entity =>
         {
             entity.HasKey(tm => tm.Id);
-            entity.Property(tm => tm.Location).HasMaxLength(200);
+
+            entity.HasOne(tm => tm.Location)
+                  .WithMany()
+                  .HasForeignKey(tm => tm.LocationId)
+                  .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(tm => tm.CreatedBy)
                   .WithMany()
