@@ -75,4 +75,26 @@ public class TournamentValidationService(LoPartidetContext db) : ITournamentVali
 
         return ValidationResult.Ok();
     }
+
+    public async Task<ValidationResult> ValidateAssignTeamsToGroupsAsync(AssignTeamsToGroupsValidationRequest request)
+    {
+        var tournament = await db.Tournaments.FindAsync(request.TournamentId);
+        if (tournament is null)
+            return ValidationResult.Fail("Tournament not found.");
+
+        if (tournament.Status != TournamentStatus.Draft)
+            return ValidationResult.Fail("Teams can only be assigned to groups while tournament is in Draft.");
+
+        var alreadyAssigned = await db.TournamentGroups
+            .AnyAsync(g => g.TournamentId == request.TournamentId && g.Phase == TournamentPhase.GroupStage);
+        if (alreadyAssigned)
+            return ValidationResult.Fail("Groups have already been assigned for this tournament.");
+
+        var teamCount = await db.Teams.CountAsync(t => t.TournamentId == request.TournamentId);
+        var capacity = tournament.GroupsCount * tournament.TeamsPerGroup;
+        if (teamCount != capacity)
+            return ValidationResult.Fail("Tournament team count does not match expected capacity.");
+
+        return ValidationResult.Ok();
+    }
 }

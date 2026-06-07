@@ -1,4 +1,4 @@
-namespace LoPartidet.API.Services.Validators;
+namespace LoPartidet.API.Services.Validators.Interfaces;
 
 public interface IUserValidationService
 {

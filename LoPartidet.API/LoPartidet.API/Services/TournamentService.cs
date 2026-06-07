@@ -4,10 +4,14 @@ using LoPartidet.API.Models;
 using LoPartidet.API.Models.Enums;
 using LoPartidet.API.Services.Interfaces;
 using LoPartidet.API.Services.Validators;
+using Microsoft.EntityFrameworkCore;
 
 namespace LoPartidet.API.Services;
 
-public class TournamentService(LoPartidetContext db, ITournamentValidationService validationService) : ITournamentService
+public class TournamentService(
+    LoPartidetContext db,
+    ITournamentValidationService validationService,
+    ILogger<TournamentService> logger) : ITournamentService
 {
     public async Task<TournamentDto> CreateAsync(CreateTournamentDto request)
     {
@@ -70,7 +74,50 @@ public class TournamentService(LoPartidetContext db, ITournamentValidationServic
         return new TeamDto(team.Id, team.Name, team.TournamentId, team.GroupId, team.CreatedById, memberIds);
     }
 
-    public Task AssignTeamsToGroupsAsync(int tournamentId) => throw new NotImplementedException();
+    public async Task<IReadOnlyList<GroupDto>> AssignTeamsToGroupsAsync(int tournamentId)
+    {
+        var validation = await validationService.ValidateAssignTeamsToGroupsAsync(
+            new AssignTeamsToGroupsValidationRequest(tournamentId));
+        if (!validation.IsValid)
+            throw new InvalidOperationException(validation.Error);
+
+        var tournament = await db.Tournaments.FirstAsync(t => t.Id == tournamentId);
+        var teams = await db.Teams.Where(t => t.TournamentId == tournamentId).ToListAsync();
+
+        var groups = Enumerable.Range(0, tournament.GroupsCount)
+            .Select(i => new TournamentGroup
+            {
+                Name = $"1.{i + 1}",
+                TournamentId = tournamentId,
+                Phase = TournamentPhase.GroupStage,
+            })
+            .ToList();
+
+        db.TournamentGroups.AddRange(groups);
+        await db.SaveChangesAsync();
+
+        var shuffled = teams.OrderBy(_ => Random.Shared.Next()).ToList();
+        var assignments = new Dictionary<int, List<int>>();
+        foreach (var group in groups)
+            assignments[group.Id] = [];
+
+        for (var i = 0; i < shuffled.Count; i++)
+        {
+            var group = groups[i % tournament.GroupsCount];
+            var team = shuffled[i];
+            db.Entry(team).Property(t => t.GroupId).CurrentValue = group.Id;
+            assignments[group.Id].Add(team.Id);
+        }
+        await db.SaveChangesAsync();
+
+        logger.LogInformation(
+            "Tournament {TournamentId} assigned {TeamCount} teams across {GroupCount} groups",
+            tournamentId, shuffled.Count, groups.Count);
+
+        return groups
+            .Select(g => (GroupDto)new GroupDto(g.Id, g.Name, g.TournamentId, assignments[g.Id]))
+            .ToList();
+    }
 
     public Task StartTournamentAsync(int tournamentId) => throw new NotImplementedException();
 

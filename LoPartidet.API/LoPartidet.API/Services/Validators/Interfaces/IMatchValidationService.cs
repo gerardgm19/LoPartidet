@@ -1,6 +1,6 @@
 using LoPartidet.API.Models;
 
-namespace LoPartidet.API.Services.Validators;
+namespace LoPartidet.API.Services.Validators.Interfaces;
 
 public interface IMatchValidationService
 {
