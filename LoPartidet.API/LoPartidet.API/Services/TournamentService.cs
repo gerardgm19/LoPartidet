@@ -42,7 +42,33 @@ public class TournamentService(LoPartidetContext db, ITournamentValidationServic
             tournament.QualifiedPerGroup);
     }
 
-    public Task AddTeamAsync(int tournamentId, int teamId) => throw new NotImplementedException();
+    public async Task<TeamDto> AddTeamAsync(int tournamentId, CreateTeamDto request)
+    {
+        var validation = await validationService.ValidateAddTeamAsync(
+            new AddTeamValidationRequest(tournamentId, request.Name, request.CreatedBy, request.MemberUserIds));
+        if (!validation.IsValid)
+            throw new InvalidOperationException(validation.Error);
+
+        var team = new Team
+        {
+            Name = request.Name,
+            TournamentId = tournamentId,
+            CreatedById = int.Parse(request.CreatedBy),
+        };
+
+        db.Teams.Add(team);
+        await db.SaveChangesAsync();
+
+        var memberIds = request.MemberUserIds ?? [];
+        if (memberIds.Count > 0)
+        {
+            foreach (var userId in memberIds)
+                db.TeamMembers.Add(new TeamMember { TeamId = team.Id, UserId = userId });
+            await db.SaveChangesAsync();
+        }
+
+        return new TeamDto(team.Id, team.Name, team.TournamentId, team.GroupId, team.CreatedById, memberIds);
+    }
 
     public Task AssignTeamsToGroupsAsync(int tournamentId) => throw new NotImplementedException();
 

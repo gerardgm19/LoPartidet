@@ -1,5 +1,6 @@
 using LoPartidet.API.Data;
 using LoPartidet.API.Models;
+using LoPartidet.API.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace LoPartidet.API.Services.Validators;
@@ -32,6 +33,45 @@ public class TournamentValidationService(LoPartidetContext db) : ITournamentVali
 
         if (request.QualifiedPerGroup > request.TeamsPerGroup)
             return ValidationResult.Fail("Qualified per group cannot exceed teams per group.");
+
+        return ValidationResult.Ok();
+    }
+
+    public async Task<ValidationResult> ValidateAddTeamAsync(AddTeamValidationRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Name))
+            return ValidationResult.Fail("Name is required.");
+
+        if (!int.TryParse(request.CreatedBy, out var userId))
+            return ValidationResult.Fail("Invalid user ID.");
+
+        var userExists = await db.Users.AnyAsync(u => u.Id == userId);
+        if (!userExists)
+            return ValidationResult.Fail("User not found.");
+
+        var tournament = await db.Tournaments.FindAsync(request.TournamentId);
+        if (tournament is null)
+            return ValidationResult.Fail("Tournament not found.");
+
+        if (tournament.Status != TournamentStatus.Draft)
+            return ValidationResult.Fail("Teams can only be added while tournament is in Draft.");
+
+        var teamCount = await db.Teams.CountAsync(t => t.TournamentId == request.TournamentId);
+        var capacity = tournament.GroupsCount * tournament.TeamsPerGroup;
+        if (teamCount >= capacity)
+            return ValidationResult.Fail("Tournament is full.");
+
+        var nameTaken = await db.Teams.AnyAsync(t => t.TournamentId == request.TournamentId && t.Name == request.Name);
+        if (nameTaken)
+            return ValidationResult.Fail("Team name already used in this tournament.");
+
+        if (request.MemberUserIds is { Count: > 0 } memberIds)
+        {
+            var distinctIds = memberIds.Distinct().ToList();
+            var foundCount = await db.Users.CountAsync(u => distinctIds.Contains(u.Id));
+            if (foundCount != distinctIds.Count)
+                return ValidationResult.Fail("One or more team members do not exist.");
+        }
 
         return ValidationResult.Ok();
     }
