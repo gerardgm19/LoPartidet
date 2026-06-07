@@ -1,6 +1,8 @@
 using LoPartidet.API.Data;
 using LoPartidet.API.Models;
 using LoPartidet.API.Models.Enums;
+using LoPartidet.API.Services.Validators.Interfaces;
+using LoPartidet.API.Services.Validators.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace LoPartidet.API.Services.Validators;

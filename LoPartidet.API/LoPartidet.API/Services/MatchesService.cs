@@ -3,6 +3,7 @@ using LoPartidet.API.Entities;
 using LoPartidet.API.Models;
 using LoPartidet.API.Services.Interfaces;
 using LoPartidet.API.Services.Validators;
+using LoPartidet.API.Services.Validators.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace LoPartidet.API.Services;

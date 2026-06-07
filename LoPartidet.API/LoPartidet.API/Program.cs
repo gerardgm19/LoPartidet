@@ -3,6 +3,7 @@ using LoPartidet.API.Data;
 using LoPartidet.API.Services;
 using LoPartidet.API.Services.Interfaces;
 using LoPartidet.API.Services.Validators;
+using LoPartidet.API.Services.Validators.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using NLog;

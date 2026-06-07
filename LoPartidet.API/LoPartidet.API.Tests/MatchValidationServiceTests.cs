@@ -3,6 +3,7 @@ using Xunit;
 using LoPartidet.API.Entities;
 using LoPartidet.API.Models;
 using LoPartidet.API.Services.Validators;
+using LoPartidet.API.Services.Validators.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using LoPartidet.API.Models.Enums;
 
