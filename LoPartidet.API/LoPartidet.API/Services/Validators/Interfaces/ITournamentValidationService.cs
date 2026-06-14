@@ -9,4 +9,5 @@ public interface ITournamentValidationService
     Task<ValidationResult> ValidateAddTeamAsync(AddTeamValidationRequest request);
     Task<ValidationResult> ValidateAssignTeamsToGroupsAsync(AssignTeamsToGroupsValidationRequest request);
     Task<ValidationResult> ValidateAddLocationAsync(AddTournamentLocationValidationRequest request);
+    Task<ValidationResult> ValidateStartTournamentAsync(StartTournamentValidationRequest request);
 }

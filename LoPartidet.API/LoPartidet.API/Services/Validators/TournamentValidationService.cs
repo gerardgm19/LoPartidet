@@ -100,6 +100,31 @@ public class TournamentValidationService(LoPartidetContext db) : ITournamentVali
         return ValidationResult.Ok();
     }
 
+    public async Task<ValidationResult> ValidateStartTournamentAsync(StartTournamentValidationRequest request)
+    {
+        var tournament = await db.Tournaments.FindAsync(request.TournamentId);
+        if (tournament is null)
+            return ValidationResult.Fail("Tournament not found.");
+
+        if (tournament.Status != TournamentStatus.Draft)
+            return ValidationResult.Fail("Only Draft tournaments can be started.");
+
+        var locationCount = await db.TournamentLocations.CountAsync(tl => tl.TournamentId == request.TournamentId);
+        if (locationCount < 1)
+            return ValidationResult.Fail("Tournament must have at least one location assigned.");
+
+        var teamCount = await db.Teams.CountAsync(t => t.TournamentId == request.TournamentId);
+        var capacity = tournament.GroupsCount * tournament.TeamsPerGroup;
+        if (teamCount != capacity)
+            return ValidationResult.Fail("Tournament team count does not match expected capacity.");
+
+        var bracketSize = tournament.GroupsCount * tournament.QualifiedPerGroup;
+        if (bracketSize is not (2 or 4 or 8 or 16))
+            return ValidationResult.Fail("Groups count multiplied by qualified per group must equal 2, 4, 8, or 16.");
+
+        return ValidationResult.Ok();
+    }
+
     public async Task<ValidationResult> ValidateAddLocationAsync(AddTournamentLocationValidationRequest request)
     {
         var tournamentExists = await db.Tournaments.AnyAsync(t => t.Id == request.TournamentId);

@@ -351,4 +351,129 @@ public class TournamentValidationServiceTests
         Assert.True(result.IsValid);
         Assert.Null(result.Error);
     }
+
+    // ValidateStartTournamentAsync
+
+    private static async Task SeedStartTournamentAsync(
+        LoPartidetContext db,
+        int tournamentId = 1,
+        int groupsCount = 2,
+        int teamsPerGroup = 2,
+        int qualifiedPerGroup = 2,
+        TournamentStatus status = TournamentStatus.Draft,
+        int locationCount = 1,
+        int? teamCount = null)
+    {
+        db.Users.Add(MakeUser(1));
+        db.Tournaments.Add(new Tournament
+        {
+            Id = tournamentId,
+            Name = "Cup",
+            SportType = SportType.Fut5,
+            Status = status,
+            CreatedById = 1,
+            StartDate = DateTime.UtcNow.AddDays(7),
+            GroupsCount = groupsCount,
+            TeamsPerGroup = teamsPerGroup,
+            QualifiedPerGroup = qualifiedPerGroup,
+        });
+        for (var i = 0; i < locationCount; i++)
+        {
+            db.Locations.Add(new Location { Id = i + 1, Name = $"Loc{i + 1}" });
+            db.TournamentLocations.Add(new TournamentLocation
+            {
+                Id = i + 1,
+                TournamentId = tournamentId,
+                LocationId = i + 1,
+            });
+        }
+        var teams = teamCount ?? groupsCount * teamsPerGroup;
+        for (var i = 0; i < teams; i++)
+            db.Teams.Add(new Team { Id = i + 1, Name = $"T{i + 1}", TournamentId = tournamentId, CreatedById = 1 });
+        await db.SaveChangesAsync();
+    }
+
+    [Fact]
+    public async Task ValidateStartTournament_NotFound_ReturnsFail()
+    {
+        using var db = CreateContext();
+        var svc = new TournamentValidationService(db);
+
+        var result = await svc.ValidateStartTournamentAsync(new StartTournamentValidationRequest(999));
+
+        Assert.False(result.IsValid);
+        Assert.Equal("Tournament not found.", result.Error);
+    }
+
+    [Fact]
+    public async Task ValidateStartTournament_NotDraft_ReturnsFail()
+    {
+        using var db = CreateContext();
+        await SeedStartTournamentAsync(db, status: TournamentStatus.GroupStage);
+        var svc = new TournamentValidationService(db);
+
+        var result = await svc.ValidateStartTournamentAsync(new StartTournamentValidationRequest(1));
+
+        Assert.False(result.IsValid);
+        Assert.Equal("Only Draft tournaments can be started.", result.Error);
+    }
+
+    [Fact]
+    public async Task ValidateStartTournament_NoLocations_ReturnsFail()
+    {
+        using var db = CreateContext();
+        await SeedStartTournamentAsync(db, locationCount: 0);
+        var svc = new TournamentValidationService(db);
+
+        var result = await svc.ValidateStartTournamentAsync(new StartTournamentValidationRequest(1));
+
+        Assert.False(result.IsValid);
+        Assert.Equal("Tournament must have at least one location assigned.", result.Error);
+    }
+
+    [Fact]
+    public async Task ValidateStartTournament_TeamCountMismatch_ReturnsFail()
+    {
+        using var db = CreateContext();
+        await SeedStartTournamentAsync(db, groupsCount: 2, teamsPerGroup: 2, teamCount: 3);
+        var svc = new TournamentValidationService(db);
+
+        var result = await svc.ValidateStartTournamentAsync(new StartTournamentValidationRequest(1));
+
+        Assert.False(result.IsValid);
+        Assert.Equal("Tournament team count does not match expected capacity.", result.Error);
+    }
+
+    [Theory]
+    [InlineData(3, 1)]
+    [InlineData(5, 1)]
+    [InlineData(3, 2)]
+    public async Task ValidateStartTournament_InvalidBracketSize_ReturnsFail(int groupsCount, int qualifiedPerGroup)
+    {
+        using var db = CreateContext();
+        await SeedStartTournamentAsync(db, groupsCount: groupsCount, teamsPerGroup: 2, qualifiedPerGroup: qualifiedPerGroup);
+        var svc = new TournamentValidationService(db);
+
+        var result = await svc.ValidateStartTournamentAsync(new StartTournamentValidationRequest(1));
+
+        Assert.False(result.IsValid);
+        Assert.Equal("Groups count multiplied by qualified per group must equal 2, 4, 8, or 16.", result.Error);
+    }
+
+    [Theory]
+    [InlineData(2, 1)]
+    [InlineData(2, 2)]
+    [InlineData(4, 2)]
+    [InlineData(8, 2)]
+    public async Task ValidateStartTournament_ValidRequest_ReturnsOk(int groupsCount, int qualifiedPerGroup)
+    {
+        using var db = CreateContext();
+        await SeedStartTournamentAsync(db, groupsCount: groupsCount, teamsPerGroup: 2, qualifiedPerGroup: qualifiedPerGroup);
+        var svc = new TournamentValidationService(db);
+
+        var result = await svc.ValidateStartTournamentAsync(new StartTournamentValidationRequest(1));
+
+        Assert.True(result.IsValid);
+        Assert.Null(result.Error);
+    }
 }

@@ -144,7 +144,21 @@ public class TournamentService(
         return new TournamentLocationDto(tournamentLocation.Id, tournamentLocation.TournamentId, tournamentLocation.LocationId);
     }
 
-    public Task StartTournamentAsync(int tournamentId) => throw new NotImplementedException();
+    public async Task StartTournamentAsync(int tournamentId)
+    {
+        var validation = await validationService.ValidateStartTournamentAsync(
+            new StartTournamentValidationRequest(tournamentId));
+        if (!validation.IsValid)
+            throw new InvalidOperationException(validation.Error);
+
+        await AssignTeamsToGroupsAsync(tournamentId);
+
+        var tournament = await db.Tournaments.FirstAsync(t => t.Id == tournamentId);
+        db.Entry(tournament).Property(t => t.Status).CurrentValue = TournamentStatus.GroupStage;
+        await db.SaveChangesAsync();
+
+        logger.LogInformation("Tournament {TournamentId} started", tournamentId);
+    }
 
     public Task GetStandingsAsync(int tournamentId) => throw new NotImplementedException();
 
