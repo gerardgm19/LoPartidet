@@ -99,4 +99,22 @@ public class TournamentValidationService(LoPartidetContext db) : ITournamentVali
 
         return ValidationResult.Ok();
     }
+
+    public async Task<ValidationResult> ValidateAddLocationAsync(AddTournamentLocationValidationRequest request)
+    {
+        var tournamentExists = await db.Tournaments.AnyAsync(t => t.Id == request.TournamentId);
+        if (!tournamentExists)
+            return ValidationResult.Fail("Tournament not found.");
+
+        var locationExists = await db.Locations.AnyAsync(l => l.Id == request.LocationId);
+        if (!locationExists)
+            return ValidationResult.Fail("Location not found.");
+
+        var duplicate = await db.TournamentLocations
+            .AnyAsync(tl => tl.TournamentId == request.TournamentId && tl.LocationId == request.LocationId);
+        if (duplicate)
+            return ValidationResult.Fail("Location already assigned to this tournament.");
+
+        return ValidationResult.Ok();
+    }
 }

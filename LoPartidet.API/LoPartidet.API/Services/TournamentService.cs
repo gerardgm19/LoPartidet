@@ -121,6 +121,29 @@ public class TournamentService(
             .ToList();
     }
 
+    public async Task<TournamentLocationDto> AddLocationAsync(int tournamentId, AddTournamentLocationDto request)
+    {
+        var validation = await validationService.ValidateAddLocationAsync(
+            new AddTournamentLocationValidationRequest(tournamentId, request.LocationId));
+        if (!validation.IsValid)
+            throw new InvalidOperationException(validation.Error);
+
+        var tournamentLocation = new TournamentLocation
+        {
+            TournamentId = tournamentId,
+            LocationId = request.LocationId,
+        };
+
+        db.TournamentLocations.Add(tournamentLocation);
+        await db.SaveChangesAsync();
+
+        logger.LogInformation(
+            "Location {LocationId} added to tournament {TournamentId}",
+            request.LocationId, tournamentId);
+
+        return new TournamentLocationDto(tournamentLocation.Id, tournamentLocation.TournamentId, tournamentLocation.LocationId);
+    }
+
     public Task StartTournamentAsync(int tournamentId) => throw new NotImplementedException();
 
     public Task GetStandingsAsync(int tournamentId) => throw new NotImplementedException();
