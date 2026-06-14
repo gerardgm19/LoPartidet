@@ -8,7 +8,7 @@ namespace LoPartidet.API.Controllers;
 
 [ApiController]
 [Route("tournaments")]
-[Authorize(Roles = nameof(Role.Player))]
+[Authorize(Roles = nameof(Role.Admin))]
 public class TournamentsController(ITournamentService tournamentService) : ControllerBase
 {
     [HttpPost("{id}/locations")]
