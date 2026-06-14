@@ -1,84 +1,16 @@
-using LoPartidet.API.Data;
-using LoPartidet.API.Entities;
 using LoPartidet.API.Models;
 using LoPartidet.API.Models.Enums;
-using LoPartidet.API.Services;
-using Microsoft.EntityFrameworkCore;
 using Xunit;
 
-namespace LoPartidet.API.Tests;
+namespace LoPartidet.API.Tests.PlayerSkillsService;
 
-public class PlayerSkillsServiceTests
+public class UpdateAsyncTests : PlayerSkillsServiceTestBase
 {
-    private static LoPartidetContext CreateContext()
-    {
-        var options = new DbContextOptionsBuilder<LoPartidetContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-        return new LoPartidetContext(options);
-    }
-
-    private static User MakeUser(int id = 1) => new()
-    {
-        Id = id,
-        Name = "Test",
-        Surname = "User",
-        Nickname = "tuser",
-        Email = "test@test.com",
-        City = "Barcelona",
-    };
-
-    private static PlayerSkill MakeSkill(int id, int userId) => new()
-    {
-        Id = id,
-        UserId = userId,
-        Position = Position.FWD,
-        PreferredFoot = PreferredFoot.Right,
-        SkillLevel = SkillLevel.Intermediate,
-        Speed = PlayerSpeed.Fast,
-        JerseyNumber = 10,
-        Height = 180,
-    };
-
-    // GetByUserId
-
-    [Fact]
-    public async Task GetByUserId_NoSkills_ReturnsEmpty()
-    {
-        using var db = CreateContext();
-        var svc = new PlayerSkillsService(db);
-
-        var result = await svc.GetByUserIdAsync(1);
-
-        Assert.Empty(result);
-    }
-
-    [Fact]
-    public async Task GetByUserId_HasSkills_ReturnsSkillsForUser()
-    {
-        using var db = CreateContext();
-        db.Users.Add(MakeUser(1));
-        db.Users.Add(MakeUser(2));
-        await db.SaveChangesAsync();
-        db.PlayerSkills.Add(MakeSkill(1, 1));
-        db.PlayerSkills.Add(MakeSkill(2, 1));
-        db.PlayerSkills.Add(MakeSkill(3, 2));
-        await db.SaveChangesAsync();
-        var svc = new PlayerSkillsService(db);
-
-        var result = (await svc.GetByUserIdAsync(1)).ToList();
-
-        Assert.Equal(2, result.Count);
-        Assert.All(result, s => Assert.Equal(1, s.UserId));
-    }
-
-    // Update
-
     [Fact]
     public async Task Update_SkillNotFound_ReturnsNull()
     {
         using var db = CreateContext();
-        var svc = new PlayerSkillsService(db);
+        var svc = new API.Services.PlayerSkillsService(db);
         var request = new UpdatePlayerSkillRequest(Position.GK, null, null, null, null, null);
 
         var result = await svc.UpdateAsync(999, request);
@@ -94,7 +26,7 @@ public class PlayerSkillsServiceTests
         await db.SaveChangesAsync();
         db.PlayerSkills.Add(MakeSkill(1, 1));
         await db.SaveChangesAsync();
-        var svc = new PlayerSkillsService(db);
+        var svc = new API.Services.PlayerSkillsService(db);
         var request = new UpdatePlayerSkillRequest(
             Position.GK, PreferredFoot.Left, SkillLevel.Expert, PlayerSpeed.Elite, 1, 190);
 
@@ -117,7 +49,7 @@ public class PlayerSkillsServiceTests
         await db.SaveChangesAsync();
         db.PlayerSkills.Add(MakeSkill(1, 1));
         await db.SaveChangesAsync();
-        var svc = new PlayerSkillsService(db);
+        var svc = new API.Services.PlayerSkillsService(db);
         var request = new UpdatePlayerSkillRequest(Position.DEF, null, null, null, null, null);
 
         var result = await svc.UpdateAsync(1, request);
@@ -139,7 +71,7 @@ public class PlayerSkillsServiceTests
         await db.SaveChangesAsync();
         db.PlayerSkills.Add(MakeSkill(1, 1));
         await db.SaveChangesAsync();
-        var svc = new PlayerSkillsService(db);
+        var svc = new API.Services.PlayerSkillsService(db);
         var request = new UpdatePlayerSkillRequest(null, null, SkillLevel.Expert, null, null, 195);
 
         await svc.UpdateAsync(1, request);
