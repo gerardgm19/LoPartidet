@@ -18,4 +18,5 @@ public class Tournament
     public ICollection<Team> Teams { get; set; } = [];
     public ICollection<TournamentGroup> Groups { get; set; } = [];
     public ICollection<TournamentMatch> Matches { get; set; } = [];
+    public ICollection<TournamentLocation> Locations { get; set; } = [];
 }

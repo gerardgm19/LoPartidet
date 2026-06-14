@@ -17,6 +17,7 @@ public class LoPartidetContext(DbContextOptions<LoPartidetContext> options) : Db
     public DbSet<TeamMember> TeamMembers => Set<TeamMember>();
     public DbSet<MatchEvent> MatchEvents => Set<MatchEvent>();
     public DbSet<Location> Locations => Set<Location>();
+    public DbSet<TournamentLocation> TournamentLocations => Set<TournamentLocation>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -65,6 +66,21 @@ public class LoPartidetContext(DbContextOptions<LoPartidetContext> options) : Db
         {
             entity.HasKey(l => l.Id);
             entity.Property(l => l.Name).HasMaxLength(200);
+        });
+
+        modelBuilder.Entity<TournamentLocation>(entity =>
+        {
+            entity.HasKey(tl => tl.Id);
+
+            entity.HasOne(tl => tl.Tournament)
+                  .WithMany(t => t.Locations)
+                  .HasForeignKey(tl => tl.TournamentId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(tl => tl.Location)
+                  .WithMany()
+                  .HasForeignKey(tl => tl.LocationId)
+                  .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Match>(entity =>
