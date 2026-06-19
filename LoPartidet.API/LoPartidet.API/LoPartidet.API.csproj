@@ -25,4 +25,8 @@
     <Content Update="nlog.config" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="LoPartidet.API.Tests" />
+  </ItemGroup>
+
 </Project>

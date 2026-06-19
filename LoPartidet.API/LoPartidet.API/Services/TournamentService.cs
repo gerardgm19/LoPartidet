@@ -15,6 +15,10 @@ public class TournamentService(
     ITournamentValidationService validationService,
     ILogger<TournamentService> logger) : ITournamentService
 {
+    private const int HalfDurationMinutes = 20;
+    private const int HalfTimeDurationMinutes = 5;
+    private const int GapBetweenMatchesMinutes = 20;
+
     public async Task<TournamentDto> CreateAsync(CreateTournamentDto request)
     {
         var validation = await validationService.ValidateCreateTournamentAsync(request);
@@ -153,11 +157,66 @@ public class TournamentService(
 
         await AssignTeamsToGroupsAsync(tournamentId);
 
+        var matches = await CreateGroupStageMatches(tournamentId);
+        db.TournamentMatches.AddRange(matches);
+
         var tournament = await db.Tournaments.FirstAsync(t => t.Id == tournamentId);
         db.Entry(tournament).Property(t => t.Status).CurrentValue = TournamentStatus.GroupStage;
         await db.SaveChangesAsync();
 
         logger.LogInformation("Tournament {TournamentId} started", tournamentId);
+    }
+
+    internal async Task<List<TournamentMatch>> CreateGroupStageMatches(int tournamentId)
+    {
+        var tournament = await db.Tournaments.FirstAsync(t => t.Id == tournamentId);
+        var groups = await db.TournamentGroups
+            .Where(g => g.TournamentId == tournamentId)
+            .ToListAsync();
+        var teams = await db.Teams
+            .Where(t => t.TournamentId == tournamentId)
+            .ToListAsync();
+        var locationIds = await db.TournamentLocations
+            .Where(tl => tl.TournamentId == tournamentId)
+            .Select(tl => tl.LocationId)
+            .ToListAsync();
+
+        var matchups = new List<(int GroupId, int TeamAId, int TeamBId)>();
+        foreach (var group in groups)
+        {
+            var groupTeams = teams.Where(t => t.GroupId == group.Id).ToList();
+            for (var i = 0; i < groupTeams.Count; i++)
+                for (var j = i + 1; j < groupTeams.Count; j++)
+                    matchups.Add((group.Id, groupTeams[i].Id, groupTeams[j].Id));
+        }
+
+        var slotCadence = HalfDurationMinutes * 2 + HalfTimeDurationMinutes + GapBetweenMatchesMinutes;
+        var createdAt = DateTime.UtcNow;
+        var matches = new List<TournamentMatch>(matchups.Count);
+        for (var k = 0; k < matchups.Count; k++)
+        {
+            var (groupId, teamAId, teamBId) = matchups[k];
+            var locationIndex = k % locationIds.Count;
+            var slotIndex = k / locationIds.Count;
+            matches.Add(new TournamentMatch
+            {
+                TournamentId = tournamentId,
+                GroupId = groupId,
+                TeamAId = teamAId,
+                TeamBId = teamBId,
+                LocationId = locationIds[locationIndex],
+                Date = tournament.StartDate.AddMinutes(slotIndex * slotCadence),
+                Status = MatchStatus.Scheduled,
+                CreatedById = tournament.CreatedById,
+                CreatedAt = createdAt,
+                HalfDuration = HalfDurationMinutes,
+                HalfTimeDuration = HalfTimeDurationMinutes,
+            });
+        }
+        logger.LogInformation(
+            "Tournament {TournamentId} started with {MatchCount} matches across {LocationCount} locations",
+            tournamentId, matches.Count, locationIds.Count);
+        return matches;
     }
 
     public Task GetStandingsAsync(int tournamentId) => throw new NotImplementedException();
