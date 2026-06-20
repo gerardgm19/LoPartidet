@@ -53,6 +53,8 @@ public abstract class TournamentServiceTestBase
             GroupsCount = groupsCount,
             TeamsPerGroup = teamsPerGroup,
             QualifiedPerGroup = qualifiedPerGroup,
+            IsSingleElimination = true,
+            HasThirdPlaceMatch = true,
         });
         for (var i = 0; i < locationCount; i++)
         {
@@ -105,6 +107,8 @@ public abstract class TournamentServiceTestBase
             GroupsCount = groupsCount,
             TeamsPerGroup = teamsPerGroup,
             QualifiedPerGroup = 2,
+            IsSingleElimination = true,
+            HasThirdPlaceMatch = true,
         });
         for (var i = 0; i < locationCount; i++)
         {

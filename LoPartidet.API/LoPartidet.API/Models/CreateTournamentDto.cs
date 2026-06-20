@@ -9,5 +9,7 @@ public record CreateTournamentDto(
     DateTime StartDate,
     int GroupsCount,
     int TeamsPerGroup,
-    int QualifiedPerGroup
+    int QualifiedPerGroup,
+    bool IsSingleElimination,
+    bool HasThirdPlaceMatch
 );

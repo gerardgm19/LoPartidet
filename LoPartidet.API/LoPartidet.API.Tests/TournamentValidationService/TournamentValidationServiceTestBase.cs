@@ -43,6 +43,8 @@ public abstract class TournamentValidationServiceTestBase
         GroupsCount = groupsCount,
         TeamsPerGroup = teamsPerGroup,
         QualifiedPerGroup = 2,
+        IsSingleElimination = true,
+        HasThirdPlaceMatch = true,
     };
 
     protected static AddTeamValidationRequest MakeAddTeamRequest(
@@ -58,9 +60,11 @@ public abstract class TournamentValidationServiceTestBase
         DateTime? startDate = null,
         int groupsCount = 2,
         int teamsPerGroup = 4,
-        int qualifiedPerGroup = 2) =>
+        int qualifiedPerGroup = 2,
+        bool isSingleElimination = true,
+        bool hasThirdPlaceMatch = true) =>
         new(name, SportType.Fut5, createdBy, startDate ?? DateTime.UtcNow.AddDays(7),
-            groupsCount, teamsPerGroup, qualifiedPerGroup);
+            groupsCount, teamsPerGroup, qualifiedPerGroup, isSingleElimination, hasThirdPlaceMatch);
 
     protected static async Task SeedStartTournamentAsync(
         LoPartidetContext db,
@@ -84,6 +88,8 @@ public abstract class TournamentValidationServiceTestBase
             GroupsCount = groupsCount,
             TeamsPerGroup = teamsPerGroup,
             QualifiedPerGroup = qualifiedPerGroup,
+            IsSingleElimination = true,
+            HasThirdPlaceMatch = true,
         });
         for (var i = 0; i < locationCount; i++)
         {

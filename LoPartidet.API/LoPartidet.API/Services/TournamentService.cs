@@ -35,6 +35,8 @@ public class TournamentService(
             GroupsCount = request.GroupsCount,
             TeamsPerGroup = request.TeamsPerGroup,
             QualifiedPerGroup = request.QualifiedPerGroup,
+            IsSingleElimination = request.IsSingleElimination,
+            HasThirdPlaceMatch = request.HasThirdPlaceMatch,
         };
 
         db.Tournaments.Add(tournament);
@@ -49,7 +51,9 @@ public class TournamentService(
             tournament.StartDate,
             tournament.GroupsCount,
             tournament.TeamsPerGroup,
-            tournament.QualifiedPerGroup);
+            tournament.QualifiedPerGroup,
+            tournament.IsSingleElimination,
+            tournament.HasThirdPlaceMatch);
     }
 
     public async Task<TeamDto> AddTeamAsync(int tournamentId, CreateTeamDto request)

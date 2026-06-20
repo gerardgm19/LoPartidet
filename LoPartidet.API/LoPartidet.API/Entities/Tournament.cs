@@ -13,6 +13,8 @@ public class Tournament
     public int GroupsCount { get; init; }
     public int TeamsPerGroup { get; init; }
     public int QualifiedPerGroup { get; init; }
+    public bool IsSingleElimination { get; init; }
+    public bool HasThirdPlaceMatch { get; init; }
 
     public User CreatedBy { get; init; } = null!;
     public ICollection<Team> Teams { get; set; } = [];

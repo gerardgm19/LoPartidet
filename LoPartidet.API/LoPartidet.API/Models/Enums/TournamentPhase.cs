@@ -6,5 +6,6 @@ public enum TournamentPhase
     RoundOf16,
     QuarterFinal,
     SemiFinal,
-    Final
+    Final,
+    ThirdPlace
 }
