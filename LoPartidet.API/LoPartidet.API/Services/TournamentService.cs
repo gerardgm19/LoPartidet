@@ -180,9 +180,9 @@ public class TournamentService(
         var teams = await db.Teams
             .Where(t => t.TournamentId == tournamentId)
             .ToListAsync();
-        var locationIds = await db.TournamentLocations
+        var tournamentLocationIds = await db.TournamentLocations
             .Where(tl => tl.TournamentId == tournamentId)
-            .Select(tl => tl.LocationId)
+            .Select(tl => tl.Id)
             .ToListAsync();
 
         var matchups = new List<(int GroupId, int TeamAId, int TeamBId)>();
@@ -200,15 +200,15 @@ public class TournamentService(
         for (var k = 0; k < matchups.Count; k++)
         {
             var (groupId, teamAId, teamBId) = matchups[k];
-            var locationIndex = k % locationIds.Count;
-            var slotIndex = k / locationIds.Count;
+            var locationIndex = k % tournamentLocationIds.Count;
+            var slotIndex = k / tournamentLocationIds.Count;
             matches.Add(new TournamentMatch
             {
                 TournamentId = tournamentId,
                 GroupId = groupId,
                 TeamAId = teamAId,
                 TeamBId = teamBId,
-                LocationId = locationIds[locationIndex],
+                TournamentLocationId = tournamentLocationIds[locationIndex],
                 Date = tournament.StartDate.AddMinutes(slotIndex * slotCadence),
                 Status = MatchStatus.Scheduled,
                 CreatedById = tournament.CreatedById,
@@ -219,25 +219,23 @@ public class TournamentService(
         }
         logger.LogInformation(
             "Tournament {TournamentId} started with {MatchCount} matches across {LocationCount} locations",
-            tournamentId, matches.Count, locationIds.Count);
+            tournamentId, matches.Count, tournamentLocationIds.Count);
         return matches;
     }
 
     internal async Task<List<TournamentMatch>> CreateTemplateBracketMatches(int tournamentId)
     {
         var tournament = await db.Tournaments.FirstAsync(t => t.Id == tournamentId);
-        var locationIds = await db.TournamentLocations
+        var tournamentLocationIds = await db.TournamentLocations
             .Where(tl => tl.TournamentId == tournamentId)
-            .Select(tl => tl.LocationId)
+            .Select(tl => tl.Id)
             .ToListAsync();
 
         var bracketSize = tournament.GroupsCount * tournament.QualifiedPerGroup;
         var rounds = BuildRoundList(bracketSize, tournament.HasThirdPlaceMatch);
 
-        var groupStageMatchCount = tournament.GroupsCount
-            * tournament.TeamsPerGroup * (tournament.TeamsPerGroup - 1) / 2;
-        var groupStageSlotsUsed = (int)Math.Ceiling(
-            (double)groupStageMatchCount / locationIds.Count);
+        var groupStageMatchCount = tournament.GroupsCount * tournament.TeamsPerGroup * (tournament.TeamsPerGroup - 1) / 2;
+        var groupStageSlotsUsed = (int)Math.Ceiling((double)groupStageMatchCount / tournamentLocationIds.Count);
         var slotCadence = HalfDurationMinutes * 2 + HalfTimeDurationMinutes + GapBetweenMatchesMinutes;
         var createdAt = DateTime.UtcNow;
 
@@ -262,14 +260,15 @@ public class TournamentService(
 
             for (var k = 0; k < round.MatchCount; k++)
             {
-                var locationIndex = k % locationIds.Count;
-                var subSlot = k / locationIds.Count;
+                var locationIndex = k % tournamentLocationIds.Count;
+                var subSlot = k / tournamentLocationIds.Count;
+                var matchDate = tournament.StartDate.AddMinutes((currentSlot + subSlot) * slotCadence);
                 matches.Add(new TournamentMatch
                 {
                     TournamentId = tournamentId,
                     GroupId = roundGroups[k].Id,
-                    LocationId = locationIds[locationIndex],
-                    Date = tournament.StartDate.AddMinutes((currentSlot + subSlot) * slotCadence),
+                    TournamentLocationId = tournamentLocationIds[locationIndex],
+                    Date = matchDate,
                     Status = MatchStatus.Scheduled,
                     CreatedById = tournament.CreatedById,
                     CreatedAt = createdAt,
@@ -277,7 +276,7 @@ public class TournamentService(
                     HalfTimeDuration = HalfTimeDurationMinutes,
                 });
             }
-            currentSlot += (int)Math.Ceiling((double)round.MatchCount / locationIds.Count);
+            currentSlot += (int)Math.Ceiling((double)round.MatchCount / tournamentLocationIds.Count);
         }
 
         logger.LogInformation(

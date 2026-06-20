@@ -8,7 +8,7 @@ public class TournamentMatch
     public int CreatedById { get; init; }
     public DateTime CreatedAt { get; init; }
     public DateTime Date { get; init; }
-    public int LocationId { get; init; }
+    public int TournamentLocationId { get; init; }
     public MatchStatus Status { get; init; }
 
     public int TournamentId { get; init; }
@@ -21,7 +21,7 @@ public class TournamentMatch
     public int HalfTimeDuration { get; init; }
 
     public User CreatedBy { get; init; } = null!;
-    public Location Location { get; init; } = null!;
+    public TournamentLocation TournamentLocation { get; init; } = null!;
     public Tournament Tournament { get; init; } = null!;
     public TournamentGroup? Group { get; init; }
     public Team? TeamA { get; init; }

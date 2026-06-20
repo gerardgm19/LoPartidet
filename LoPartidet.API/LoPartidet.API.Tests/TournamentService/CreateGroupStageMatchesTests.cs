@@ -56,7 +56,7 @@ public class CreateGroupStageMatchesTests : TournamentServiceTestBase
         for (var i = 0; i < ordered.Count; i++)
         {
             Assert.Equal(startDate.AddMinutes(i * SlotCadenceMinutes), ordered[i].Date);
-            Assert.Equal(1, ordered[i].LocationId);
+            Assert.Equal(1, ordered[i].TournamentLocationId);
         }
     }
 
@@ -76,11 +76,11 @@ public class CreateGroupStageMatchesTests : TournamentServiceTestBase
             var expectedDate = startDate.AddMinutes(slot * SlotCadenceMinutes);
             var inSlot = matches.Where(m => m.Date == expectedDate).ToList();
             Assert.Equal(2, inSlot.Count);
-            Assert.Contains(inSlot, m => m.LocationId == 1);
-            Assert.Contains(inSlot, m => m.LocationId == 2);
+            Assert.Contains(inSlot, m => m.TournamentLocationId == 1);
+            Assert.Contains(inSlot, m => m.TournamentLocationId == 2);
         }
-        Assert.Equal(3, matches.Count(m => m.LocationId == 1));
-        Assert.Equal(3, matches.Count(m => m.LocationId == 2));
+        Assert.Equal(3, matches.Count(m => m.TournamentLocationId == 1));
+        Assert.Equal(3, matches.Count(m => m.TournamentLocationId == 2));
     }
 
     [Fact]

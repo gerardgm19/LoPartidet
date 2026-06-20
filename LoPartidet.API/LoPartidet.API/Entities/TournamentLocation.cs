@@ -8,4 +8,5 @@ public class TournamentLocation
 
     public Tournament Tournament { get; init; } = null!;
     public Location Location { get; init; } = null!;
+    public ICollection<TournamentMatch> Matches { get; set; } = [];
 }

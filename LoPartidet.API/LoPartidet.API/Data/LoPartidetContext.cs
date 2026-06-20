@@ -123,9 +123,9 @@ public class LoPartidetContext(DbContextOptions<LoPartidetContext> options) : Db
         {
             entity.HasKey(tm => tm.Id);
 
-            entity.HasOne(tm => tm.Location)
-                  .WithMany()
-                  .HasForeignKey(tm => tm.LocationId)
+            entity.HasOne(tm => tm.TournamentLocation)
+                  .WithMany(tl => tl.Matches)
+                  .HasForeignKey(tm => tm.TournamentLocationId)
                   .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(tm => tm.CreatedBy)

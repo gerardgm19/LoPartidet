@@ -179,7 +179,7 @@ public class CreateTemplateBracketMatchesTests : TournamentServiceTestBase
         var ordered = matches.OrderBy(m => m.Date).ToList();
         for (var i = 0; i < ordered.Count; i++)
             Assert.Equal(StartDate.AddMinutes((2 + i) * SlotCadenceMinutes), ordered[i].Date);
-        Assert.All(matches, m => Assert.Equal(1, m.LocationId));
+        Assert.All(matches, m => Assert.Equal(1, m.TournamentLocationId));
     }
 
     [Fact]
