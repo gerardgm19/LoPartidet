@@ -31,7 +31,8 @@ public abstract class TournamentServiceTestBase
         int teamsPerGroup = 3,
         int qualifiedPerGroup = 2,
         int locationCount = 1,
-        DateTime? startDate = null)
+        DateTime? startDate = null,
+        bool hasThirdPlaceMatch = true)
     {
         db.Users.Add(new User
         {
@@ -54,7 +55,7 @@ public abstract class TournamentServiceTestBase
             TeamsPerGroup = teamsPerGroup,
             QualifiedPerGroup = qualifiedPerGroup,
             IsSingleElimination = true,
-            HasThirdPlaceMatch = true,
+            HasThirdPlaceMatch = hasThirdPlaceMatch,
         });
         for (var i = 0; i < locationCount; i++)
         {
