@@ -22,7 +22,8 @@ public class CreateTemplateBracketMatchesTests : TournamentServiceTestBase
         await SeedReadyToStartAsync(db, groupsCount: 1, teamsPerGroup: 2, qualifiedPerGroup: 2,
             locationCount: 1, startDate: StartDate, hasThirdPlaceMatch: true);
         var svc = CreateService(db);
-        await svc.StartTournamentAsync(1);
+        await svc.AssignTeamsToGroupsAsync(1);
+        await svc.CreateGroupStageMatches(1);
 
         var matches = await svc.CreateTemplateBracketMatches(1);
 
@@ -32,9 +33,9 @@ public class CreateTemplateBracketMatchesTests : TournamentServiceTestBase
         Assert.Equal(TournamentPhase.Final, groups[0].Phase);
         Assert.Equal($"{Enum.GetName(TournamentPhase.Final)}1", groups[0].Name);
         Assert.Equal(1, groups[0].BracketSlot);
-        // 1 group * C(2,2)=1 group match @ slot 0 → bracketsStartDate = slot 1; currentSlot = 1 → Final @ slot 2
+        // 1 group * C(2,2)=1 group match @ slot 0 → bracketsStartDate = slot 1; currentSlot = 0 → Final @ slot 1
         var slotCadence = await SlotCadenceMinutesAsync(db, 1);
-        Assert.Equal(StartDate.AddMinutes(2 * slotCadence), matches[0].Date);
+        Assert.Equal(StartDate.AddMinutes(1 * slotCadence), matches[0].Date);
     }
 
     [Fact]
@@ -44,7 +45,8 @@ public class CreateTemplateBracketMatchesTests : TournamentServiceTestBase
         await SeedReadyToStartAsync(db, groupsCount: 2, teamsPerGroup: 2, qualifiedPerGroup: 2,
             locationCount: 1, startDate: StartDate, hasThirdPlaceMatch: true);
         var svc = CreateService(db);
-        await svc.StartTournamentAsync(1);
+        await svc.AssignTeamsToGroupsAsync(1);
+        await svc.CreateGroupStageMatches(1);
 
         var matches = await svc.CreateTemplateBracketMatches(1);
 
@@ -62,7 +64,8 @@ public class CreateTemplateBracketMatchesTests : TournamentServiceTestBase
         await SeedReadyToStartAsync(db, groupsCount: 2, teamsPerGroup: 2, qualifiedPerGroup: 2,
             locationCount: 1, startDate: StartDate, hasThirdPlaceMatch: false);
         var svc = CreateService(db);
-        await svc.StartTournamentAsync(1);
+        await svc.AssignTeamsToGroupsAsync(1);
+        await svc.CreateGroupStageMatches(1);
 
         var matches = await svc.CreateTemplateBracketMatches(1);
 
@@ -80,7 +83,8 @@ public class CreateTemplateBracketMatchesTests : TournamentServiceTestBase
         await SeedReadyToStartAsync(db, groupsCount: 4, teamsPerGroup: 2, qualifiedPerGroup: 2,
             locationCount: 1, startDate: StartDate, hasThirdPlaceMatch: true);
         var svc = CreateService(db);
-        await svc.StartTournamentAsync(1);
+        await svc.AssignTeamsToGroupsAsync(1);
+        await svc.CreateGroupStageMatches(1);
 
         var matches = await svc.CreateTemplateBracketMatches(1);
 
@@ -99,7 +103,8 @@ public class CreateTemplateBracketMatchesTests : TournamentServiceTestBase
         await SeedReadyToStartAsync(db, groupsCount: 4, teamsPerGroup: 2, qualifiedPerGroup: 2,
             locationCount: 1, startDate: StartDate);
         var svc = CreateService(db);
-        await svc.StartTournamentAsync(1);
+        await svc.AssignTeamsToGroupsAsync(1);
+        await svc.CreateGroupStageMatches(1);
 
         var matches = await svc.CreateTemplateBracketMatches(1);
 
@@ -117,7 +122,8 @@ public class CreateTemplateBracketMatchesTests : TournamentServiceTestBase
         await SeedReadyToStartAsync(db, groupsCount: 2, teamsPerGroup: 2, qualifiedPerGroup: 2,
             locationCount: 1, startDate: StartDate, createdById: 1);
         var svc = CreateService(db);
-        await svc.StartTournamentAsync(1);
+        await svc.AssignTeamsToGroupsAsync(1);
+        await svc.CreateGroupStageMatches(1);
 
         var matches = await svc.CreateTemplateBracketMatches(1);
 
@@ -139,7 +145,8 @@ public class CreateTemplateBracketMatchesTests : TournamentServiceTestBase
         await SeedReadyToStartAsync(db, groupsCount: 4, teamsPerGroup: 2, qualifiedPerGroup: 2,
             locationCount: 1, startDate: StartDate, hasThirdPlaceMatch: true);
         var svc = CreateService(db);
-        await svc.StartTournamentAsync(1);
+        await svc.AssignTeamsToGroupsAsync(1);
+        await svc.CreateGroupStageMatches(1);
 
         await svc.CreateTemplateBracketMatches(1);
 
@@ -166,16 +173,17 @@ public class CreateTemplateBracketMatchesTests : TournamentServiceTestBase
         await SeedReadyToStartAsync(db, groupsCount: 2, teamsPerGroup: 2, qualifiedPerGroup: 2,
             locationCount: 1, startDate: StartDate, hasThirdPlaceMatch: true);
         var svc = CreateService(db);
-        await svc.StartTournamentAsync(1);
+        await svc.AssignTeamsToGroupsAsync(1);
+        await svc.CreateGroupStageMatches(1);
 
         var matches = await svc.CreateTemplateBracketMatches(1);
 
         // group matches = 2 groups * C(2,2)=1 → 2 group slots used; bracketsStartDate = lastGroup + 1 slot = slot 2
-        // currentSlot = 2 → SF1@4, SF2@5, 3P@6, F@7
+        // currentSlot = 0 → SF1@2, SF2@3, 3P@4, F@5
         var slotCadence = await SlotCadenceMinutesAsync(db, 1);
         var ordered = matches.OrderBy(m => m.Date).ToList();
         for (var i = 0; i < ordered.Count; i++)
-            Assert.Equal(StartDate.AddMinutes((4 + i) * slotCadence), ordered[i].Date);
+            Assert.Equal(StartDate.AddMinutes((2 + i) * slotCadence), ordered[i].Date);
         Assert.All(matches, m => Assert.Equal(1, m.TournamentLocationId));
     }
 
@@ -186,7 +194,8 @@ public class CreateTemplateBracketMatchesTests : TournamentServiceTestBase
         await SeedReadyToStartAsync(db, groupsCount: 4, teamsPerGroup: 2, qualifiedPerGroup: 2,
             locationCount: 2, startDate: StartDate, hasThirdPlaceMatch: true);
         var svc = CreateService(db);
-        await svc.StartTournamentAsync(1);
+        await svc.AssignTeamsToGroupsAsync(1);
+        await svc.CreateGroupStageMatches(1);
 
         var matches = await svc.CreateTemplateBracketMatches(1);
         var bracketGroups = await db.TournamentGroups
@@ -194,43 +203,44 @@ public class CreateTemplateBracketMatchesTests : TournamentServiceTestBase
             .ToDictionaryAsync(g => g.Id);
 
         // group matches = 4 groups * C(2,2)=1 → 4 group matches → ceil(4/2)=2 slots used (last @ slot 1)
-        // bracketsStartDate = lastGroup + 1 slot = slot 2; currentSlot = 2
-        // QF (4 matches, 2 loc): 2 at slot 4, 2 at slot 5
-        // SF (2 matches, 2 loc): 2 at slot 6
-        // 3P (1 match): slot 7
-        // F (1 match):  slot 8
+        // bracketsStartDate = lastGroup + 1 slot = slot 2; currentSlot = 0
+        // QF (4 matches, 2 loc): 2 at slot 2, 2 at slot 3
+        // SF (2 matches, 2 loc): 2 at slot 4
+        // 3P (1 match): slot 5
+        // F (1 match):  slot 6
         var slotCadence = await SlotCadenceMinutesAsync(db, 1);
         DateTime Slot(int s) => StartDate.AddMinutes(s * slotCadence);
 
         var qfDates = matches.Where(m => bracketGroups[m.GroupId!.Value].Phase == TournamentPhase.QuarterFinal)
             .Select(m => m.Date).OrderBy(d => d).ToList();
-        Assert.Equal(new[] { Slot(4), Slot(4), Slot(5), Slot(5) }, qfDates);
+        Assert.Equal(new[] { Slot(2), Slot(2), Slot(3), Slot(3) }, qfDates);
 
         var sfDates = matches.Where(m => bracketGroups[m.GroupId!.Value].Phase == TournamentPhase.SemiFinal)
             .Select(m => m.Date).OrderBy(d => d).ToList();
-        Assert.Equal(new[] { Slot(6), Slot(6) }, sfDates);
+        Assert.Equal(new[] { Slot(4), Slot(4) }, sfDates);
 
         var third = matches.Single(m => bracketGroups[m.GroupId!.Value].Phase == TournamentPhase.ThirdPlace);
-        Assert.Equal(Slot(7), third.Date);
+        Assert.Equal(Slot(5), third.Date);
 
         var final = matches.Single(m => bracketGroups[m.GroupId!.Value].Phase == TournamentPhase.Final);
-        Assert.Equal(Slot(8), final.Date);
+        Assert.Equal(Slot(6), final.Date);
     }
 
     [Fact]
-    public async Task PersistsGroupsButDoesNotPersistMatches()
+    public async Task PersistsGroupsAndMatches()
     {
         using var db = CreateContext();
         await SeedReadyToStartAsync(db, groupsCount: 2, teamsPerGroup: 2, qualifiedPerGroup: 2,
             locationCount: 1, startDate: StartDate);
         var svc = CreateService(db);
-        await svc.StartTournamentAsync(1);
-        var groupStageMatchCount = await db.TournamentMatches.CountAsync();
+        await svc.AssignTeamsToGroupsAsync(1);
+        await svc.CreateGroupStageMatches(1);
+        var matchCountBefore = await db.TournamentMatches.CountAsync();
 
         var matches = await svc.CreateTemplateBracketMatches(1);
 
         Assert.NotEmpty(matches);
-        Assert.Equal(groupStageMatchCount, await db.TournamentMatches.CountAsync());
+        Assert.Equal(matchCountBefore + matches.Count, await db.TournamentMatches.CountAsync());
         Assert.True(await db.TournamentGroups.AnyAsync(g => g.Phase != TournamentPhase.GroupStage));
     }
 }

@@ -103,7 +103,7 @@ public class CreateGroupStageMatchesTests : TournamentServiceTestBase
     }
 
     [Fact]
-    public async Task DoesNotPersistMatches()
+    public async Task PersistsMatches()
     {
         using var db = CreateContext();
         await SeedAssignedGroupsAsync(db, groupsCount: 2, teamsPerGroup: 3, locationCount: 1);
@@ -112,6 +112,6 @@ public class CreateGroupStageMatchesTests : TournamentServiceTestBase
         var matches = await svc.CreateGroupStageMatches(1);
 
         Assert.NotEmpty(matches);
-        Assert.Equal(0, await db.TournamentMatches.CountAsync());
+        Assert.Equal(matches.Count, await db.TournamentMatches.CountAsync());
     }
 }
