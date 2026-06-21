@@ -15,6 +15,7 @@ public class TournamentService(
     ITournamentValidationService validationService,
     ILogger<TournamentService> logger) : ITournamentService
 {
+    //TODO: Make these configurable in tournament entity
     private const int HalfDurationMinutes = 20;
     private const int HalfTimeDurationMinutes = 5;
     private const int GapBetweenMatchesMinutes = 20;
@@ -184,22 +185,14 @@ public class TournamentService(
             .Where(tl => tl.TournamentId == tournamentId)
             .Select(tl => tl.Id)
             .ToListAsync();
-
-        var matchups = new List<(int GroupId, int TeamAId, int TeamBId)>();
-        foreach (var group in groups)
-        {
-            var groupTeams = teams.Where(t => t.GroupId == group.Id).ToList();
-            for (var i = 0; i < groupTeams.Count; i++)
-                for (var j = i + 1; j < groupTeams.Count; j++)
-                    matchups.Add((group.Id, groupTeams[i].Id, groupTeams[j].Id));
-        }
+        List<(int GroupId, int TeamAId, int TeamBId)> shuffledMatchups = GenerateTeamMatchups(groups, teams);
 
         var slotCadence = HalfDurationMinutes * 2 + HalfTimeDurationMinutes + GapBetweenMatchesMinutes;
         var createdAt = DateTime.UtcNow;
-        var matches = new List<TournamentMatch>(matchups.Count);
-        for (var k = 0; k < matchups.Count; k++)
+        var matches = new List<TournamentMatch>(shuffledMatchups.Count);
+        for (var k = 0; k < shuffledMatchups.Count; k++)
         {
-            var (groupId, teamAId, teamBId) = matchups[k];
+            var (groupId, teamAId, teamBId) = shuffledMatchups[k];
             var locationIndex = k % tournamentLocationIds.Count;
             var slotIndex = k / tournamentLocationIds.Count;
             matches.Add(new TournamentMatch
@@ -223,6 +216,20 @@ public class TournamentService(
         return matches;
     }
 
+    private static List<(int GroupId, int TeamAId, int TeamBId)> GenerateTeamMatchups(List<TournamentGroup> groups, List<Team> teams)
+    {
+        var matchups = new List<(int GroupId, int TeamAId, int TeamBId)>();
+        foreach (var group in groups)
+        {
+            var groupTeams = teams.Where(t => t.GroupId == group.Id).ToList();
+            for (var i = 0; i < groupTeams.Count; i++)
+                for (var j = i + 1; j < groupTeams.Count; j++)
+                    matchups.Add((group.Id, groupTeams[i].Id, groupTeams[j].Id));
+        }
+        var shuffledMatchups = matchups.OrderBy(_ => Random.Shared.Next()).ToList();
+        return shuffledMatchups;
+    }
+
     internal async Task<List<TournamentMatch>> CreateTemplateBracketMatches(int tournamentId)
     {
         var tournament = await db.Tournaments.FirstAsync(t => t.Id == tournamentId);
@@ -233,10 +240,17 @@ public class TournamentService(
 
         var bracketSize = tournament.GroupsCount * tournament.QualifiedPerGroup;
         var rounds = BuildRoundList(bracketSize, tournament.HasThirdPlaceMatch);
+        var slotCadence = HalfDurationMinutes * 2 + HalfTimeDurationMinutes + GapBetweenMatchesMinutes;
+        
+        var latestGroupStageMatch = await db.TournamentMatches
+            .Where(m => m.TournamentId == tournamentId && m.TournamentLocation.TournamentId == tournamentId)
+            .OrderByDescending(m => m.Date)
+            .FirstOrDefaultAsync();
+
+        var bracketsStartDate = latestGroupStageMatch.Date.AddMinutes(slotCadence);
 
         var groupStageMatchCount = tournament.GroupsCount * tournament.TeamsPerGroup * (tournament.TeamsPerGroup - 1) / 2;
         var groupStageSlotsUsed = (int)Math.Ceiling((double)groupStageMatchCount / tournamentLocationIds.Count);
-        var slotCadence = HalfDurationMinutes * 2 + HalfTimeDurationMinutes + GapBetweenMatchesMinutes;
         var createdAt = DateTime.UtcNow;
 
         var matches = new List<TournamentMatch>();
@@ -249,7 +263,7 @@ public class TournamentService(
             {
                 roundGroups.Add(new TournamentGroup
                 {
-                    Name = $"{round.Label}{slot}",
+                    Name = $"{Enum.GetName(round.Phase)}{slot}",
                     TournamentId = tournamentId,
                     Phase = round.Phase,
                     BracketSlot = slot,
@@ -262,7 +276,7 @@ public class TournamentService(
             {
                 var locationIndex = k % tournamentLocationIds.Count;
                 var subSlot = k / tournamentLocationIds.Count;
-                var matchDate = tournament.StartDate.AddMinutes((currentSlot + subSlot) * slotCadence);
+                var matchDate = bracketsStartDate.AddMinutes((currentSlot + subSlot) * slotCadence);
                 matches.Add(new TournamentMatch
                 {
                     TournamentId = tournamentId,
@@ -288,16 +302,16 @@ public class TournamentService(
     private static List<RoundDefinition> BuildRoundList(int bracketSize, bool hasThirdPlaceMatch)
     {
         var rounds = new List<RoundDefinition>();
-        if (bracketSize >= 16) rounds.Add(new RoundDefinition(TournamentPhase.RoundOf16, "R16", 8));
-        if (bracketSize >= 8) rounds.Add(new RoundDefinition(TournamentPhase.QuarterFinal, "QF", 4));
-        if (bracketSize >= 4) rounds.Add(new RoundDefinition(TournamentPhase.SemiFinal, "SF", 2));
+        if (bracketSize >= 16) rounds.Add(new RoundDefinition(TournamentPhase.RoundOf16, 8));
+        if (bracketSize >= 8) rounds.Add(new RoundDefinition(TournamentPhase.QuarterFinal, 4));
+        if (bracketSize >= 4) rounds.Add(new RoundDefinition(TournamentPhase.SemiFinal, 2));
         if (hasThirdPlaceMatch && bracketSize >= 4)
-            rounds.Add(new RoundDefinition(TournamentPhase.ThirdPlace, "3P", 1));
-        rounds.Add(new RoundDefinition(TournamentPhase.Final, "F", 1));
+            rounds.Add(new RoundDefinition(TournamentPhase.ThirdPlace, 1));
+        rounds.Add(new RoundDefinition(TournamentPhase.Final, 1));
         return rounds;
     }
 
-    private sealed record RoundDefinition(TournamentPhase Phase, string Label, int MatchCount);
+    private sealed record RoundDefinition(TournamentPhase Phase, int MatchCount);
 
     public Task GetStandingsAsync(int tournamentId) => throw new NotImplementedException();
 
