@@ -46,6 +46,17 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
+        name="tournaments"
+        options={{
+          title: t.tournaments,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="trophy-outline" size={size} color={color} />
+          ),
+          tabBarLabel: ({ color }) => <TabLabel label={t.tournaments} color={color} />,
+        }}
+      />
+
+      <Tabs.Screen
         name="create"
         options={{
           title: "",

@@ -21,7 +21,13 @@ const cat_es = {
 
   // Tabs
   matches: "Partits",
+  tournaments: "Tornejos",
   profile: "Perfil",
+
+  // Tournaments screen
+  noTournamentsTitle: "Sense tornejos",
+  noTournamentsSubtitle: "Els tornejos apareixeran aquí",
+  tournamentsError: "No s'han pogut carregar els tornejos. Comprova la connexió.",
 
   // Matches screen
   live: "En viu",

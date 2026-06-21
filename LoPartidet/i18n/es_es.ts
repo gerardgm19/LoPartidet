@@ -21,7 +21,13 @@ const es_es = {
 
   // Tabs
   matches: "Partidos",
+  tournaments: "Torneos",
   profile: "Perfil",
+
+  // Tournaments screen
+  noTournamentsTitle: "Sin torneos",
+  noTournamentsSubtitle: "Los torneos aparecerán aquí",
+  tournamentsError: "No se pudieron cargar los torneos. Comprueba tu conexión.",
 
   // Matches screen
   live: "En vivo",
