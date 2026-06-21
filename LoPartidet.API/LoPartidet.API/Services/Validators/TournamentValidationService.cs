@@ -36,6 +36,15 @@ public class TournamentValidationService(LoPartidetContext db) : ITournamentVali
         if (request.QualifiedPerGroup > request.TeamsPerGroup)
             return ValidationResult.Fail("Qualified per group cannot exceed teams per group.");
 
+        if (request.HalfDurationMinutes < 1)
+            return ValidationResult.Fail("Half duration must be at least 1 minute.");
+
+        if (request.HalfTimeDurationMinutes < 0)
+            return ValidationResult.Fail("Half-time duration cannot be negative.");
+
+        if (request.GapBetweenMatchesMinutes < 0)
+            return ValidationResult.Fail("Gap between matches cannot be negative.");
+
         return ValidationResult.Ok();
     }
 

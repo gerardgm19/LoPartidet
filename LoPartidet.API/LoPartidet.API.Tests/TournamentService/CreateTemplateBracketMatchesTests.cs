@@ -7,8 +7,13 @@ namespace LoPartidet.API.Tests.TournamentService;
 
 public class CreateTemplateBracketMatchesTests : TournamentServiceTestBase
 {
-    private const int SlotCadenceMinutes = 20 * 2 + 5 + 20;
     private static readonly DateTime StartDate = new(2030, 1, 1, 10, 0, 0, DateTimeKind.Utc);
+
+    private static async Task<int> SlotCadenceMinutesAsync(LoPartidet.API.Data.LoPartidetContext db, int tournamentId)
+    {
+        var t = await db.Tournaments.FirstAsync(x => x.Id == tournamentId);
+        return t.HalfDurationMinutes * 2 + t.HalfTimeDurationMinutes + t.GapBetweenMatchesMinutes;
+    }
 
     [Fact]
     public async Task BracketSize2_CreatesOnlyFinal()
@@ -28,7 +33,8 @@ public class CreateTemplateBracketMatchesTests : TournamentServiceTestBase
         Assert.Equal($"{Enum.GetName(TournamentPhase.Final)}1", groups[0].Name);
         Assert.Equal(1, groups[0].BracketSlot);
         // 1 group * C(2,2)=1 group match @ slot 0 → bracketsStartDate = slot 1; currentSlot = 1 → Final @ slot 2
-        Assert.Equal(StartDate.AddMinutes(2 * SlotCadenceMinutes), matches[0].Date);
+        var slotCadence = await SlotCadenceMinutesAsync(db, 1);
+        Assert.Equal(StartDate.AddMinutes(2 * slotCadence), matches[0].Date);
     }
 
     [Fact]
@@ -166,9 +172,10 @@ public class CreateTemplateBracketMatchesTests : TournamentServiceTestBase
 
         // group matches = 2 groups * C(2,2)=1 → 2 group slots used; bracketsStartDate = lastGroup + 1 slot = slot 2
         // currentSlot = 2 → SF1@4, SF2@5, 3P@6, F@7
+        var slotCadence = await SlotCadenceMinutesAsync(db, 1);
         var ordered = matches.OrderBy(m => m.Date).ToList();
         for (var i = 0; i < ordered.Count; i++)
-            Assert.Equal(StartDate.AddMinutes((4 + i) * SlotCadenceMinutes), ordered[i].Date);
+            Assert.Equal(StartDate.AddMinutes((4 + i) * slotCadence), ordered[i].Date);
         Assert.All(matches, m => Assert.Equal(1, m.TournamentLocationId));
     }
 
@@ -192,7 +199,8 @@ public class CreateTemplateBracketMatchesTests : TournamentServiceTestBase
         // SF (2 matches, 2 loc): 2 at slot 6
         // 3P (1 match): slot 7
         // F (1 match):  slot 8
-        DateTime Slot(int s) => StartDate.AddMinutes(s * SlotCadenceMinutes);
+        var slotCadence = await SlotCadenceMinutesAsync(db, 1);
+        DateTime Slot(int s) => StartDate.AddMinutes(s * slotCadence);
 
         var qfDates = matches.Where(m => bracketGroups[m.GroupId!.Value].Phase == TournamentPhase.QuarterFinal)
             .Select(m => m.Date).OrderBy(d => d).ToList();

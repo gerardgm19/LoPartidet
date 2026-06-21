@@ -11,5 +11,8 @@ public record CreateTournamentDto(
     int TeamsPerGroup,
     int QualifiedPerGroup,
     bool IsSingleElimination,
-    bool HasThirdPlaceMatch
+    bool HasThirdPlaceMatch,
+    int HalfDurationMinutes,
+    int HalfTimeDurationMinutes,
+    int GapBetweenMatchesMinutes
 );

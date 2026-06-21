@@ -56,6 +56,9 @@ public abstract class TournamentServiceTestBase
             QualifiedPerGroup = qualifiedPerGroup,
             IsSingleElimination = true,
             HasThirdPlaceMatch = hasThirdPlaceMatch,
+            HalfDurationMinutes = 20,
+            HalfTimeDurationMinutes = 5,
+            GapBetweenMatchesMinutes = 20,
         });
         for (var i = 0; i < locationCount; i++)
         {
@@ -110,6 +113,9 @@ public abstract class TournamentServiceTestBase
             QualifiedPerGroup = 2,
             IsSingleElimination = true,
             HasThirdPlaceMatch = true,
+            HalfDurationMinutes = 20,
+            HalfTimeDurationMinutes = 5,
+            GapBetweenMatchesMinutes = 20,
         });
         for (var i = 0; i < locationCount; i++)
         {

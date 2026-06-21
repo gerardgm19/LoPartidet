@@ -15,11 +15,6 @@ public class TournamentService(
     ITournamentValidationService validationService,
     ILogger<TournamentService> logger) : ITournamentService
 {
-    //TODO: Make these configurable in tournament entity
-    private const int HalfDurationMinutes = 20;
-    private const int HalfTimeDurationMinutes = 5;
-    private const int GapBetweenMatchesMinutes = 20;
-
     public async Task<TournamentDto> CreateAsync(CreateTournamentDto request)
     {
         var validation = await validationService.ValidateCreateTournamentAsync(request);
@@ -38,6 +33,9 @@ public class TournamentService(
             QualifiedPerGroup = request.QualifiedPerGroup,
             IsSingleElimination = request.IsSingleElimination,
             HasThirdPlaceMatch = request.HasThirdPlaceMatch,
+            HalfDurationMinutes = request.HalfDurationMinutes,
+            HalfTimeDurationMinutes = request.HalfTimeDurationMinutes,
+            GapBetweenMatchesMinutes = request.GapBetweenMatchesMinutes,
         };
 
         db.Tournaments.Add(tournament);
@@ -54,7 +52,10 @@ public class TournamentService(
             tournament.TeamsPerGroup,
             tournament.QualifiedPerGroup,
             tournament.IsSingleElimination,
-            tournament.HasThirdPlaceMatch);
+            tournament.HasThirdPlaceMatch,
+            tournament.HalfDurationMinutes,
+            tournament.HalfTimeDurationMinutes,
+            tournament.GapBetweenMatchesMinutes);
     }
 
     public async Task<TeamDto> AddTeamAsync(int tournamentId, CreateTeamDto request)
@@ -187,7 +188,7 @@ public class TournamentService(
             .ToListAsync();
         List<(int GroupId, int TeamAId, int TeamBId)> shuffledMatchups = GenerateTeamMatchups(groups, teams);
 
-        var slotCadence = HalfDurationMinutes * 2 + HalfTimeDurationMinutes + GapBetweenMatchesMinutes;
+        var slotCadence = tournament.HalfDurationMinutes * 2 + tournament.HalfTimeDurationMinutes + tournament.GapBetweenMatchesMinutes;
         var createdAt = DateTime.UtcNow;
         var matches = new List<TournamentMatch>(shuffledMatchups.Count);
         for (var k = 0; k < shuffledMatchups.Count; k++)
@@ -206,8 +207,8 @@ public class TournamentService(
                 Status = MatchStatus.Scheduled,
                 CreatedById = tournament.CreatedById,
                 CreatedAt = createdAt,
-                HalfDuration = HalfDurationMinutes,
-                HalfTimeDuration = HalfTimeDurationMinutes,
+                HalfDuration = tournament.HalfDurationMinutes,
+                HalfTimeDuration = tournament.HalfTimeDurationMinutes,
             });
         }
         logger.LogInformation(
@@ -240,7 +241,7 @@ public class TournamentService(
 
         var bracketSize = tournament.GroupsCount * tournament.QualifiedPerGroup;
         var rounds = BuildRoundList(bracketSize, tournament.HasThirdPlaceMatch);
-        var slotCadence = HalfDurationMinutes * 2 + HalfTimeDurationMinutes + GapBetweenMatchesMinutes;
+        var slotCadence = tournament.HalfDurationMinutes * 2 + tournament.HalfTimeDurationMinutes + tournament.GapBetweenMatchesMinutes;
         
         var latestGroupStageMatch = await db.TournamentMatches
             .Where(m => m.TournamentId == tournamentId && m.TournamentLocation.TournamentId == tournamentId)
@@ -286,8 +287,8 @@ public class TournamentService(
                     Status = MatchStatus.Scheduled,
                     CreatedById = tournament.CreatedById,
                     CreatedAt = createdAt,
-                    HalfDuration = HalfDurationMinutes,
-                    HalfTimeDuration = HalfTimeDurationMinutes,
+                    HalfDuration = tournament.HalfDurationMinutes,
+                    HalfTimeDuration = tournament.HalfTimeDurationMinutes,
                 });
             }
             currentSlot += (int)Math.Ceiling((double)round.MatchCount / tournamentLocationIds.Count);

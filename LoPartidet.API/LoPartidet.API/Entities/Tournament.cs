@@ -15,6 +15,9 @@ public class Tournament
     public int QualifiedPerGroup { get; init; }
     public bool IsSingleElimination { get; init; }
     public bool HasThirdPlaceMatch { get; init; }
+    public int HalfDurationMinutes { get; init; }
+    public int HalfTimeDurationMinutes { get; init; }
+    public int GapBetweenMatchesMinutes { get; init; }
 
     public User CreatedBy { get; init; } = null!;
     public ICollection<Team> Teams { get; set; } = [];

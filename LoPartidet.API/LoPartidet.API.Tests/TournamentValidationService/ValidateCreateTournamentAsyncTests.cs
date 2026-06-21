@@ -120,6 +120,51 @@ public class ValidateCreateTournamentAsyncTests : TournamentValidationServiceTes
     }
 
     [Fact]
+    public async Task ValidateCreateTournament_HalfDurationZero_ReturnsFail()
+    {
+        using var db = CreateContext();
+        db.Users.Add(MakeUser(1));
+        await db.SaveChangesAsync();
+        var svc = new API.Services.Validators.TournamentValidationService(db);
+        var request = MakeRequest(halfDurationMinutes: 0);
+
+        var result = await svc.ValidateCreateTournamentAsync(request);
+
+        Assert.False(result.IsValid);
+        Assert.Equal("Half duration must be at least 1 minute.", result.Error);
+    }
+
+    [Fact]
+    public async Task ValidateCreateTournament_HalfTimeDurationNegative_ReturnsFail()
+    {
+        using var db = CreateContext();
+        db.Users.Add(MakeUser(1));
+        await db.SaveChangesAsync();
+        var svc = new API.Services.Validators.TournamentValidationService(db);
+        var request = MakeRequest(halfTimeDurationMinutes: -1);
+
+        var result = await svc.ValidateCreateTournamentAsync(request);
+
+        Assert.False(result.IsValid);
+        Assert.Equal("Half-time duration cannot be negative.", result.Error);
+    }
+
+    [Fact]
+    public async Task ValidateCreateTournament_GapBetweenMatchesNegative_ReturnsFail()
+    {
+        using var db = CreateContext();
+        db.Users.Add(MakeUser(1));
+        await db.SaveChangesAsync();
+        var svc = new API.Services.Validators.TournamentValidationService(db);
+        var request = MakeRequest(gapBetweenMatchesMinutes: -1);
+
+        var result = await svc.ValidateCreateTournamentAsync(request);
+
+        Assert.False(result.IsValid);
+        Assert.Equal("Gap between matches cannot be negative.", result.Error);
+    }
+
+    [Fact]
     public async Task ValidateCreateTournament_ValidRequest_ReturnsOk()
     {
         using var db = CreateContext();
