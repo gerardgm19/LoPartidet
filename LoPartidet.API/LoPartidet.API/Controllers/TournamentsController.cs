@@ -40,6 +40,13 @@ public class TournamentsController(ITournamentService tournamentService) : Contr
         return Ok(result);
     }
 
+    [HttpGet("{id}/teams")]
+    public async Task<ActionResult<IReadOnlyList<TeamDto>>> GetTeams(int id)
+    {
+        var result = await tournamentService.GetTeamsByTournamentAsync(id);
+        return Ok(result);
+    }
+
     [HttpPost("{id}/locations")]
     public async Task<ActionResult<TournamentLocationDto>> AddLocation(int id, AddTournamentLocationDto request)
     {

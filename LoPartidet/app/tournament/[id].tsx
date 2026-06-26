@@ -6,7 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useThemeStore } from "@/store/themeStore";
 import { makeStyles } from "@/utils/makeStyles";
 import { getSportTypeLabel } from "@/constants/match";
-import { getTournamentById, Tournament } from "@/services/tournamentsService";
+import { getTournamentById, getTournamentTeams, Tournament, TournamentTeam } from "@/services/tournamentsService";
 import { TournamentStatus } from "@/types/tournamentStatus";
 import { DetailRow } from "@/components/DetailRow";
 import { formatDateShort } from "@/utils/formatDate";
@@ -62,6 +62,26 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
   boolRowFirst: { borderTopWidth: 0 },
   boolLabel: { color: colors.muted, fontSize: 14 },
   boolValue: { fontSize: 13, fontWeight: "700" },
+  sectionHeader: {
+    flexDirection: "row", alignItems: "center",
+    justifyContent: "space-between", paddingVertical: 16,
+  },
+  sectionTitle: { color: colors.white, fontSize: 15, fontWeight: "700" },
+  sectionCount: { color: colors.muted, fontSize: 13 },
+  teamRow: {
+    flexDirection: "row", alignItems: "center", gap: 12,
+    paddingVertical: 12,
+    borderTopWidth: 1, borderTopColor: colors.border,
+  },
+  teamAvatar: {
+    width: 36, height: 36, borderRadius: 10,
+    backgroundColor: colors.green,
+    alignItems: "center", justifyContent: "center",
+  },
+  teamAvatarText: { color: colors.black, fontSize: 13, fontWeight: "800" },
+  teamName: { color: colors.white, fontSize: 14, fontWeight: "600" },
+  teamMeta: { color: colors.muted, fontSize: 12 },
+  noTeamsText: { color: colors.muted, fontSize: 14, paddingVertical: 16, textAlign: "center" },
 }));
 
 function getStatusConfig(t: any, colors: any): Record<TournamentStatus, { label: string; bg: string; fg: string }> {
@@ -79,15 +99,17 @@ export default function TournamentDetailPage() {
   const styles = useStyles();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [tournament, setTournament] = useState<Tournament | undefined>();
+  const [teams, setTeams] = useState<TournamentTeam[]>([]);
   const [loading, setLoading] = useState(true);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
 
   useEffect(() => {
-    getTournamentById(id)
-      .then((data) => {
-        setTournament(data);
-        if (!data) { setToastMessage(t.tournamentError); setToastVisible(true); }
+    Promise.all([getTournamentById(id), getTournamentTeams(id)])
+      .then(([tournamentData, teamsData]) => {
+        setTournament(tournamentData);
+        setTeams(teamsData);
+        if (!tournamentData) { setToastMessage(t.tournamentError); setToastVisible(true); }
       })
       .catch(() => { setToastMessage(t.tournamentError); setToastVisible(true); })
       .finally(() => setLoading(false));
@@ -174,6 +196,27 @@ export default function TournamentDetailPage() {
               {tournament.hasThirdPlaceMatch ? t.yes : t.no}
             </Text>
           </View>
+        </View>
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>{t.tournamentTeams}</Text>
+            <Text style={styles.sectionCount}>{teams.length}</Text>
+          </View>
+          {teams.length === 0
+            ? <Text style={styles.noTeamsText}>{t.tournamentNoTeams}</Text>
+            : teams.map((team) => (
+              <View key={team.id} style={styles.teamRow}>
+                <View style={styles.teamAvatar}>
+                  <Text style={styles.teamAvatarText}>{team.name[0]?.toUpperCase() ?? "?"}</Text>
+                </View>
+                <View>
+                  <Text style={styles.teamName}>{team.name}</Text>
+                  <Text style={styles.teamMeta}>{team.memberUserIds.length} {t.tournamentMembers}</Text>
+                </View>
+              </View>
+            ))
+          }
         </View>
 
       </ScrollView>

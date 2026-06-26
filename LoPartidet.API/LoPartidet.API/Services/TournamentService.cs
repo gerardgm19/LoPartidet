@@ -323,6 +323,20 @@ public class TournamentService(
 
     private sealed record RoundDefinition(TournamentPhase Phase, int MatchCount);
 
+    public async Task<IReadOnlyList<TeamDto>> GetTeamsByTournamentAsync(int tournamentId)
+    {
+        return await db.Teams
+            .Where(t => t.TournamentId == tournamentId)
+            .Select(t => new TeamDto(
+                t.Id,
+                t.Name,
+                t.TournamentId,
+                t.GroupId,
+                t.CreatedById,
+                t.Members.Select(m => m.UserId).ToList()))
+            .ToListAsync();
+    }
+
     public Task GetStandingsAsync(int tournamentId) => throw new NotImplementedException();
 
     public Task GetBracketAsync(int tournamentId) => throw new NotImplementedException();

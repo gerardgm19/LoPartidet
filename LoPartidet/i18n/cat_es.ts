@@ -46,6 +46,9 @@ const cat_es = {
   tournamentHalfDuration: "Durada de la part",
   tournamentHalfTime: "Descans",
   tournamentGapBetweenMatches: "Entre partits",
+  tournamentTeams: "Equips inscrits",
+  tournamentNoTeams: "Cap equip inscrit encara",
+  tournamentMembers: "membres",
 
   // Create tournament
   createTournamentTitle: "Nou torneig",

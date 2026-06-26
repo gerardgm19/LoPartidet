@@ -59,6 +59,20 @@ export async function createTournament(request: CreateTournamentRequest): Promis
   return normalizeTournament(data);
 }
 
+export type TournamentTeam = {
+  id: number;
+  name: string;
+  tournamentId: number;
+  groupId: number | null;
+  createdById: number;
+  memberUserIds: number[];
+};
+
+export async function getTournamentTeams(tournamentId: string): Promise<TournamentTeam[]> {
+  const { data } = await apiClient.get<TournamentTeam[]>(`${API_BASE_URL}/tournaments/${tournamentId}/teams`);
+  return data;
+}
+
 export async function getTournamentById(id: string): Promise<Tournament | undefined> {
   try {
     const { data } = await apiClient.get<any>(`${API_BASE_URL}/tournaments/${id}`);

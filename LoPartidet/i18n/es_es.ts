@@ -46,6 +46,9 @@ const es_es = {
   tournamentHalfDuration: "Duración de parte",
   tournamentHalfTime: "Descanso",
   tournamentGapBetweenMatches: "Entre partidos",
+  tournamentTeams: "Equipos inscritos",
+  tournamentNoTeams: "Ningún equipo inscrito todavía",
+  tournamentMembers: "miembros",
 
   // Create tournament
   createTournamentTitle: "Nuevo torneo",
