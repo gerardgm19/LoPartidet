@@ -21,7 +21,7 @@ public class TournamentValidationService(LoPartidetContext db) : ITournamentVali
         if (!userExists)
             return ValidationResult.Fail("User not found.");
 
-        if (request.StartDate <= DateTime.UtcNow)
+        if (request.StartDate <= DateTime.Now)
             return ValidationResult.Fail("Tournament start date must be in the future.");
 
         if (request.GroupsCount < 1)

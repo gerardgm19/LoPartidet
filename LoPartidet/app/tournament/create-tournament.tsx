@@ -145,7 +145,12 @@ export default function CreateTournament() {
 
   const [name, setName] = useState("");
   const [selectedType, setSelectedType] = useState<SportType>(SportType.Fut7);
-  const [datetime, setDatetime] = useState<Date>(new Date());
+  const [datetime, setDatetime] = useState<Date>(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    d.setHours(10, 0, 0, 0);
+    return d;
+  });
   const [groupsCount, setGroupsCount] = useState(2);
   const [teamsPerGroup, setTeamsPerGroup] = useState(4);
   const [qualifiedPerGroup, setQualifiedPerGroup] = useState(2);
@@ -181,7 +186,7 @@ export default function CreateTournament() {
         name: name.trim(),
         sportType: selectedType,
         createdBy: userId,
-        startDate: datetime.toISOString(),
+        startDate: `${datetime.getFullYear()}-${String(datetime.getMonth() + 1).padStart(2, "0")}-${String(datetime.getDate()).padStart(2, "0")}T${String(datetime.getHours()).padStart(2, "0")}:${String(datetime.getMinutes()).padStart(2, "0")}:00`,
         groupsCount,
         teamsPerGroup,
         qualifiedPerGroup,

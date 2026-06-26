@@ -14,7 +14,7 @@ public class MatchesService(LoPartidetContext db, IMatchValidationService valida
     {
         var userId = await db.Users.Where(u => u.IdentityId == identityId).Select(u => u.Id).FirstOrDefaultAsync();
 
-        var minDate = filter.MinDate ?? DateTime.UtcNow;
+        var minDate = filter.MinDate ?? DateTime.Now;
         var query = db.Matches.Where(m => m.Date >= minDate);
 
         if (!string.IsNullOrWhiteSpace(filter.Location))
@@ -99,7 +99,7 @@ public class MatchesService(LoPartidetContext db, IMatchValidationService valida
             Date = request.Date,
             LocationId = locationId,
             CreatedById = int.Parse(request.CreatedBy),
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = DateTime.Now,
             MaxPlayers = request.MaxPlayers,
             DurationInMinutes = request.DurationInMinutes,
             Status = MatchStatus.Scheduled,

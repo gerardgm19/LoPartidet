@@ -190,7 +190,7 @@ public class TournamentService(
         List<(int GroupId, int TeamAId, int TeamBId)> shuffledMatchups = GenerateTeamMatchups(groups, teams);
 
         var slotCadence = tournament.HalfDurationMinutes * 2 + tournament.HalfTimeDurationMinutes + tournament.GapBetweenMatchesMinutes;
-        var createdAt = DateTime.UtcNow;
+        var createdAt = DateTime.Now;
         var matches = new List<TournamentMatch>(shuffledMatchups.Count);
         for (var k = 0; k < shuffledMatchups.Count; k++)
         {
@@ -246,7 +246,7 @@ public class TournamentService(
 
         var bracketsStartDate = latestGroupStageMatch.Date.AddMinutes(slotCadence);
 
-        var createdAt = DateTime.UtcNow;
+        var createdAt = DateTime.Now;
         var currentSlot = 0;
         var matches = new List<TournamentMatch>();
         foreach (var round in rounds)

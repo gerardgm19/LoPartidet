@@ -14,7 +14,7 @@ public class MatchValidationService(LoPartidetContext db) : IMatchValidationServ
         if (!userExists)
             return ValidationResult.Fail("User not found.");
 
-        if (request.Date <= DateTime.UtcNow)
+        if (request.Date <= DateTime.Now)
             return ValidationResult.Fail("Match date must be in the future.");
 
         if (string.IsNullOrWhiteSpace(request.Location))
