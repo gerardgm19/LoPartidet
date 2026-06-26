@@ -34,7 +34,27 @@ function normalizeTournament(raw: any): Tournament {
   };
 }
 
+export type CreateTournamentRequest = {
+  name: string;
+  sportType: SportType;
+  createdBy: string;
+  startDate: string;
+  groupsCount: number;
+  teamsPerGroup: number;
+  qualifiedPerGroup: number;
+  isSingleElimination: boolean;
+  hasThirdPlaceMatch: boolean;
+  halfDurationMinutes: number;
+  halfTimeDurationMinutes: number;
+  gapBetweenMatchesMinutes: number;
+};
+
 export async function getTournaments(): Promise<Tournament[]> {
   const { data } = await apiClient.get<any[]>(`${API_BASE_URL}/tournaments`);
   return data.map(normalizeTournament);
+}
+
+export async function createTournament(request: CreateTournamentRequest): Promise<Tournament> {
+  const { data } = await apiClient.post<any>(`${API_BASE_URL}/tournaments`, request);
+  return normalizeTournament(data);
 }

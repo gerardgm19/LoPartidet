@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Animated, FlatList, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useThemeStore } from "@/store/themeStore";
 import { makeStyles } from "@/utils/makeStyles";
@@ -35,7 +36,23 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
     padding: 6,
   },
   list: {
-    paddingBottom: 16,
+    paddingBottom: 80,
+  },
+  fab: {
+    position: "absolute",
+    bottom: 24,
+    right: 20,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: colors.green,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: colors.green,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 8,
   },
   centered: {
     flex: 1,
@@ -211,6 +228,13 @@ export default function Tournaments() {
           }
         />
       )}
+      <Pressable
+        style={({ pressed }) => [styles.fab, pressed && { opacity: 0.8 }]}
+        onPress={() => router.push("/tournament/create-tournament")}
+        accessibilityLabel={t.createTournamentBtn}
+      >
+        <Ionicons name="add" size={28} color={colors.black} />
+      </Pressable>
       <Toast
         message={t.tournamentsError}
         visible={toastVisible}

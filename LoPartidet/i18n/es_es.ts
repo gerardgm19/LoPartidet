@@ -29,6 +29,22 @@ const es_es = {
   noTournamentsSubtitle: "Los torneos aparecerán aquí",
   tournamentsError: "No se pudieron cargar los torneos. Comprueba tu conexión.",
 
+  // Create tournament
+  createTournamentTitle: "Nuevo torneo",
+  createTournamentBtn: "Crear torneo",
+  tournamentCreated: "¡Torneo creado!",
+  createTournamentError: "No se pudo crear el torneo.",
+  tournamentName: "Nombre",
+  tournamentNamePlaceholder: "Liga de verano",
+  groups: "Grupos",
+  teamsPerGroup: "Equipos por grupo",
+  qualifiedPerGroup: "Clasificados por grupo",
+  singleElimination: "Eliminación directa",
+  thirdPlaceMatch: "Partido por el 3er puesto",
+  halfDuration: "Duración de la parte (min)",
+  halfTimeDuration: "Descanso (min)",
+  gapBetweenMatches: "Tiempo entre partidos (min)",
+
   // Matches screen
   live: "En vivo",
   refresh: "Actualizar",

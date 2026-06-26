@@ -29,6 +29,22 @@ const cat_es = {
   noTournamentsSubtitle: "Els tornejos apareixeran aquí",
   tournamentsError: "No s'han pogut carregar els tornejos. Comprova la connexió.",
 
+  // Create tournament
+  createTournamentTitle: "Nou torneig",
+  createTournamentBtn: "Crear torneig",
+  tournamentCreated: "Torneig creat!",
+  createTournamentError: "No s'ha pogut crear el torneig.",
+  tournamentName: "Nom",
+  tournamentNamePlaceholder: "Lliga d'estiu",
+  groups: "Grups",
+  teamsPerGroup: "Equips per grup",
+  qualifiedPerGroup: "Classificats per grup",
+  singleElimination: "Eliminació directa",
+  thirdPlaceMatch: "Partit pel 3r lloc",
+  halfDuration: "Durada de la part (min)",
+  halfTimeDuration: "Descans (min)",
+  gapBetweenMatches: "Temps entre partits (min)",
+
   // Matches screen
   live: "En viu",
   refresh: "Actualitzar",
