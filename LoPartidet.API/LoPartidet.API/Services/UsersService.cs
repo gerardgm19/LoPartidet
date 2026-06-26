@@ -1,6 +1,7 @@
 using LoPartidet.API.Data;
 using LoPartidet.API.Entities;
 using LoPartidet.API.Models;
+using LoPartidet.API.Models.Enums;
 using LoPartidet.API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -129,6 +130,18 @@ public class UsersService(LoPartidetContext db, IIdentityManagerService identity
 
         await db.SaveChangesAsync();
         return ToDto(user);
+    }
+
+    public async Task<bool> PromoteToAdminAsync(int id)
+    {
+        var user = await db.Users.Include(u => u.UserRoles).FirstOrDefaultAsync(u => u.Id == id);
+        if (user is null) return false;
+
+        if (user.UserRoles.Any(ur => ur.Role == Role.Admin)) return true;
+
+        db.UserRoles.Add(new UserRole { UserId = user.Id, Role = Role.Admin });
+        await db.SaveChangesAsync();
+        return true;
     }
 
     private static UserDto ToDto(User u) =>

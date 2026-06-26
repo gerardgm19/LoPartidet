@@ -329,5 +329,24 @@ public class TournamentService(
 
     public Task GetByIdAsync(int id) => throw new NotImplementedException();
 
-    public Task GetAllAsync() => throw new NotImplementedException();
+    public async Task<IReadOnlyList<TournamentDto>> GetAllAsync()
+    {
+        return await db.Tournaments
+            .Select(t => new TournamentDto(
+                t.Id,
+                t.Name,
+                t.SportType,
+                t.Status,
+                t.CreatedById,
+                t.StartDate,
+                t.GroupsCount,
+                t.TeamsPerGroup,
+                t.QualifiedPerGroup,
+                t.IsSingleElimination,
+                t.HasThirdPlaceMatch,
+                t.HalfDurationMinutes,
+                t.HalfTimeDurationMinutes,
+                t.GapBetweenMatchesMinutes))
+            .ToListAsync();
+    }
 }

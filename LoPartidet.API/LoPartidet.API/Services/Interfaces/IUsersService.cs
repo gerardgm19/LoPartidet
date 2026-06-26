@@ -9,4 +9,5 @@ public interface IUsersService
     Task<RegisterUserResponse?> RegisterUserAsync(RegisterUserDto request);
     Task<UserDto> CreateUserAsync(CreateUserRequest request);
     Task<UserDto?> UpdateUserAsync(int id, UpdateUserRequest request);
+    Task<bool> PromoteToAdminAsync(int id);
 }

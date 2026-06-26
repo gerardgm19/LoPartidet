@@ -46,6 +46,14 @@ public class UsersController(IUsersService usersService, IUserValidationService 
     //    return user is null ? NotFound() : Ok(user);
     //}
 
+    [HttpPost("{id}/admin")]
+    [Authorize(Roles = nameof(Role.Admin))]
+    public async Task<IActionResult> PromoteToAdmin(int id)
+    {
+        var ok = await usersService.PromoteToAdminAsync(id);
+        return ok ? NoContent() : NotFound();
+    }
+
     [HttpPut("{id}")]
     public async Task<ActionResult<UserDto>> PutUser(int id, UpdateUserRequest request)
     {
