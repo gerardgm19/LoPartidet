@@ -82,6 +82,16 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
   teamName: { color: colors.white, fontSize: 14, fontWeight: "600" },
   teamMeta: { color: colors.muted, fontSize: 12 },
   noTeamsText: { color: colors.muted, fontSize: 14, paddingVertical: 16, textAlign: "center" },
+  joinButton: {
+    marginHorizontal: 16,
+    marginBottom: 24,
+    borderRadius: 14,
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.green,
+  },
+  joinButtonText: { color: colors.black, fontSize: 16, fontWeight: "800" },
 }));
 
 function getStatusConfig(t: any, colors: any): Record<TournamentStatus, { label: string; bg: string; fg: string }> {
@@ -218,6 +228,15 @@ export default function TournamentDetailPage() {
             ))
           }
         </View>
+
+        {tournament.status === TournamentStatus.Draft && (
+          <Pressable
+            style={({ pressed }) => [styles.joinButton, pressed && { opacity: 0.8 }]}
+            onPress={() => router.push({ pathname: "/tournament/create-team", params: { tournamentId: id } })}
+          >
+            <Text style={styles.joinButtonText}>{t.joinTournament}</Text>
+          </Pressable>
+        )}
 
       </ScrollView>
 

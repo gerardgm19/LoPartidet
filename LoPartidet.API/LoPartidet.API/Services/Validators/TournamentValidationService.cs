@@ -76,12 +76,32 @@ public class TournamentValidationService(LoPartidetContext db) : ITournamentVali
         if (nameTaken)
             return ValidationResult.Fail("Team name already used in this tournament.");
 
+        var allCandidateIds = new List<int> { userId };
         if (request.MemberUserIds is { Count: > 0 } memberIds)
         {
             var distinctIds = memberIds.Distinct().ToList();
             var foundCount = await db.Users.CountAsync(u => distinctIds.Contains(u.Id));
             if (foundCount != distinctIds.Count)
                 return ValidationResult.Fail("One or more team members do not exist.");
+            allCandidateIds.AddRange(distinctIds);
+        }
+
+        var tournamentTeamIds = await db.Teams
+            .Where(t => t.TournamentId == request.TournamentId)
+            .Select(t => t.Id)
+            .ToListAsync();
+
+        if (tournamentTeamIds.Count > 0)
+        {
+            var alreadyInTeam = await db.TeamMembers
+                .AnyAsync(m => tournamentTeamIds.Contains(m.TeamId) && allCandidateIds.Contains(m.UserId));
+            if (alreadyInTeam)
+                return ValidationResult.Fail("One or more players are already in a team in this tournament.");
+
+            var creatorAlreadyLeads = await db.Teams
+                .AnyAsync(t => t.TournamentId == request.TournamentId && t.CreatedById == userId);
+            if (creatorAlreadyLeads)
+                return ValidationResult.Fail("You already have a team in this tournament.");
         }
 
         return ValidationResult.Ok();

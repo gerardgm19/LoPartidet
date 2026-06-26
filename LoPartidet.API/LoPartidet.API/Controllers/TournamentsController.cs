@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using LoPartidet.API.Models;
 using LoPartidet.API.Models.Enums;
 using LoPartidet.API.Services.Interfaces;
@@ -8,10 +9,11 @@ namespace LoPartidet.API.Controllers;
 
 [ApiController]
 [Route("tournaments")]
-[Authorize(Roles = nameof(Role.Admin))]
+[Authorize]
 public class TournamentsController(ITournamentService tournamentService) : ControllerBase
 {
     [HttpPost]
+    [Authorize(Roles = nameof(Role.Admin))]
     public async Task<ActionResult<TournamentDto>> CreateTournament(CreateTournamentDto request)
     {
         try
@@ -47,7 +49,25 @@ public class TournamentsController(ITournamentService tournamentService) : Contr
         return Ok(result);
     }
 
+    [HttpPost("{id}/teams")]
+    [Authorize(Roles = nameof(Role.Player))]
+    public async Task<ActionResult<TeamDto>> AddTeam(int id, CreateTeamDto request)
+    {
+        var identityId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (identityId is null) return Unauthorized();
+        try
+        {
+            var result = await tournamentService.AddTeamAsync(id, request);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     [HttpPost("{id}/locations")]
+    [Authorize(Roles = nameof(Role.Admin))]
     public async Task<ActionResult<TournamentLocationDto>> AddLocation(int id, AddTournamentLocationDto request)
     {
         try

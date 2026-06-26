@@ -73,6 +73,20 @@ export async function getTournamentTeams(tournamentId: string): Promise<Tourname
   return data;
 }
 
+export type CreateTeamRequest = {
+  name: string;
+  createdBy: string;
+  memberUserIds: number[] | null;
+};
+
+export async function addTeam(tournamentId: string, request: CreateTeamRequest): Promise<TournamentTeam> {
+  const { data } = await apiClient.post<TournamentTeam>(
+    `${API_BASE_URL}/tournaments/${tournamentId}/teams`,
+    request
+  );
+  return data;
+}
+
 export async function getTournamentById(id: string): Promise<Tournament | undefined> {
   try {
     const { data } = await apiClient.get<any>(`${API_BASE_URL}/tournaments/${id}`);
