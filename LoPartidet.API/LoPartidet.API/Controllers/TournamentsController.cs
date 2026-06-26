@@ -28,9 +28,10 @@ public class TournamentsController(ITournamentService tournamentService) : Contr
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<TournamentDto>> GetTournamentById(int id)
+    public async Task<ActionResult<TournamentDetailDto>> GetTournamentById(int id)
     {
-        var result = await tournamentService.GetByIdAsync(id);
+        var identityId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var result = await tournamentService.GetByIdAsync(id, identityId);
         if (result is null) return NotFound();
         return Ok(result);
     }

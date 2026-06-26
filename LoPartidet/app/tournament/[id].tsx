@@ -91,7 +91,9 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
     justifyContent: "center",
     backgroundColor: colors.green,
   },
+  joinButtonDisabled: { backgroundColor: colors.border },
   joinButtonText: { color: colors.black, fontSize: 16, fontWeight: "800" },
+  joinButtonTextDisabled: { color: colors.muted },
 }));
 
 function getStatusConfig(t: any, colors: any): Record<TournamentStatus, { label: string; bg: string; fg: string }> {
@@ -231,10 +233,17 @@ export default function TournamentDetailPage() {
 
         {tournament.status === TournamentStatus.Draft && (
           <Pressable
-            style={({ pressed }) => [styles.joinButton, pressed && { opacity: 0.8 }]}
+            style={({ pressed }) => [
+              styles.joinButton,
+              tournament.isCurrentUserInTeam && styles.joinButtonDisabled,
+              !tournament.isCurrentUserInTeam && pressed && { opacity: 0.8 },
+            ]}
             onPress={() => router.push({ pathname: "/tournament/create-team", params: { tournamentId: id } })}
+            disabled={tournament.isCurrentUserInTeam}
           >
-            <Text style={styles.joinButtonText}>{t.joinTournament}</Text>
+            <Text style={[styles.joinButtonText, tournament.isCurrentUserInTeam && styles.joinButtonTextDisabled]}>
+              {tournament.isCurrentUserInTeam ? t.createTeamAlreadyInTeam : t.joinTournament}
+            </Text>
           </Pressable>
         )}
 

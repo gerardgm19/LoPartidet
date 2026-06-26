@@ -18,6 +18,7 @@ export type Tournament = {
   halfDurationMinutes: number;
   halfTimeDurationMinutes: number;
   gapBetweenMatchesMinutes: number;
+  isCurrentUserInTeam?: boolean;
 };
 
 function normalizeTournament(raw: any): Tournament {
