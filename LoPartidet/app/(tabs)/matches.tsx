@@ -73,7 +73,23 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
     letterSpacing: 0.5,
   },
   list: {
-    paddingBottom: 16,
+    paddingBottom: 80,
+  },
+  fab: {
+    position: "absolute",
+    bottom: 24,
+    right: 20,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: colors.green,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: colors.green,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 8,
   },
   centered: {
     flex: 1,
@@ -216,6 +232,13 @@ export default function Matches() {
           }
         />
       )}
+      <Pressable
+        style={({ pressed }) => [styles.fab, pressed && { opacity: 0.8 }]}
+        onPress={() => router.push("/match/create-match")}
+        accessibilityLabel={t.createMatchBtn}
+      >
+        <Ionicons name="add" size={28} color={colors.black} />
+      </Pressable>
       <Toast
         message={t.matchesError}
         visible={toastVisible}

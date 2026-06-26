@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import { Text, View } from "react-native";
+import { Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useThemeStore } from "@/store/themeStore";
 import { useLangStore } from "@/store/langStore";
@@ -53,32 +53,6 @@ export default function TabLayout() {
             <Ionicons name="trophy-outline" size={size} color={color} />
           ),
           tabBarLabel: ({ color }) => <TabLabel label={t.tournaments} color={color} />,
-        }}
-      />
-
-      <Tabs.Screen
-        name="create"
-        options={{
-          title: "",
-          tabBarLabel: () => null,
-          tabBarIcon: () => (
-            <View style={{
-              width: 52,
-              height: 52,
-              borderRadius: 26,
-              backgroundColor: colors.green,
-              justifyContent: "center",
-              alignItems: "center",
-              marginBottom: 8,
-              shadowColor: colors.green,
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.4,
-              shadowRadius: 8,
-              elevation: 8,
-            }}>
-              <Ionicons name="add" size={28} color={colors.black} />
-            </View>
-          ),
         }}
       />
 

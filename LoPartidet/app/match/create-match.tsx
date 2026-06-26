@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { useThemeStore } from "@/store/themeStore";
 import { makeStyles } from "@/utils/makeStyles";
 import { getSportTypeLabel } from "@/constants/match";
@@ -37,14 +38,22 @@ const SPORT_TYPES = [
 const useStyles = makeStyles((colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.black },
   flex: { flex: 1 },
-  scroll: { paddingHorizontal: 20, paddingBottom: 32, gap: 20 },
-  title: {
-    color: colors.white,
-    fontSize: 32,
-    fontWeight: "800",
-    letterSpacing: -0.5,
-    marginTop: 8,
+  navbar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
+  backButton: {
+    width: 38, height: 38, borderRadius: 12,
+    backgroundColor: colors.card,
+    borderWidth: 1, borderColor: colors.border,
+    justifyContent: "center", alignItems: "center",
+  },
+  navTitle: { color: colors.white, fontSize: 16, fontWeight: "700" },
+  navPlaceholder: { width: 38 },
+  scroll: { paddingHorizontal: 20, paddingBottom: 32, gap: 20 },
   section: { gap: 10 },
   label: {
     color: colors.muted,
@@ -154,6 +163,16 @@ export default function Create() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
+      <View style={styles.navbar}>
+        <Pressable
+          style={({ pressed }) => [styles.backButton, pressed && { opacity: 0.6 }]}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={22} color={colors.white} />
+        </Pressable>
+        <Text style={styles.navTitle}>{t.createMatchTitle}</Text>
+        <View style={styles.navPlaceholder} />
+      </View>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -163,8 +182,6 @@ export default function Create() {
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.title}>{t.createMatchTitle}</Text>
-
         <View style={styles.section}>
           <Text style={styles.label}>{t.sportType}</Text>
           <View style={styles.typeGrid}>
