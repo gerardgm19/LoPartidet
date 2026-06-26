@@ -7,8 +7,10 @@ import { makeStyles } from "@/utils/makeStyles";
 import MatchCardSkeleton from "@/components/MatchCardSkeleton";
 import { Toast } from "@/components/Toast";
 import { useLangStore } from "@/store/langStore";
-
-type Tournament = { id: string };
+import { getTournaments, Tournament } from "@/services/tournamentsService";
+import { getSportTypeLabel } from "@/constants/match";
+import { TournamentStatus } from "@/types/tournamentStatus";
+import { formatDateShort } from "@/utils/formatDate";
 
 const useStyles = makeStyles((colors) => StyleSheet.create({
   container: {
@@ -54,7 +56,54 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
     color: colors.muted,
     fontSize: 14,
   },
+  card: {
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  cardName: {
+    color: colors.white,
+    fontSize: 18,
+    fontWeight: "700",
+    flex: 1,
+    marginRight: 8,
+  },
+  statusPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: colors.border,
+  },
+  statusText: {
+    color: colors.muted,
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+  },
+  metaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 4,
+  },
+  metaText: {
+    color: colors.muted,
+    fontSize: 13,
+  },
 }));
+
+function statusLabel(status: TournamentStatus): string {
+  return TournamentStatus[status] ?? "";
+}
 
 export default function Tournaments() {
   const t = useLangStore((s) => s.t);
@@ -66,9 +115,11 @@ export default function Tournaments() {
   const [toastVisible, setToastVisible] = useState(false);
   const spinAnim = useRef(new Animated.Value(0)).current;
 
+  const sportLabels = getSportTypeLabel(t);
+
   const fetchTournaments = useCallback((isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
-    Promise.resolve<Tournament[]>([])
+    getTournaments()
       .then(setTournaments)
       .catch(() => setToastVisible(true))
       .finally(() => {
@@ -120,8 +171,33 @@ export default function Tournaments() {
       ) : (
         <FlatList
           data={tournaments}
-          keyExtractor={(item) => item.id}
-          renderItem={() => null}
+          keyExtractor={(item) => String(item.id)}
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              <View style={styles.cardHeader}>
+                <Text style={styles.cardName} numberOfLines={1}>{item.name}</Text>
+                <View style={styles.statusPill}>
+                  <Text style={styles.statusText}>{statusLabel(item.status)}</Text>
+                </View>
+              </View>
+              <View style={styles.metaRow}>
+                <Ionicons name="football-outline" size={14} color={colors.muted} />
+                <Text style={styles.metaText}>{sportLabels[item.sportType]}</Text>
+              </View>
+              <View style={styles.metaRow}>
+                <Ionicons name="calendar-outline" size={14} color={colors.muted} />
+                <Text style={styles.metaText}>
+                  {formatDateShort(item.startDate).day} · {formatDateShort(item.startDate).time}
+                </Text>
+              </View>
+              <View style={styles.metaRow}>
+                <Ionicons name="people-outline" size={14} color={colors.muted} />
+                <Text style={styles.metaText}>
+                  {item.groupsCount} × {item.teamsPerGroup}
+                </Text>
+              </View>
+            </View>
+          )}
           contentContainerStyle={tournaments.length === 0 ? { flexGrow: 1 } : styles.list}
           showsVerticalScrollIndicator={false}
           refreshing={false}
