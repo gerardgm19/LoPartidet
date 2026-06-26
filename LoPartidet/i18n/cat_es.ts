@@ -29,6 +29,24 @@ const cat_es = {
   noTournamentsSubtitle: "Els tornejos apareixeran aquí",
   tournamentsError: "No s'han pogut carregar els tornejos. Comprova la connexió.",
 
+  // Tournament detail
+  tournamentDetails: "Detalls del torneig",
+  tournamentNotFound: "Torneig no trobat",
+  tournamentError: "No s'ha pogut carregar el torneig. Comprova la connexió.",
+  tournamentStatusDraft: "Esborrany",
+  tournamentStatusGroupStage: "Fase de grups",
+  tournamentStatusKnockout: "Eliminatòries",
+  tournamentStatusFinished: "Finalitzat",
+  tournamentStartDate: "Data d'inici",
+  tournamentGroups: "Grups",
+  tournamentTeamsPerGroup: "Equips per grup",
+  tournamentQualifiedPerGroup: "Classificats per grup",
+  tournamentSingleElimination: "Eliminació directa",
+  tournamentThirdPlace: "3r lloc",
+  tournamentHalfDuration: "Durada de la part",
+  tournamentHalfTime: "Descans",
+  tournamentGapBetweenMatches: "Entre partits",
+
   // Create tournament
   createTournamentTitle: "Nou torneig",
   createTournamentBtn: "Crear torneig",

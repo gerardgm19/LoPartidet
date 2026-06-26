@@ -58,3 +58,12 @@ export async function createTournament(request: CreateTournamentRequest): Promis
   const { data } = await apiClient.post<any>(`${API_BASE_URL}/tournaments`, request);
   return normalizeTournament(data);
 }
+
+export async function getTournamentById(id: string): Promise<Tournament | undefined> {
+  try {
+    const { data } = await apiClient.get<any>(`${API_BASE_URL}/tournaments/${id}`);
+    return normalizeTournament(data);
+  } catch {
+    return undefined;
+  }
+}

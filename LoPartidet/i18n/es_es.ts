@@ -29,6 +29,24 @@ const es_es = {
   noTournamentsSubtitle: "Los torneos aparecerán aquí",
   tournamentsError: "No se pudieron cargar los torneos. Comprueba tu conexión.",
 
+  // Tournament detail
+  tournamentDetails: "Detalles del torneo",
+  tournamentNotFound: "Torneo no encontrado",
+  tournamentError: "No se pudo cargar el torneo. Comprueba tu conexión.",
+  tournamentStatusDraft: "Borrador",
+  tournamentStatusGroupStage: "Fase de grupos",
+  tournamentStatusKnockout: "Eliminatorias",
+  tournamentStatusFinished: "Finalizado",
+  tournamentStartDate: "Fecha de inicio",
+  tournamentGroups: "Grupos",
+  tournamentTeamsPerGroup: "Equipos por grupo",
+  tournamentQualifiedPerGroup: "Clasificados por grupo",
+  tournamentSingleElimination: "Eliminación directa",
+  tournamentThirdPlace: "3er puesto",
+  tournamentHalfDuration: "Duración de parte",
+  tournamentHalfTime: "Descanso",
+  tournamentGapBetweenMatches: "Entre partidos",
+
   // Create tournament
   createTournamentTitle: "Nuevo torneo",
   createTournamentBtn: "Crear torneo",

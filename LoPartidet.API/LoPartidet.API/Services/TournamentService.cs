@@ -327,7 +327,16 @@ public class TournamentService(
 
     public Task GetBracketAsync(int tournamentId) => throw new NotImplementedException();
 
-    public Task GetByIdAsync(int id) => throw new NotImplementedException();
+    public async Task<TournamentDto?> GetByIdAsync(int id)
+    {
+        var t = await db.Tournaments.FindAsync(id);
+        if (t is null) return null;
+        return new TournamentDto(
+            t.Id, t.Name, t.SportType, t.Status, t.CreatedById, t.StartDate,
+            t.GroupsCount, t.TeamsPerGroup, t.QualifiedPerGroup,
+            t.IsSingleElimination, t.HasThirdPlaceMatch,
+            t.HalfDurationMinutes, t.HalfTimeDurationMinutes, t.GapBetweenMatchesMinutes);
+    }
 
     public async Task<IReadOnlyList<TournamentDto>> GetAllAsync()
     {

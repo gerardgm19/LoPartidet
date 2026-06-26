@@ -190,7 +190,7 @@ export default function Tournaments() {
           data={tournaments}
           keyExtractor={(item) => String(item.id)}
           renderItem={({ item }) => (
-            <View style={styles.card}>
+            <Pressable style={({ pressed }) => [styles.card, pressed && { opacity: 0.75 }]} onPress={() => router.push(`/tournament/${item.id}`)}>
               <View style={styles.cardHeader}>
                 <Text style={styles.cardName} numberOfLines={1}>{item.name}</Text>
                 <View style={styles.statusPill}>
@@ -213,7 +213,7 @@ export default function Tournaments() {
                   {item.groupsCount} × {item.teamsPerGroup}
                 </Text>
               </View>
-            </View>
+            </Pressable>
           )}
           contentContainerStyle={tournaments.length === 0 ? { flexGrow: 1 } : styles.list}
           showsVerticalScrollIndicator={false}

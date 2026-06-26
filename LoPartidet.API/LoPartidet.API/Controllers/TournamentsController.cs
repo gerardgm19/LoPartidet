@@ -25,6 +25,14 @@ public class TournamentsController(ITournamentService tournamentService) : Contr
         }
     }
 
+    [HttpGet("{id}")]
+    public async Task<ActionResult<TournamentDto>> GetTournamentById(int id)
+    {
+        var result = await tournamentService.GetByIdAsync(id);
+        if (result is null) return NotFound();
+        return Ok(result);
+    }
+
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<TournamentDto>>> GetAllTournaments()
     {
