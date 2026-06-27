@@ -49,6 +49,7 @@ const cat_es = {
   tournamentTeams: "Equips inscrits",
   tournamentNoTeams: "Cap equip inscrit encara",
   tournamentMembers: "membres",
+  yourTeam: "El teu equip",
   you: "Tu",
   joinTournament: "Unir-se al torneig",
   createTeamTitle: "Crear equip",

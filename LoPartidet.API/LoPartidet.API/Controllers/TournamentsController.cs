@@ -46,7 +46,8 @@ public class TournamentsController(ITournamentService tournamentService) : Contr
     [HttpGet("{id}/teams")]
     public async Task<ActionResult<IReadOnlyList<TeamDto>>> GetTeams(int id)
     {
-        var result = await tournamentService.GetTeamsByTournamentAsync(id);
+        var identityId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var result = await tournamentService.GetTeamsByTournamentAsync(id, identityId);
         return Ok(result);
     }
 

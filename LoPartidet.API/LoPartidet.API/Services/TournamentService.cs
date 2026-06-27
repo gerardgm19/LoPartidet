@@ -83,7 +83,7 @@ public class TournamentService(
             await db.SaveChangesAsync();
         }
 
-        return new TeamDto(team.Id, team.Name, team.TournamentId, team.GroupId, team.CreatedById, memberIds);
+        return new TeamDto(team.Id, team.Name, team.TournamentId, team.GroupId, team.CreatedById, false);
     }
 
     public async Task<TournamentLocationDto> AddLocationAsync(int tournamentId, AddTournamentLocationDto request)
@@ -323,8 +323,13 @@ public class TournamentService(
 
     private sealed record RoundDefinition(TournamentPhase Phase, int MatchCount);
 
-    public async Task<IReadOnlyList<TeamDto>> GetTeamsByTournamentAsync(int tournamentId)
+    public async Task<IReadOnlyList<TeamDto>> GetTeamsByTournamentAsync(int tournamentId, string identityId)
     {
+        var appUserId = await db.Users
+            .Where(u => u.IdentityId == identityId)
+            .Select(u => u.Id)
+            .FirstOrDefaultAsync();
+
         return await db.Teams
             .Where(t => t.TournamentId == tournamentId)
             .Select(t => new TeamDto(
@@ -333,7 +338,7 @@ public class TournamentService(
                 t.TournamentId,
                 t.GroupId,
                 t.CreatedById,
-                t.Members.Select(m => m.UserId).ToList()))
+                appUserId > 0 && t.Members.Any(m => m.UserId == appUserId)))
             .ToListAsync();
     }
 

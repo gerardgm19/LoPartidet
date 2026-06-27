@@ -49,6 +49,7 @@ const es_es = {
   tournamentTeams: "Equipos inscritos",
   tournamentNoTeams: "Ningún equipo inscrito todavía",
   tournamentMembers: "miembros",
+  yourTeam: "Tu equipo",
   you: "Tú",
   joinTournament: "Unirse al torneo",
   createTeamTitle: "Crear equipo",

@@ -6,5 +6,5 @@ public record TeamDto(
     int TournamentId,
     int? GroupId,
     int CreatedById,
-    IReadOnlyList<int> MemberUserIds
+    bool IsUserTeam
 );

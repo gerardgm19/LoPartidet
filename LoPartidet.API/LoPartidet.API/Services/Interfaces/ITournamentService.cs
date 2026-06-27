@@ -12,6 +12,6 @@ public interface ITournamentService
     Task GetStandingsAsync(int tournamentId);
     Task GetBracketAsync(int tournamentId);
     Task<TournamentDetailDto?> GetByIdAsync(int id, string identityId);
-    Task<IReadOnlyList<TeamDto>> GetTeamsByTournamentAsync(int tournamentId);
+    Task<IReadOnlyList<TeamDto>> GetTeamsByTournamentAsync(int tournamentId, string identityId);
     Task<IReadOnlyList<TournamentDto>> GetAllAsync();
 }

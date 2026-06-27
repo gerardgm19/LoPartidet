@@ -82,6 +82,12 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
   teamName: { color: colors.white, fontSize: 14, fontWeight: "600" },
   teamMeta: { color: colors.muted, fontSize: 12 },
   noTeamsText: { color: colors.muted, fontSize: 14, paddingVertical: 16, textAlign: "center" },
+  yourTeamBadge: {
+    marginLeft: "auto",
+    backgroundColor: colors.green,
+    borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3,
+  },
+  yourTeamBadgeText: { color: colors.black, fontSize: 11, fontWeight: "800" },
   joinButton: {
     marginHorizontal: 16,
     marginBottom: 24,
@@ -224,8 +230,12 @@ export default function TournamentDetailPage() {
                 </View>
                 <View>
                   <Text style={styles.teamName}>{team.name}</Text>
-                  <Text style={styles.teamMeta}>{team.memberUserIds.length} {t.tournamentMembers}</Text>
                 </View>
+                {team.isUserTeam && (
+                  <View style={styles.yourTeamBadge}>
+                    <Text style={styles.yourTeamBadgeText}>{t.yourTeam}</Text>
+                  </View>
+                )}
               </View>
             ))
           }

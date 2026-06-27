@@ -66,7 +66,7 @@ export type TournamentTeam = {
   tournamentId: number;
   groupId: number | null;
   createdById: number;
-  memberUserIds: number[];
+  isUserTeam: boolean;
 };
 
 export async function getTournamentTeams(tournamentId: string): Promise<TournamentTeam[]> {
