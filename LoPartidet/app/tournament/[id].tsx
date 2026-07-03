@@ -12,6 +12,7 @@ import { DetailRow } from "@/components/DetailRow";
 import { formatDateShort } from "@/utils/formatDate";
 import { Toast } from "@/components/Toast";
 import { useLangStore } from "@/store/langStore";
+import { useAuthStore } from "@/store/authStore";
 
 const useStyles = makeStyles((colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.black },
@@ -126,6 +127,7 @@ function getStatusConfig(t: any, colors: any): Record<TournamentStatus, { label:
 
 export default function TournamentDetailPage() {
   const t = useLangStore((s) => s.t);
+  const isAdmin = useAuthStore((s) => s.isAdmin());
   const colors = useThemeStore((s) => s.colors);
   const styles = useStyles();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -287,22 +289,24 @@ export default function TournamentDetailPage() {
               </Text>
             </Pressable>
 
-            <Pressable
-              style={({ pressed }) => [
-                styles.testTeamsButton,
-                (isFull || generating) && styles.testTeamsButtonDisabled,
-                !isFull && !generating && pressed && { opacity: 0.8 },
-              ]}
-              onPress={handleGenerateTestTeams}
-              disabled={isFull || generating}
-            >
-              {generating
-                ? <ActivityIndicator color={colors.green} />
-                : <Text style={[styles.testTeamsButtonText, isFull && styles.joinButtonTextDisabled]}>
-                    {isFull ? t.tournamentFull : t.generateTestTeams}
-                  </Text>
-              }
-            </Pressable>
+            {isAdmin && (
+              <Pressable
+                style={({ pressed }) => [
+                  styles.testTeamsButton,
+                  (isFull || generating) && styles.testTeamsButtonDisabled,
+                  !isFull && !generating && pressed && { opacity: 0.8 },
+                ]}
+                onPress={handleGenerateTestTeams}
+                disabled={isFull || generating}
+              >
+                {generating
+                  ? <ActivityIndicator color={colors.green} />
+                  : <Text style={[styles.testTeamsButtonText, isFull && styles.joinButtonTextDisabled]}>
+                      {isFull ? t.tournamentFull : t.generateTestTeams}
+                    </Text>
+                }
+              </Pressable>
+            )}
           </>
         )}
 

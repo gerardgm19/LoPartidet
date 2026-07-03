@@ -9,7 +9,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import LoadingScreen from "@/components/LoadingScreen";
 
 function RootNavigator() {
-  const { token, userId, isLoading, signOut, initialize, setUserId } = useAuthStore();
+  const { token, userId, isLoading, signOut, initialize, setUserId, setRoles } = useAuthStore();
   const segments = useSegments();
   const router = useRouter();
 
@@ -47,6 +47,7 @@ function RootNavigator() {
         .then(async (me) => {
           if (me) {
             setUserId(me.userId.toString());
+            await setRoles(me.roles);
           } else {
             await signOut();
             router.replace("/(auth)/login");
