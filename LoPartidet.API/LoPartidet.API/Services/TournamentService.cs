@@ -86,6 +86,50 @@ public class TournamentService(
         return new TeamDto(team.Id, team.Name, team.TournamentId, team.GroupId, team.CreatedById, false);
     }
 
+    #region Test methods
+
+    public async Task<IReadOnlyList<TeamDto>> GenerateTestTeams(int tournamentId)
+    {
+        var tournament = await db.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId);
+        if (tournament is null)
+            throw new InvalidOperationException($"Tournament {tournamentId} not found.");
+
+        var capacity = tournament.GroupsCount * tournament.TeamsPerGroup;
+        var existingCount = await db.Teams.CountAsync(t => t.TournamentId == tournamentId);
+        var missing = capacity - existingCount;
+        if (missing <= 0)
+        {
+            logger.LogInformation(
+                "Tournament {TournamentId} already full ({ExistingCount}/{Capacity} teams), no test teams generated",
+                tournamentId, existingCount, capacity);
+            return [];
+        }
+
+        var teams = new List<Team>(missing);
+        for (var i = 0; i < missing; i++)
+        {
+            teams.Add(new Team
+            {
+                Name = $"Test Team {existingCount + i + 1}",
+                TournamentId = tournamentId,
+                CreatedById = tournament.CreatedById,
+            });
+        }
+
+        db.Teams.AddRange(teams);
+        await db.SaveChangesAsync();
+
+        logger.LogInformation(
+            "Tournament {TournamentId} generated {Count} test teams to reach capacity {Capacity}",
+            tournamentId, teams.Count, capacity);
+
+        return teams
+            .Select(t => new TeamDto(t.Id, t.Name, t.TournamentId, t.GroupId, t.CreatedById, false))
+            .ToList();
+    }
+
+    #endregion
+
     public async Task<TournamentLocationDto> AddLocationAsync(int tournamentId, AddTournamentLocationDto request)
     {
         var validation = await validationService.ValidateAddLocationAsync(

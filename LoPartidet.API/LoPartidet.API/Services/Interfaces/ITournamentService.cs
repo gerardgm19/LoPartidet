@@ -6,6 +6,7 @@ public interface ITournamentService
 {
     Task<TournamentDto> CreateAsync(CreateTournamentDto request);
     Task<TeamDto> AddTeamAsync(int tournamentId, CreateTeamDto request);
+    Task<IReadOnlyList<TeamDto>> GenerateTestTeams(int tournamentId);
     Task<IReadOnlyList<GroupDto>> AssignTeamsToGroupsAsync(int tournamentId);
     Task<TournamentLocationDto> AddLocationAsync(int tournamentId, AddTournamentLocationDto request);
     Task StartTournamentAsync(int tournamentId);

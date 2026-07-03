@@ -52,6 +52,8 @@ const cat_es = {
   yourTeam: "El teu equip",
   you: "Tu",
   joinTournament: "Unir-se al torneig",
+  generateTestTeams: "Generar equips de prova",
+  tournamentFull: "Torneig complet",
   createTeamTitle: "Crear equip",
   createTeamBtn: "Crear equip",
   teamName: "Nom de l'equip",

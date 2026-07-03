@@ -88,6 +88,13 @@ export async function addTeam(tournamentId: string, request: CreateTeamRequest):
   return data;
 }
 
+export async function generateTestTeams(tournamentId: string): Promise<TournamentTeam[]> {
+  const { data } = await apiClient.post<TournamentTeam[]>(
+    `${API_BASE_URL}/tournaments/${tournamentId}/test-teams`
+  );
+  return data;
+}
+
 export async function getTournamentById(id: string): Promise<Tournament | undefined> {
   try {
     const { data } = await apiClient.get<any>(`${API_BASE_URL}/tournaments/${id}`);

@@ -6,7 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useThemeStore } from "@/store/themeStore";
 import { makeStyles } from "@/utils/makeStyles";
 import { getSportTypeLabel } from "@/constants/match";
-import { getTournamentById, getTournamentTeams, Tournament, TournamentTeam } from "@/services/tournamentsService";
+import { generateTestTeams, getTournamentById, getTournamentTeams, Tournament, TournamentTeam } from "@/services/tournamentsService";
 import { TournamentStatus } from "@/types/tournamentStatus";
 import { DetailRow } from "@/components/DetailRow";
 import { formatDateShort } from "@/utils/formatDate";
@@ -100,6 +100,19 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
   joinButtonDisabled: { backgroundColor: colors.border },
   joinButtonText: { color: colors.black, fontSize: 16, fontWeight: "800" },
   joinButtonTextDisabled: { color: colors.muted },
+  testTeamsButton: {
+    marginHorizontal: 16,
+    marginBottom: 24,
+    borderRadius: 14,
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.green,
+  },
+  testTeamsButtonDisabled: { borderColor: colors.border },
+  testTeamsButtonText: { color: colors.green, fontSize: 16, fontWeight: "800" },
 }));
 
 function getStatusConfig(t: any, colors: any): Record<TournamentStatus, { label: string; bg: string; fg: string }> {
@@ -121,6 +134,7 @@ export default function TournamentDetailPage() {
   const [loading, setLoading] = useState(true);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
     Promise.all([getTournamentById(id), getTournamentTeams(id)])
@@ -160,6 +174,22 @@ export default function TournamentDetailPage() {
   const sportTypeLabel = getSportTypeLabel(t);
   const statusCfg = getStatusConfig(t, colors)[tournament.status];
   const { day, time } = formatDateShort(tournament.startDate);
+
+  const capacity = tournament.groupsCount * tournament.teamsPerGroup;
+  const isFull = teams.length >= capacity;
+
+  const handleGenerateTestTeams = async () => {
+    setGenerating(true);
+    try {
+      const created = await generateTestTeams(id);
+      setTeams((prev) => [...prev, ...created]);
+    } catch {
+      setToastMessage(t.tournamentError);
+      setToastVisible(true);
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
@@ -242,19 +272,38 @@ export default function TournamentDetailPage() {
         </View>
 
         {tournament.status === TournamentStatus.Draft && (
-          <Pressable
-            style={({ pressed }) => [
-              styles.joinButton,
-              tournament.isCurrentUserInTeam && styles.joinButtonDisabled,
-              !tournament.isCurrentUserInTeam && pressed && { opacity: 0.8 },
-            ]}
-            onPress={() => router.push({ pathname: "/tournament/create-team", params: { tournamentId: id } })}
-            disabled={tournament.isCurrentUserInTeam}
-          >
-            <Text style={[styles.joinButtonText, tournament.isCurrentUserInTeam && styles.joinButtonTextDisabled]}>
-              {tournament.isCurrentUserInTeam ? t.createTeamAlreadyInTeam : t.joinTournament}
-            </Text>
-          </Pressable>
+          <>
+            <Pressable
+              style={({ pressed }) => [
+                styles.joinButton,
+                tournament.isCurrentUserInTeam && styles.joinButtonDisabled,
+                !tournament.isCurrentUserInTeam && pressed && { opacity: 0.8 },
+              ]}
+              onPress={() => router.push({ pathname: "/tournament/create-team", params: { tournamentId: id } })}
+              disabled={tournament.isCurrentUserInTeam}
+            >
+              <Text style={[styles.joinButtonText, tournament.isCurrentUserInTeam && styles.joinButtonTextDisabled]}>
+                {tournament.isCurrentUserInTeam ? t.createTeamAlreadyInTeam : t.joinTournament}
+              </Text>
+            </Pressable>
+
+            <Pressable
+              style={({ pressed }) => [
+                styles.testTeamsButton,
+                (isFull || generating) && styles.testTeamsButtonDisabled,
+                !isFull && !generating && pressed && { opacity: 0.8 },
+              ]}
+              onPress={handleGenerateTestTeams}
+              disabled={isFull || generating}
+            >
+              {generating
+                ? <ActivityIndicator color={colors.green} />
+                : <Text style={[styles.testTeamsButtonText, isFull && styles.joinButtonTextDisabled]}>
+                    {isFull ? t.tournamentFull : t.generateTestTeams}
+                  </Text>
+              }
+            </Pressable>
+          </>
         )}
 
       </ScrollView>

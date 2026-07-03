@@ -52,6 +52,8 @@ const es_es = {
   yourTeam: "Tu equipo",
   you: "Tú",
   joinTournament: "Unirse al torneo",
+  generateTestTeams: "Generar equipos de prueba",
+  tournamentFull: "Torneo completo",
   createTeamTitle: "Crear equipo",
   createTeamBtn: "Crear equipo",
   teamName: "Nombre del equipo",

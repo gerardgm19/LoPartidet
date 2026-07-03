@@ -68,6 +68,25 @@ public class TournamentsController(ITournamentService tournamentService) : Contr
         }
     }
 
+    #region Test methods
+
+    [HttpPost("{id}/test-teams")]
+    [Authorize(Roles = nameof(Role.Admin))]
+    public async Task<ActionResult<IReadOnlyList<TeamDto>>> GenerateTestTeams(int id)
+    {
+        try
+        {
+            var result = await tournamentService.GenerateTestTeams(id);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    #endregion
+
     [HttpPost("{id}/locations")]
     [Authorize(Roles = nameof(Role.Admin))]
     public async Task<ActionResult<TournamentLocationDto>> AddLocation(int id, AddTournamentLocationDto request)
