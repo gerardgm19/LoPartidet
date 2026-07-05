@@ -11,5 +11,7 @@ namespace LoPartidet.API.Entities
         public int? BracketSlot { get; init; }
 
         public Tournament Tournament { get; init; } = null!;
+        public ICollection<Team> Teams { get; set; } = [];
+        public ICollection<TournamentMatch> Matches { get; set; } = [];
     }
 }
