@@ -128,6 +128,94 @@ public class TournamentService(
             .ToList();
     }
 
+    public async Task<TournamentPreviewDto> GetTestTournamentGroupsAndMatchesAsync(int tournamentId)
+    {
+        var validation = await validationService.ValidateStartTournamentAsync(
+            new StartTournamentValidationRequest(tournamentId));
+        if (!validation.IsValid)
+            throw new InvalidOperationException(validation.Error);
+
+        var tournament = await db.Tournaments.FirstAsync(t => t.Id == tournamentId);
+        var teams = await db.Teams
+            .Where(t => t.TournamentId == tournamentId)
+            .ToListAsync();
+        var tournamentLocationIds = await db.TournamentLocations
+            .Where(tl => tl.TournamentId == tournamentId)
+            .Select(tl => tl.Id)
+            .ToListAsync();
+
+        var slotCadence = tournament.HalfDurationMinutes * 2 + tournament.HalfTimeDurationMinutes + tournament.GapBetweenMatchesMinutes;
+
+        // Assign teams to groups in memory (mirrors AssignTeamsToGroupsAsync, without persisting).
+        var groups = Enumerable.Range(0, tournament.GroupsCount)
+            .Select(i => (Name: $"1.{i + 1}", Teams: new List<Team>()))
+            .ToList();
+        var shuffledTeams = teams.OrderBy(_ => Random.Shared.Next()).ToList();
+        for (var i = 0; i < shuffledTeams.Count; i++)
+            groups[i % tournament.GroupsCount].Teams.Add(shuffledTeams[i]);
+
+        // Group stage matchups (mirrors CreateGroupStageMatches).
+        var matchups = new List<(string GroupName, Team A, Team B)>();
+        foreach (var group in groups)
+            for (var i = 0; i < group.Teams.Count; i++)
+                for (var j = i + 1; j < group.Teams.Count; j++)
+                    matchups.Add((group.Name, group.Teams[i], group.Teams[j]));
+        var shuffledMatchups = matchups.OrderBy(_ => Random.Shared.Next()).ToList();
+
+        var groupStageMatches = new List<PreviewMatchDto>(shuffledMatchups.Count);
+        for (var k = 0; k < shuffledMatchups.Count; k++)
+        {
+            var (groupName, teamA, teamB) = shuffledMatchups[k];
+            var locationIndex = k % tournamentLocationIds.Count;
+            var slotIndex = k / tournamentLocationIds.Count;
+            groupStageMatches.Add(new PreviewMatchDto(
+                groupName,
+                TournamentPhase.GroupStage,
+                null,
+                teamA.Id, teamA.Name,
+                teamB.Id, teamB.Name,
+                tournamentLocationIds[locationIndex],
+                tournament.StartDate.AddMinutes(slotIndex * slotCadence)));
+        }
+
+        // Bracket template (mirrors CreateTemplateBracketMatches) — no teams assigned yet.
+        var bracketSize = tournament.GroupsCount * tournament.QualifiedPerGroup;
+        var rounds = BuildRoundList(bracketSize, tournament.HasThirdPlaceMatch);
+        var latestGroupStageDate = groupStageMatches.Count > 0
+            ? groupStageMatches.Max(m => m.Date)
+            : tournament.StartDate;
+        var bracketsStartDate = latestGroupStageDate.AddMinutes(slotCadence);
+
+        var currentSlot = 0;
+        var bracketMatches = new List<PreviewMatchDto>();
+        foreach (var round in rounds)
+        {
+            for (var k = 0; k < round.MatchCount; k++)
+            {
+                var locationIndex = k % tournamentLocationIds.Count;
+                var subSlot = k / tournamentLocationIds.Count;
+                bracketMatches.Add(new PreviewMatchDto(
+                    $"{Enum.GetName(round.Phase)}{k + 1}",
+                    round.Phase,
+                    k + 1,
+                    null, null,
+                    null, null,
+                    tournamentLocationIds[locationIndex],
+                    bracketsStartDate.AddMinutes((currentSlot + subSlot) * slotCadence)));
+            }
+            currentSlot += (int)Math.Ceiling((double)round.MatchCount / tournamentLocationIds.Count);
+        }
+
+        var groupDtos = groups
+            .Select(g => new PreviewGroupDto(
+                g.Name,
+                TournamentPhase.GroupStage,
+                g.Teams.Select(team => new PreviewTeamDto(team.Id, team.Name)).ToList()))
+            .ToList();
+
+        return new TournamentPreviewDto(groupDtos, groupStageMatches, bracketMatches);
+    }
+
     #endregion
 
     public async Task<TournamentLocationDto> AddLocationAsync(int tournamentId, AddTournamentLocationDto request)

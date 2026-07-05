@@ -85,6 +85,21 @@ public class TournamentsController(ITournamentService tournamentService) : Contr
         }
     }
 
+    [HttpGet("{id}/preview")]
+    [Authorize(Roles = nameof(Role.Admin))]
+    public async Task<ActionResult<TournamentPreviewDto>> GetTestGroupsAndMatches(int id)
+    {
+        try
+        {
+            var result = await tournamentService.GetTestTournamentGroupsAndMatchesAsync(id);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     #endregion
 
     [HttpPost("{id}/locations")]

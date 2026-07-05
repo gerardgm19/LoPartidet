@@ -10,6 +10,7 @@ public interface ITournamentService
     Task<IReadOnlyList<GroupDto>> AssignTeamsToGroupsAsync(int tournamentId);
     Task<TournamentLocationDto> AddLocationAsync(int tournamentId, AddTournamentLocationDto request);
     Task StartTournamentAsync(int tournamentId);
+    Task<TournamentPreviewDto> GetTestTournamentGroupsAndMatchesAsync(int tournamentId);
     Task GetStandingsAsync(int tournamentId);
     Task GetBracketAsync(int tournamentId);
     Task<TournamentDetailDto?> GetByIdAsync(int id, string identityId);

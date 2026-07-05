@@ -1,5 +1,6 @@
 import { SportType } from "@/types/sportType";
 import { TournamentStatus } from "@/types/tournamentStatus";
+import { TournamentPhase } from "@/types/tournamentPhase";
 import { API_BASE_URL } from "@/constants/env";
 import { apiClient } from "./api";
 
@@ -91,6 +92,42 @@ export async function addTeam(tournamentId: string, request: CreateTeamRequest):
 export async function generateTestTeams(tournamentId: string): Promise<TournamentTeam[]> {
   const { data } = await apiClient.post<TournamentTeam[]>(
     `${API_BASE_URL}/tournaments/${tournamentId}/test-teams`
+  );
+  return data;
+}
+
+export type PreviewTeam = {
+  id: number;
+  name: string;
+};
+
+export type PreviewGroup = {
+  name: string;
+  phase: TournamentPhase;
+  teams: PreviewTeam[];
+};
+
+export type PreviewMatch = {
+  groupName: string;
+  phase: TournamentPhase;
+  bracketSlot: number | null;
+  teamAId: number | null;
+  teamAName: string | null;
+  teamBId: number | null;
+  teamBName: string | null;
+  tournamentLocationId: number;
+  date: string;
+};
+
+export type TournamentPreview = {
+  groups: PreviewGroup[];
+  groupStageMatches: PreviewMatch[];
+  bracketMatches: PreviewMatch[];
+};
+
+export async function getTestTournamentGroupsAndMatches(tournamentId: string): Promise<TournamentPreview> {
+  const { data } = await apiClient.get<TournamentPreview>(
+    `${API_BASE_URL}/tournaments/${tournamentId}/preview`
   );
   return data;
 }
