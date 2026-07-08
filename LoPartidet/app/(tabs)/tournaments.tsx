@@ -10,7 +10,7 @@ import { Toast } from "@/components/Toast";
 import { useLangStore } from "@/store/langStore";
 import { getTournaments, Tournament } from "@/services/tournamentsService";
 import { getSportTypeLabel } from "@/constants/match";
-import { TournamentStatus } from "@/types/tournamentStatus";
+import { getTournamentStatusConfig } from "@/constants/tournament";
 import { formatDateShort } from "@/utils/formatDate";
 
 const useStyles = makeStyles((colors) => StyleSheet.create({
@@ -74,53 +74,70 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
     fontSize: 14,
   },
   card: {
+    flexDirection: "row",
     backgroundColor: colors.surface,
     borderRadius: 16,
-    padding: 16,
     marginBottom: 12,
     borderWidth: 1,
     borderColor: colors.border,
+    overflow: "hidden",
+  },
+  accentBar: {
+    width: 4,
+    alignSelf: "stretch",
+  },
+  cardBody: {
+    flex: 1,
+    padding: 16,
   },
   cardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 10,
+    gap: 8,
   },
   cardName: {
     color: colors.white,
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: "800",
     flex: 1,
-    marginRight: 8,
+    letterSpacing: -0.3,
   },
   statusPill: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
-    backgroundColor: colors.border,
+    borderRadius: 999,
   },
   statusText: {
-    color: colors.muted,
     fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 0.5,
+    fontWeight: "800",
+    letterSpacing: 0.4,
+    textTransform: "uppercase",
+  },
+  metaGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    rowGap: 8,
+    columnGap: 16,
   },
   metaRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    marginTop: 4,
   },
   metaText: {
     color: colors.muted,
     fontSize: 13,
+    fontWeight: "600",
+  },
+  chevron: {
+    alignSelf: "center",
+    paddingRight: 12,
+    paddingLeft: 4,
   },
 }));
-
-function statusLabel(status: TournamentStatus): string {
-  return TournamentStatus[status] ?? "";
-}
 
 export default function Tournaments() {
   const t = useLangStore((s) => s.t);
@@ -133,6 +150,7 @@ export default function Tournaments() {
   const spinAnim = useRef(new Animated.Value(0)).current;
 
   const sportLabels = getSportTypeLabel(t);
+  const statusConfig = getTournamentStatusConfig(t, colors);
 
   const fetchTournaments = useCallback((isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -189,32 +207,38 @@ export default function Tournaments() {
         <FlatList
           data={tournaments}
           keyExtractor={(item) => String(item.id)}
-          renderItem={({ item }) => (
-            <Pressable style={({ pressed }) => [styles.card, pressed && { opacity: 0.75 }]} onPress={() => router.push(`/tournament/${item.id}`)}>
-              <View style={styles.cardHeader}>
-                <Text style={styles.cardName} numberOfLines={1}>{item.name}</Text>
-                <View style={styles.statusPill}>
-                  <Text style={styles.statusText}>{statusLabel(item.status)}</Text>
+          renderItem={({ item }) => {
+            const status = statusConfig[item.status];
+            const date = formatDateShort(item.startDate);
+            return (
+              <Pressable style={({ pressed }) => [styles.card, pressed && { opacity: 0.75 }]} onPress={() => router.push(`/tournament/${item.id}`)}>
+                <View style={[styles.accentBar, { backgroundColor: status.fg }]} />
+                <View style={styles.cardBody}>
+                  <View style={styles.cardHeader}>
+                    <Text style={styles.cardName} numberOfLines={1}>{item.name}</Text>
+                    <View style={[styles.statusPill, { backgroundColor: status.bg }]}>
+                      <Text style={[styles.statusText, { color: status.fg }]}>{status.label}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.metaGrid}>
+                    <View style={styles.metaRow}>
+                      <Ionicons name="football-outline" size={14} color={colors.muted} />
+                      <Text style={styles.metaText}>{sportLabels[item.sportType]}</Text>
+                    </View>
+                    <View style={styles.metaRow}>
+                      <Ionicons name="calendar-outline" size={14} color={colors.muted} />
+                      <Text style={styles.metaText}>{date.day} · {date.time}</Text>
+                    </View>
+                    <View style={styles.metaRow}>
+                      <Ionicons name="people-outline" size={14} color={colors.muted} />
+                      <Text style={styles.metaText}>{item.groupsCount} × {item.teamsPerGroup}</Text>
+                    </View>
+                  </View>
                 </View>
-              </View>
-              <View style={styles.metaRow}>
-                <Ionicons name="football-outline" size={14} color={colors.muted} />
-                <Text style={styles.metaText}>{sportLabels[item.sportType]}</Text>
-              </View>
-              <View style={styles.metaRow}>
-                <Ionicons name="calendar-outline" size={14} color={colors.muted} />
-                <Text style={styles.metaText}>
-                  {formatDateShort(item.startDate).day} · {formatDateShort(item.startDate).time}
-                </Text>
-              </View>
-              <View style={styles.metaRow}>
-                <Ionicons name="people-outline" size={14} color={colors.muted} />
-                <Text style={styles.metaText}>
-                  {item.groupsCount} × {item.teamsPerGroup}
-                </Text>
-              </View>
-            </Pressable>
-          )}
+                <Ionicons style={styles.chevron} name="chevron-forward" size={20} color={colors.muted} />
+              </Pressable>
+            );
+          }}
           contentContainerStyle={tournaments.length === 0 ? { flexGrow: 1 } : styles.list}
           showsVerticalScrollIndicator={false}
           refreshing={false}

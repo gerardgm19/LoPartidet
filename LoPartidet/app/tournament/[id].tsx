@@ -6,6 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useThemeStore } from "@/store/themeStore";
 import { makeStyles } from "@/utils/makeStyles";
 import { getSportTypeLabel } from "@/constants/match";
+import { getTournamentStatusConfig } from "@/constants/tournament";
 import { deleteTournamentData, generateTestTeams, generateTournamentData, getTournamentById, getTournamentResults, getTournamentTeams, Tournament, TournamentTeam } from "@/services/tournamentsService";
 import { TournamentStatus } from "@/types/tournamentStatus";
 import { DetailRow } from "@/components/DetailRow";
@@ -129,15 +130,6 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
   deleteButtonText: { color: colors.red, fontSize: 16, fontWeight: "800" },
 }));
 
-function getStatusConfig(t: any, colors: any): Record<TournamentStatus, { label: string; bg: string; fg: string }> {
-  return {
-    [TournamentStatus.Draft]:      { label: t.tournamentStatusDraft,       bg: colors.border,  fg: colors.muted },
-    [TournamentStatus.GroupStage]: { label: t.tournamentStatusGroupStage,  bg: "#1a3a5c",      fg: "#4da6ff" },
-    [TournamentStatus.Knockout]:   { label: t.tournamentStatusKnockout,    bg: "#3a1a1a",      fg: "#ff6b6b" },
-    [TournamentStatus.Finished]:   { label: t.tournamentStatusFinished,    bg: colors.border,  fg: colors.muted },
-  };
-}
-
 export default function TournamentDetailPage() {
   const t = useLangStore((s) => s.t);
   const isAdmin = useAuthStore((s) => s.isAdmin());
@@ -192,7 +184,7 @@ export default function TournamentDetailPage() {
   }
 
   const sportTypeLabel = getSportTypeLabel(t);
-  const statusCfg = getStatusConfig(t, colors)[tournament.status];
+  const statusCfg = getTournamentStatusConfig(t, colors)[tournament.status];
   const { day, time } = formatDateShort(tournament.startDate);
 
   const capacity = tournament.groupsCount * tournament.teamsPerGroup;
@@ -375,20 +367,20 @@ export default function TournamentDetailPage() {
                 {generating
                   ? <ActivityIndicator color={colors.green} />
                   : <Text style={[styles.testTeamsButtonText, isFull && styles.joinButtonTextDisabled]}>
-                      {isFull ? t.tournamentFull : t.generateTestTeams}
-                    </Text>
+                    {isFull ? t.tournamentFull : t.generateTestTeams}
+                  </Text>
                 }
               </Pressable>
             )}
 
-            {isAdmin && isFull && (
+            {/* {isAdmin && isFull && (
               <Pressable
                 style={({ pressed }) => [styles.testTeamsButton, pressed && { opacity: 0.8 }]}
                 onPress={() => router.push({ pathname: "/tournament/results/[id]", params: { id } })}
               >
                 <Text style={styles.testTeamsButtonText}>{t.previewResults}</Text>
               </Pressable>
-            )}
+            )} */}
 
             {isAdmin && isFull && !hasData && (
               <Pressable
