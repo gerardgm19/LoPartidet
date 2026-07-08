@@ -113,8 +113,10 @@ export type PreviewMatch = {
   bracketSlot: number | null;
   teamAId: number | null;
   teamAName: string | null;
+  teamAScore: number | null;
   teamBId: number | null;
   teamBName: string | null;
+  teamBScore: number | null;
   tournamentLocationId: number;
   date: string;
 };

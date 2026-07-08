@@ -190,7 +190,19 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
     gap: 10,
   },
   listMatchupRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  listMatchup: { color: colors.white, fontSize: 16, fontWeight: "700", flexShrink: 1 },
+  listMatchup: { color: colors.white, fontSize: 15, fontWeight: "700", flex: 1 },
+  listMatchupRight: { textAlign: "right" },
+  scoreBox: {
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  scoreBoxActive: { backgroundColor: colors.green, borderColor: colors.green },
+  scoreText: { color: colors.muted, fontSize: 15, fontWeight: "800", letterSpacing: 0.5 },
+  scoreTextActive: { color: colors.black },
   listDivider: { height: 1, backgroundColor: colors.border },
   listDateRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   listDateBlock: { flexDirection: "row", alignItems: "center", gap: 6 },
@@ -362,6 +374,8 @@ function MatchRow({
   const { day, time } = formatDateShort(match.date);
   const teamA = match.teamAName ?? t.toBeDefined;
   const teamB = match.teamBName ?? t.toBeDefined;
+  const hasScore = match.teamAScore !== null && match.teamBScore !== null;
+  const score = hasScore ? `${match.teamAScore} : ${match.teamBScore}` : "- : -";
   const label = match.phase === TournamentPhase.GroupStage
     ? groupLabelFromName(match.groupName, t)
     : phaseLabel(match.phase);
@@ -370,8 +384,11 @@ function MatchRow({
   return (
     <View style={styles.listCard}>
       <View style={styles.listMatchupRow}>
-        <Ionicons name="football-outline" size={16} color={styles.listMatchup.color as string} />
-        <Text style={styles.listMatchup} numberOfLines={1}>{teamA} {t.versus} {teamB}</Text>
+        <Text style={styles.listMatchup} numberOfLines={1}>{teamA}</Text>
+        <View style={[styles.scoreBox, hasScore && styles.scoreBoxActive]}>
+          <Text style={[styles.scoreText, hasScore && styles.scoreTextActive]}>{score}</Text>
+        </View>
+        <Text style={[styles.listMatchup, styles.listMatchupRight]} numberOfLines={1}>{teamB}</Text>
       </View>
 
       <View style={styles.listDivider} />
