@@ -232,6 +232,24 @@ export default function TournamentDetailPage() {
         </View>
 
         <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>{t.tournamentLocations}</Text>
+            <Text style={styles.sectionCount}>{tournament.locations?.length ?? 0}</Text>
+          </View>
+          {!tournament.locations || tournament.locations.length === 0
+            ? <Text style={styles.noTeamsText}>{t.noLocations}</Text>
+            : tournament.locations.map((loc) => (
+              <View key={loc.id} style={styles.teamRow}>
+                <View style={styles.teamAvatar}>
+                  <Ionicons name="location-outline" size={18} color={colors.black} />
+                </View>
+                <Text style={styles.teamName}>{loc.name}</Text>
+              </View>
+            ))
+          }
+        </View>
+
+        <View style={styles.section}>
           <DetailRow icon="calendar-outline" label={t.tournamentStartDate} value={`${day}  ${time}`} />
           <DetailRow icon="football-outline" label={t.format} value={sportTypeLabel[tournament.sportType]} />
           <DetailRow icon="layers-outline" label={t.tournamentGroups} value={String(tournament.groupsCount)} />
@@ -277,24 +295,6 @@ export default function TournamentDetailPage() {
                     <Text style={styles.yourTeamBadgeText}>{t.yourTeam}</Text>
                   </View>
                 )}
-              </View>
-            ))
-          }
-        </View>
-
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t.tournamentLocations}</Text>
-            <Text style={styles.sectionCount}>{tournament.locations?.length ?? 0}</Text>
-          </View>
-          {!tournament.locations || tournament.locations.length === 0
-            ? <Text style={styles.noTeamsText}>{t.noLocations}</Text>
-            : tournament.locations.map((loc) => (
-              <View key={loc.id} style={styles.teamRow}>
-                <View style={styles.teamAvatar}>
-                  <Ionicons name="location-outline" size={18} color={colors.black} />
-                </View>
-                <Text style={styles.teamName}>{loc.name}</Text>
               </View>
             ))
           }
