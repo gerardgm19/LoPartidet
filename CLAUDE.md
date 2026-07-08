@@ -6,10 +6,23 @@ A football match organizer app with a React Native frontend and a .NET REST API 
 
 ```
 LoPartidet/          → Expo Router (React Native) app
-LoPartidet.API/      → ASP.NET Core Web API
+LoPartidet.API/      → ASP.NET Core Web API (matches, tournaments, players, locations)
+IdentityManager/     → ASP.NET Core auth service (login/register, JWT issuance)
 ```
 
-See each sub-project's `CLAUDE.md` for detailed conventions.
+See each sub-project's `CLAUDE.md` for detailed conventions, and `.claude/rules/cs-structure.md` for C# structure rules shared by both backends.
+
+## Features
+
+Implemented across the stack:
+
+- **Auth** — register / login via `IdentityManager`; the app stores the JWT and the API validates it through `RemoteJwtAuthHandler`, mapping `UserRoles` to role claims (`Admin`, `Player`, `Referee`).
+- **Matches** — create, list with filters, detail, join/leave, and match events (goals, cards, etc.).
+- **Tournaments** — create; admin edit while in `Draft` (fields + assigned locations); team registration; test-team generation; automatic group assignment, group-stage fixtures, and knockout bracket templating (R16 → Final, optional third-place); preview and results.
+- **Locations** — global location catalog (`GET /locations`); tournaments reference a subset via `TournamentLocation`.
+- **Player profile & skills** — position, preferred foot, skill level, speed, jersey number, height.
+
+Known backend stubs (not yet implemented): `TournamentService.GetStandingsAsync` and `GetBracketAsync` throw `NotImplementedException`.
 
 ## Frontend — `LoPartidet/`
 - React Native with Expo Router v6
