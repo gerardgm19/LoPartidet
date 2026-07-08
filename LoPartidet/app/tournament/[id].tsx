@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -11,6 +11,7 @@ import { TournamentStatus } from "@/types/tournamentStatus";
 import { DetailRow } from "@/components/DetailRow";
 import { formatDateShort } from "@/utils/formatDate";
 import { Toast } from "@/components/Toast";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { useLangStore } from "@/store/langStore";
 import { useAuthStore } from "@/store/authStore";
 
@@ -126,28 +127,6 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
     borderColor: colors.red,
   },
   deleteButtonText: { color: colors.red, fontSize: 16, fontWeight: "800" },
-
-  // Confirm dialog
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.6)",
-    justifyContent: "center",
-  },
-  dialogSheet: {
-    margin: 32,
-    backgroundColor: colors.surface,
-    borderRadius: 20,
-    padding: 24,
-    gap: 8,
-  },
-  dialogTitle: { color: colors.white, fontSize: 17, fontWeight: "700", textAlign: "center" },
-  dialogMessage: { color: colors.muted, fontSize: 14, textAlign: "center", marginBottom: 8 },
-  dialogActions: { flexDirection: "row", gap: 12, marginTop: 4 },
-  dialogBtn: { flex: 1, paddingVertical: 13, borderRadius: 12, alignItems: "center" },
-  dialogBtnCancel: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
-  dialogBtnCancelText: { color: colors.white, fontSize: 15, fontWeight: "600" },
-  dialogBtnConfirm: { backgroundColor: colors.red },
-  dialogBtnConfirmText: { color: colors.white, fontSize: 15, fontWeight: "700" },
 }));
 
 function getStatusConfig(t: any, colors: any): Record<TournamentStatus, { label: string; bg: string; fg: string }> {
@@ -454,34 +433,16 @@ export default function TournamentDetailPage() {
 
       </ScrollView>
 
-      {/* Delete generated data dialog */}
-      <Modal
+      <ConfirmDialog
         visible={deleteModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setDeleteModalVisible(false)}
-      >
-        <Pressable style={styles.modalOverlay} onPress={() => setDeleteModalVisible(false)}>
-          <View style={styles.dialogSheet}>
-            <Text style={styles.dialogTitle}>{t.deleteTournamentDataTitle}</Text>
-            <Text style={styles.dialogMessage}>{t.deleteTournamentDataMessage}</Text>
-            <View style={styles.dialogActions}>
-              <TouchableOpacity
-                style={[styles.dialogBtn, styles.dialogBtnCancel]}
-                onPress={() => setDeleteModalVisible(false)}
-              >
-                <Text style={styles.dialogBtnCancelText}>{t.cancel}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.dialogBtn, styles.dialogBtnConfirm]}
-                onPress={handleDeleteTournamentData}
-              >
-                <Text style={styles.dialogBtnConfirmText}>{t.delete}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Pressable>
-      </Modal>
+        title={t.deleteTournamentDataTitle}
+        message={t.deleteTournamentDataMessage}
+        confirmLabel={t.delete}
+        cancelLabel={t.cancel}
+        onConfirm={handleDeleteTournamentData}
+        onCancel={() => setDeleteModalVisible(false)}
+        destructive
+      />
 
       <Toast message={toastMessage} visible={toastVisible} onHide={() => setToastVisible(false)} />
     </SafeAreaView>

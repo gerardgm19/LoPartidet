@@ -29,6 +29,7 @@ Known backend stubs (not yet implemented): `TournamentService.GetStandingsAsync`
 - Screens in `app/`, shared UI in `components/`, business logic in `services/`
 - Colors always via `Colors.*` from `constants/colors.ts` — never hardcode hex values
 - All UI text, code, and file names in English
+- Confirmation dialogs use the shared `components/ConfirmDialog.tsx` (centered Modal, `destructive?` prop) — never `Alert.alert` (no-op on web) or ad-hoc per-screen Modals
 
 ## Backend — `LoPartidet.API/`
 - .NET 10 · Entity Framework Core 9 · MySQL 8

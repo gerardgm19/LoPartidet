@@ -9,6 +9,7 @@ import { useLangStore } from "@/store/langStore";
 import { useAuthStore } from "@/store/authStore";
 import { Lang } from "@/i18n";
 import { getUserById, User } from "@/services/usersService";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 const useStyles = makeStyles((colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.black },
@@ -88,23 +89,6 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
   },
   themeBtnText: { color: colors.muted, fontSize: 13, fontWeight: "600" },
   themeBtnTextActive: { color: colors.black, fontWeight: "700" },
-
-  // Sign-out dialog
-  dialogSheet: {
-    margin: 32,
-    backgroundColor: colors.surface,
-    borderRadius: 20,
-    padding: 24,
-    gap: 8,
-  },
-  dialogTitle: { color: colors.white, fontSize: 17, fontWeight: "700", textAlign: "center" },
-  dialogMessage: { color: colors.muted, fontSize: 14, textAlign: "center", marginBottom: 8 },
-  dialogActions: { flexDirection: "row", gap: 12, marginTop: 4 },
-  dialogBtn: { flex: 1, paddingVertical: 13, borderRadius: 12, alignItems: "center" },
-  dialogBtnCancel: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
-  dialogBtnCancelText: { color: colors.white, fontSize: 15, fontWeight: "600" },
-  dialogBtnConfirm: { backgroundColor: "#FF5252" },
-  dialogBtnConfirmText: { color: colors.white, fontSize: 15, fontWeight: "700" },
 
   // Modal
   modalOverlay: {
@@ -262,33 +246,16 @@ export default function Profile() {
       </ScrollView>
 
       {/* Sign-out dialog */}
-      <Modal
+      <ConfirmDialog
         visible={signOutModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setSignOutModalVisible(false)}
-      >
-        <Pressable style={styles.modalOverlay} onPress={() => setSignOutModalVisible(false)}>
-          <View style={styles.dialogSheet}>
-            <Text style={styles.dialogTitle}>{t.signOutConfirmTitle}</Text>
-            <Text style={styles.dialogMessage}>{t.signOutConfirmMessage}</Text>
-            <View style={styles.dialogActions}>
-              <TouchableOpacity
-                style={[styles.dialogBtn, styles.dialogBtnCancel]}
-                onPress={() => setSignOutModalVisible(false)}
-              >
-                <Text style={styles.dialogBtnCancelText}>{t.cancel}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.dialogBtn, styles.dialogBtnConfirm]}
-                onPress={handleSignOut}
-              >
-                <Text style={styles.dialogBtnConfirmText}>{t.confirm}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Pressable>
-      </Modal>
+        title={t.signOutConfirmTitle}
+        message={t.signOutConfirmMessage}
+        confirmLabel={t.confirm}
+        cancelLabel={t.cancel}
+        onConfirm={handleSignOut}
+        onCancel={() => setSignOutModalVisible(false)}
+        destructive
+      />
 
       {/* Language picker */}
       <Modal
