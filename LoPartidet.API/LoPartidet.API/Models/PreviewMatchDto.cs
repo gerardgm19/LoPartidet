@@ -8,7 +8,9 @@ public record PreviewMatchDto(
     int? BracketSlot,
     int? TeamAId,
     string? TeamAName,
+    int? TeamAScore,
     int? TeamBId,
     string? TeamBName,
+    int? TeamBScore,
     int TournamentLocationId,
     DateTime Date);

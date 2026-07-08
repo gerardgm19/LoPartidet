@@ -172,8 +172,8 @@ public class TournamentService(
                 groupName,
                 TournamentPhase.GroupStage,
                 null,
-                teamA.Id, teamA.Name,
-                teamB.Id, teamB.Name,
+                teamA.Id, teamA.Name, null,
+                teamB.Id, teamB.Name, null,
                 tournamentLocationIds[locationIndex],
                 tournament.StartDate.AddMinutes(slotIndex * slotCadence)));
         }
@@ -198,8 +198,8 @@ public class TournamentService(
                     $"{Enum.GetName(round.Phase)}{k + 1}",
                     round.Phase,
                     k + 1,
-                    null, null,
-                    null, null,
+                    null, null, null,
+                    null, null, null,
                     tournamentLocationIds[locationIndex],
                     bracketsStartDate.AddMinutes((currentSlot + subSlot) * slotCadence)));
             }
