@@ -66,6 +66,7 @@ public class LoPartidetContext(DbContextOptions<LoPartidetContext> options) : Db
         {
             entity.HasKey(l => l.Id);
             entity.Property(l => l.Name).HasMaxLength(200);
+            entity.Property(l => l.Description).HasMaxLength(500);
         });
 
         modelBuilder.Entity<TournamentLocation>(entity =>

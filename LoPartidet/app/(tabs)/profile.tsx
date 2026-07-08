@@ -128,6 +128,7 @@ export default function Profile() {
   const t = useLangStore((s) => s.t);
   const { lang, setLang } = useLangStore();
   const { signOut, userId } = useAuthStore();
+  const isAdmin = useAuthStore((s) => s.isAdmin());
   const { theme, setTheme, colors } = useThemeStore();
   const styles = useStyles();
   const [user, setUser] = useState<User | undefined>(undefined);
@@ -154,6 +155,7 @@ export default function Profile() {
     { label: t.myMatches, route: "/user-matches" },
     { label: t.skills, route: "/skills" },
     { label: t.playerInformation, route: "/player-information" },
+    ...(isAdmin ? [{ label: t.manageLocations, route: "/locations" }] : []),
     { label: t.aboutUs, route: "/about-us" },
   ];
 

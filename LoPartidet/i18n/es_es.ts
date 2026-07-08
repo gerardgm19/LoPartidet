@@ -191,6 +191,26 @@ const es_es = {
   playerInformation: "Información del jugador",
   aboutUs: "Quiénes somos",
   language: "Idioma",
+  manageLocations: "Ubicaciones",
+
+  // Locations (admin)
+  locationsTitle: "Ubicaciones",
+  noLocationsTitle: "Sin ubicaciones",
+  noLocationsSubtitle: "Añade ubicaciones para tus partidos y torneos",
+  newLocationTitle: "Nueva ubicación",
+  editLocationTitle: "Editar ubicación",
+  locationName: "Nombre",
+  locationNamePlaceholder: "p.ej. Camp Nou",
+  locationDescription: "Descripción",
+  locationDescriptionPlaceholder: "Dirección, notas...",
+  locationCreated: "Ubicación creada",
+  locationUpdated: "Ubicación actualizada",
+  locationDeleted: "Ubicación eliminada",
+  locationSaveError: "No se pudo guardar la ubicación.",
+  locationDeleteError: "No se pudo eliminar la ubicación.",
+  locationsError: "No se pudieron cargar las ubicaciones.",
+  deleteLocationTitle: "¿Eliminar ubicación?",
+  deleteLocationMessage: "Esta acción no se puede deshacer.",
 
   // Skills
   skillsTitle: "Habilidades",

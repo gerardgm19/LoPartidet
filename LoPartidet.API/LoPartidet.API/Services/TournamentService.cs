@@ -633,7 +633,7 @@ public class TournamentService(
         var locations = await db.TournamentLocations
             .Where(tl => tl.TournamentId == id)
             .OrderBy(tl => tl.Location.Name)
-            .Select(tl => new LocationDto(tl.LocationId, tl.Location.Name))
+            .Select(tl => new LocationDto(tl.LocationId, tl.Location.Name, tl.Location.Description))
             .ToListAsync();
 
         return new TournamentDetailDto(

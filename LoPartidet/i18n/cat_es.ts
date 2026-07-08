@@ -191,6 +191,26 @@ const cat_es = {
   playerInformation: "Informació del jugador",
   aboutUs: "Qui som",
   language: "Idioma",
+  manageLocations: "Ubicacions",
+
+  // Locations (admin)
+  locationsTitle: "Ubicacions",
+  noLocationsTitle: "Sense ubicacions",
+  noLocationsSubtitle: "Afegeix ubicacions per als teus partits i tornejos",
+  newLocationTitle: "Nova ubicació",
+  editLocationTitle: "Editar ubicació",
+  locationName: "Nom",
+  locationNamePlaceholder: "p.ex. Camp Nou",
+  locationDescription: "Descripció",
+  locationDescriptionPlaceholder: "Adreça, notes...",
+  locationCreated: "Ubicació creada",
+  locationUpdated: "Ubicació actualitzada",
+  locationDeleted: "Ubicació eliminada",
+  locationSaveError: "No s'ha pogut desar la ubicació.",
+  locationDeleteError: "No s'ha pogut eliminar la ubicació.",
+  locationsError: "No s'han pogut carregar les ubicacions.",
+  deleteLocationTitle: "Eliminar ubicació?",
+  deleteLocationMessage: "Aquesta acció no es pot desfer.",
 
   // Skills
   skillsTitle: "Habilitats",

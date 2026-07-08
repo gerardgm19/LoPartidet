@@ -35,6 +35,7 @@ try
     builder.Services.AddScoped<ITournamentValidationService, TournamentValidationService>();
     builder.Services.AddScoped<IMatchValidationService, MatchValidationService>();
     builder.Services.AddScoped<IUserValidationService, UserValidationService>();
+    builder.Services.AddScoped<ILocationValidationService, LocationValidationService>();
 
     builder.Services.AddHttpClient();
     builder.Services.AddHttpClient<IIdentityManagerService, IdentityManagerService>(client =>

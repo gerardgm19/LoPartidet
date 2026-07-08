@@ -74,6 +74,7 @@ function RootNavigator() {
       <Stack.Screen name="tournament/results/[id]" options={{ headerShown: false }} />
       <Stack.Screen name="skills" options={{ headerShown: false }} />
       <Stack.Screen name="player-information" options={{ headerShown: false }} />
+      <Stack.Screen name="locations" options={{ headerShown: false }} />
       <Stack.Screen name="about-us" options={{ headerShown: false }} />
     </Stack>
   );
