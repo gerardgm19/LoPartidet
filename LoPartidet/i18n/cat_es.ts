@@ -89,6 +89,7 @@ const cat_es = {
   phaseFinal: "Final",
   phaseThirdPlace: "Tercer lloc",
   toBeDefined: "Per definir",
+  versus: "vs",
 
   // Create tournament
   createTournamentTitle: "Nou torneig",

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,7 +15,7 @@ import {
   TournamentPreview,
 } from "@/services/tournamentsService";
 
-type Tab = "groups" | "knockout";
+type Tab = "groups" | "knockout" | "matches";
 
 // Bracket rounds are shown left-to-right in this order.
 const BRACKET_PHASE_ORDER: TournamentPhase[] = [
@@ -40,6 +40,13 @@ const STAT_KEYS = [
 
 function groupLetter(index: number): string {
   return String.fromCharCode(65 + index);
+}
+
+// Group-stage group names come from the backend as "1.1", "1.2"… → "Grupo A", "Grupo B".
+function groupLabelFromName(name: string, t: ReturnType<typeof useLangStore.getState>["t"]): string {
+  const suffix = Number.parseInt(name.split(".")[1] ?? "", 10);
+  const index = Number.isNaN(suffix) ? 0 : suffix - 1;
+  return `${t.groupLabel} ${groupLetter(index)}`;
 }
 
 function usePhaseLabel() {
@@ -161,6 +168,32 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
   matchTeamNameTbd: { color: colors.muted, fontWeight: "500" },
 
   emptyText: { color: colors.muted, fontSize: 14, textAlign: "center", paddingVertical: 32 },
+
+  // Matches list
+  listContent: { padding: 16, gap: 12 },
+  listCard: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: 10,
+  },
+  listMatchupRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  listMatchup: { color: colors.white, fontSize: 16, fontWeight: "700", flexShrink: 1 },
+  listDivider: { height: 1, backgroundColor: colors.border },
+  listDateRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  listDateBlock: { flexDirection: "row", alignItems: "center", gap: 6 },
+  listDateText: { color: colors.white, fontSize: 14, fontWeight: "600" },
+  listBadge: {
+    backgroundColor: colors.surface,
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  listBadgeText: { color: colors.muted, fontSize: 11, fontWeight: "700", letterSpacing: 0.3 },
 }));
 
 export default function TournamentResultsPage() {
@@ -193,6 +226,11 @@ export default function TournamentResultsPage() {
         .filter((r) => r.matches.length > 0)
     : [];
 
+  const allMatches = [
+    ...(preview?.groupStageMatches ?? []),
+    ...(preview?.bracketMatches ?? []),
+  ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <View style={styles.navbar}>
@@ -212,6 +250,9 @@ export default function TournamentResultsPage() {
         </Pressable>
         <Pressable style={[styles.tab, tab === "knockout" && styles.tabActive]} onPress={() => setTab("knockout")}>
           <Text style={[styles.tabText, tab === "knockout" && styles.tabTextActive]}>{t.tabKnockout}</Text>
+        </Pressable>
+        <Pressable style={[styles.tab, tab === "matches" && styles.tabActive]} onPress={() => setTab("matches")}>
+          <Text style={[styles.tabText, tab === "matches" && styles.tabTextActive]}>{t.matches}</Text>
         </Pressable>
       </View>
 
@@ -265,7 +306,7 @@ export default function TournamentResultsPage() {
             </View>
           ))}
         </ScrollView>
-      ) : (
+      ) : tab === "knockout" ? (
         <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
           {rounds.length === 0 ? (
             <Text style={styles.emptyText}>{t.tournamentNoTeams}</Text>
@@ -284,10 +325,61 @@ export default function TournamentResultsPage() {
             </ScrollView>
           )}
         </ScrollView>
+      ) : (
+        <FlatList
+          data={allMatches}
+          keyExtractor={(_, i) => String(i)}
+          renderItem={({ item }) => <MatchRow match={item} styles={styles} t={t} phaseLabel={phaseLabel} />}
+          contentContainerStyle={allMatches.length === 0 ? { flexGrow: 1 } : styles.listContent}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={<Text style={styles.emptyText}>{t.tournamentNoTeams}</Text>}
+        />
       )}
 
       <Toast message={t.tournamentError} visible={toastVisible} onHide={() => setToastVisible(false)} />
     </SafeAreaView>
+  );
+}
+
+function MatchRow({
+  match,
+  styles,
+  t,
+  phaseLabel,
+}: {
+  match: PreviewMatch;
+  styles: ReturnType<typeof useStyles>;
+  t: ReturnType<typeof useLangStore.getState>["t"];
+  phaseLabel: (phase: TournamentPhase) => string;
+}) {
+  const { day, time } = formatDateShort(match.date);
+  const teamA = match.teamAName ?? t.toBeDefined;
+  const teamB = match.teamBName ?? t.toBeDefined;
+  const label = match.phase === TournamentPhase.GroupStage
+    ? groupLabelFromName(match.groupName, t)
+    : phaseLabel(match.phase);
+
+  return (
+    <View style={styles.listCard}>
+      <View style={styles.listMatchupRow}>
+        <Ionicons name="football-outline" size={16} color={styles.listMatchup.color as string} />
+        <Text style={styles.listMatchup} numberOfLines={1}>{teamA} {t.versus} {teamB}</Text>
+      </View>
+
+      <View style={styles.listDivider} />
+
+      <View style={styles.listDateRow}>
+        <View style={styles.listDateBlock}>
+          <Ionicons name="calendar-outline" size={14} color={styles.listDateText.color as string} />
+          <Text style={styles.listDateText}>{day}</Text>
+          <Ionicons name="time-outline" size={14} color={styles.listDateText.color as string} />
+          <Text style={styles.listDateText}>{time}</Text>
+        </View>
+        <View style={styles.listBadge}>
+          <Text style={styles.listBadgeText}>{label}</Text>
+        </View>
+      </View>
+    </View>
   );
 }
 

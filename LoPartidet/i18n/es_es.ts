@@ -89,6 +89,7 @@ const es_es = {
   phaseFinal: "Final",
   phaseThirdPlace: "Tercer puesto",
   toBeDefined: "Por definir",
+  versus: "vs",
 
   // Create tournament
   createTournamentTitle: "Nuevo torneo",
