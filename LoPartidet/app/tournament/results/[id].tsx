@@ -49,6 +49,16 @@ function groupLabelFromName(name: string, t: ReturnType<typeof useLangStore.getS
   return `${t.groupLabel} ${groupLetter(index)}`;
 }
 
+// Tinted background + bright foreground per phase (mirrors the tournament status badge style).
+const PHASE_TAG: Record<TournamentPhase, { bg: string; fg: string }> = {
+  [TournamentPhase.GroupStage]: { bg: "#1a3a5c", fg: "#4da6ff" },
+  [TournamentPhase.RoundOf16]: { bg: "#2e2140", fg: "#b388ff" },
+  [TournamentPhase.QuarterFinal]: { bg: "#3a2a12", fg: "#ffb74d" },
+  [TournamentPhase.SemiFinal]: { bg: "#3a1a1a", fg: "#ff6b6b" },
+  [TournamentPhase.ThirdPlace]: { bg: "#3a2f12", fg: "#d4af37" },
+  [TournamentPhase.Final]: { bg: "#123d2b", fg: "#00e676" },
+};
+
 function usePhaseLabel() {
   const t = useLangStore((s) => s.t);
   return (phase: TournamentPhase): string => {
@@ -186,14 +196,11 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
   listDateBlock: { flexDirection: "row", alignItems: "center", gap: 6 },
   listDateText: { color: colors.white, fontSize: 14, fontWeight: "600" },
   listBadge: {
-    backgroundColor: colors.surface,
     borderRadius: 6,
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderWidth: 1,
-    borderColor: colors.border,
   },
-  listBadgeText: { color: colors.muted, fontSize: 11, fontWeight: "700", letterSpacing: 0.3 },
+  listBadgeText: { fontSize: 11, fontWeight: "700", letterSpacing: 0.3 },
 }));
 
 export default function TournamentResultsPage() {
@@ -358,6 +365,7 @@ function MatchRow({
   const label = match.phase === TournamentPhase.GroupStage
     ? groupLabelFromName(match.groupName, t)
     : phaseLabel(match.phase);
+  const tag = PHASE_TAG[match.phase];
 
   return (
     <View style={styles.listCard}>
@@ -375,8 +383,8 @@ function MatchRow({
           <Ionicons name="time-outline" size={14} color={styles.listDateText.color as string} />
           <Text style={styles.listDateText}>{time}</Text>
         </View>
-        <View style={styles.listBadge}>
-          <Text style={styles.listBadgeText}>{label}</Text>
+        <View style={[styles.listBadge, { backgroundColor: tag.bg }]}>
+          <Text style={[styles.listBadgeText, { color: tag.fg }]}>{label}</Text>
         </View>
       </View>
     </View>
