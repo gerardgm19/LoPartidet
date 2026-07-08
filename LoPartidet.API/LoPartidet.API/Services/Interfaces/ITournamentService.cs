@@ -12,6 +12,7 @@ public interface ITournamentService
     Task<TournamentLocationDto> AddLocationAsync(int tournamentId, AddTournamentLocationDto request);
     Task<TournamentDataDto> GenerateTournamentData(int tournamentId);
     Task<TournamentDataDto> GetResultsAsync(int tournamentId);
+    Task DeleteTournamentDataAsync(int tournamentId);
     Task<TournamentPreviewDto> GetTestTournamentGroupsAndMatchesAsync(int tournamentId);
     Task GetStandingsAsync(int tournamentId);
     Task GetBracketAsync(int tournamentId);

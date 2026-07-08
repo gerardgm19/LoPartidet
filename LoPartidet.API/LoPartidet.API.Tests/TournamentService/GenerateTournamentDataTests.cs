@@ -7,7 +7,7 @@ namespace LoPartidet.API.Tests.TournamentService;
 public class GenerateTournamentDataTests : TournamentServiceTestBase
 {
     [Fact]
-    public async Task GenerateTournamentData_FlipsStatusToGroupStage()
+    public async Task GenerateTournamentData_KeepsStatusDraft()
     {
         using var db = CreateContext();
         await SeedReadyToStartAsync(db, groupsCount: 2, teamsPerGroup: 3, locationCount: 1);
@@ -16,7 +16,7 @@ public class GenerateTournamentDataTests : TournamentServiceTestBase
         await svc.GenerateTournamentData(1);
 
         var tournament = await db.Tournaments.FirstAsync(t => t.Id == 1);
-        Assert.Equal(TournamentStatus.GroupStage, tournament.Status);
+        Assert.Equal(TournamentStatus.Draft, tournament.Status);
     }
 
     [Fact]

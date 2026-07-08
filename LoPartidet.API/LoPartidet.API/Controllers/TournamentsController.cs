@@ -105,6 +105,21 @@ public class TournamentsController(ITournamentService tournamentService) : Contr
         return Ok(result);
     }
 
+    [HttpDelete("{id}/generate")]
+    [Authorize(Roles = nameof(Role.Admin))]
+    public async Task<IActionResult> DeleteTournamentData(int id)
+    {
+        try
+        {
+            await tournamentService.DeleteTournamentDataAsync(id);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     #region Test methods
 
     [HttpPost("{id}/test-teams")]

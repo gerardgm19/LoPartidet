@@ -321,13 +321,41 @@ public class TournamentService(
 
         await CreateTemplateBracketMatches(tournamentId);
 
-        var tournament = await db.Tournaments.FirstAsync(t => t.Id == tournamentId);
-        db.Entry(tournament).Property(t => t.Status).CurrentValue = TournamentStatus.GroupStage;
-        await db.SaveChangesAsync();
-
-        logger.LogInformation("Tournament {TournamentId} started", tournamentId);
+        logger.LogInformation("Tournament {TournamentId} data generated", tournamentId);
 
         return await GetResultsAsync(tournamentId);
+    }
+
+    public async Task DeleteTournamentDataAsync(int tournamentId)
+    {
+        var tournament = await db.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId)
+            ?? throw new InvalidOperationException($"Tournament {tournamentId} not found.");
+
+        if (tournament.Status != TournamentStatus.Draft)
+            throw new InvalidOperationException($"Tournament {tournamentId} data can only be deleted while in Draft.");
+
+        var matches = await db.TournamentMatches
+            .Where(m => m.TournamentId == tournamentId)
+            .ToListAsync();
+        db.TournamentMatches.RemoveRange(matches);
+
+        // Unassign teams from the groups about to be removed (Team.GroupId FK → TournamentGroup).
+        var teams = await db.Teams
+            .Where(t => t.TournamentId == tournamentId && t.GroupId != null)
+            .ToListAsync();
+        foreach (var team in teams)
+            db.Entry(team).Property(t => t.GroupId).CurrentValue = null;
+
+        var groups = await db.TournamentGroups
+            .Where(g => g.TournamentId == tournamentId)
+            .ToListAsync();
+        db.TournamentGroups.RemoveRange(groups);
+
+        await db.SaveChangesAsync();
+
+        logger.LogInformation(
+            "Tournament {TournamentId} generated data deleted: {MatchCount} matches, {GroupCount} groups",
+            tournamentId, matches.Count, groups.Count);
     }
 
     public async Task<TournamentDataDto> GetResultsAsync(int tournamentId)

@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useThemeStore } from "@/store/themeStore";
 import { makeStyles } from "@/utils/makeStyles";
 import { getSportTypeLabel } from "@/constants/match";
-import { generateTestTeams, generateTournamentData, getTournamentById, getTournamentResults, getTournamentTeams, Tournament, TournamentTeam } from "@/services/tournamentsService";
+import { deleteTournamentData, generateTestTeams, generateTournamentData, getTournamentById, getTournamentResults, getTournamentTeams, Tournament, TournamentTeam } from "@/services/tournamentsService";
 import { TournamentStatus } from "@/types/tournamentStatus";
 import { DetailRow } from "@/components/DetailRow";
 import { formatDateShort } from "@/utils/formatDate";
@@ -114,6 +114,40 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
   },
   testTeamsButtonDisabled: { borderColor: colors.border },
   testTeamsButtonText: { color: colors.green, fontSize: 16, fontWeight: "800" },
+  deleteButton: {
+    marginHorizontal: 16,
+    marginBottom: 24,
+    borderRadius: 14,
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.red,
+  },
+  deleteButtonText: { color: colors.red, fontSize: 16, fontWeight: "800" },
+
+  // Confirm dialog
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+  },
+  dialogSheet: {
+    margin: 32,
+    backgroundColor: colors.surface,
+    borderRadius: 20,
+    padding: 24,
+    gap: 8,
+  },
+  dialogTitle: { color: colors.white, fontSize: 17, fontWeight: "700", textAlign: "center" },
+  dialogMessage: { color: colors.muted, fontSize: 14, textAlign: "center", marginBottom: 8 },
+  dialogActions: { flexDirection: "row", gap: 12, marginTop: 4 },
+  dialogBtn: { flex: 1, paddingVertical: 13, borderRadius: 12, alignItems: "center" },
+  dialogBtnCancel: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
+  dialogBtnCancelText: { color: colors.white, fontSize: 15, fontWeight: "600" },
+  dialogBtnConfirm: { backgroundColor: colors.red },
+  dialogBtnConfirmText: { color: colors.white, fontSize: 15, fontWeight: "700" },
 }));
 
 function getStatusConfig(t: any, colors: any): Record<TournamentStatus, { label: string; bg: string; fg: string }> {
@@ -138,6 +172,8 @@ export default function TournamentDetailPage() {
   const [toastMessage, setToastMessage] = useState("");
   const [generating, setGenerating] = useState(false);
   const [starting, setStarting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [hasData, setHasData] = useState(false);
 
   useEffect(() => {
@@ -200,12 +236,27 @@ export default function TournamentDetailPage() {
     setStarting(true);
     try {
       await generateTournamentData(id);
+      setHasData(true);
       router.push({ pathname: "/tournament/results/[id]", params: { id, real: "true" } });
     } catch {
       setToastMessage(t.tournamentError);
       setToastVisible(true);
     } finally {
       setStarting(false);
+    }
+  };
+
+  const handleDeleteTournamentData = async () => {
+    setDeleteModalVisible(false);
+    setDeleting(true);
+    try {
+      await deleteTournamentData(id);
+      setHasData(false);
+    } catch {
+      setToastMessage(t.tournamentError);
+      setToastVisible(true);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -376,6 +427,19 @@ export default function TournamentDetailPage() {
                 }
               </Pressable>
             )}
+
+            {isAdmin && hasData && (
+              <Pressable
+                style={({ pressed }) => [styles.deleteButton, !deleting && pressed && { opacity: 0.8 }]}
+                onPress={() => setDeleteModalVisible(true)}
+                disabled={deleting}
+              >
+                {deleting
+                  ? <ActivityIndicator color={colors.red} />
+                  : <Text style={styles.deleteButtonText}>{t.deleteTournamentData}</Text>
+                }
+              </Pressable>
+            )}
           </>
         )}
 
@@ -389,6 +453,35 @@ export default function TournamentDetailPage() {
         )}
 
       </ScrollView>
+
+      {/* Delete generated data dialog */}
+      <Modal
+        visible={deleteModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setDeleteModalVisible(false)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setDeleteModalVisible(false)}>
+          <View style={styles.dialogSheet}>
+            <Text style={styles.dialogTitle}>{t.deleteTournamentDataTitle}</Text>
+            <Text style={styles.dialogMessage}>{t.deleteTournamentDataMessage}</Text>
+            <View style={styles.dialogActions}>
+              <TouchableOpacity
+                style={[styles.dialogBtn, styles.dialogBtnCancel]}
+                onPress={() => setDeleteModalVisible(false)}
+              >
+                <Text style={styles.dialogBtnCancelText}>{t.cancel}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.dialogBtn, styles.dialogBtnConfirm]}
+                onPress={handleDeleteTournamentData}
+              >
+                <Text style={styles.dialogBtnConfirmText}>{t.delete}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Pressable>
+      </Modal>
 
       <Toast message={toastMessage} visible={toastVisible} onHide={() => setToastVisible(false)} />
     </SafeAreaView>

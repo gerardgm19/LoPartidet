@@ -186,6 +186,11 @@ export async function getTournamentResults(tournamentId: string): Promise<Tourna
   return data;
 }
 
+// Deletes the generated groups and matches. Only allowed while the tournament is in Draft.
+export async function deleteTournamentData(tournamentId: string): Promise<void> {
+  await apiClient.delete(`${API_BASE_URL}/tournaments/${tournamentId}/generate`);
+}
+
 export async function getTournamentById(id: string): Promise<Tournament | undefined> {
   try {
     const { data } = await apiClient.get<any>(`${API_BASE_URL}/tournaments/${id}`);
