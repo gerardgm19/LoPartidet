@@ -58,6 +58,73 @@ public class TournamentService(
             tournament.GapBetweenMatchesMinutes);
     }
 
+    public async Task<TournamentDto> UpdateAsync(int id, UpdateTournamentDto request)
+    {
+        var validation = await validationService.ValidateUpdateTournamentAsync(id, request);
+        if (!validation.IsValid)
+            throw new InvalidOperationException(validation.Error);
+
+        var tournament = await db.Tournaments.FirstOrDefaultAsync(t => t.Id == id)
+            ?? throw new InvalidOperationException($"Tournament {id} not found.");
+
+        // Tournament properties use init accessors; update through the change tracker.
+        var entry = db.Entry(tournament);
+        entry.Property(t => t.Name).CurrentValue = request.Name;
+        entry.Property(t => t.SportType).CurrentValue = request.SportType;
+        entry.Property(t => t.StartDate).CurrentValue = request.StartDate;
+        entry.Property(t => t.GroupsCount).CurrentValue = request.GroupsCount;
+        entry.Property(t => t.TeamsPerGroup).CurrentValue = request.TeamsPerGroup;
+        entry.Property(t => t.QualifiedPerGroup).CurrentValue = request.QualifiedPerGroup;
+        entry.Property(t => t.IsSingleElimination).CurrentValue = request.IsSingleElimination;
+        entry.Property(t => t.HasThirdPlaceMatch).CurrentValue = request.HasThirdPlaceMatch;
+        entry.Property(t => t.HalfDurationMinutes).CurrentValue = request.HalfDurationMinutes;
+        entry.Property(t => t.HalfTimeDurationMinutes).CurrentValue = request.HalfTimeDurationMinutes;
+        entry.Property(t => t.GapBetweenMatchesMinutes).CurrentValue = request.GapBetweenMatchesMinutes;
+
+        await ReconcileLocationsAsync(id, request.LocationIds);
+
+        await db.SaveChangesAsync();
+
+        logger.LogInformation("Tournament {TournamentId} updated", id);
+
+        return new TournamentDto(
+            tournament.Id,
+            tournament.Name,
+            tournament.SportType,
+            tournament.Status,
+            tournament.CreatedById,
+            tournament.StartDate,
+            tournament.GroupsCount,
+            tournament.TeamsPerGroup,
+            tournament.QualifiedPerGroup,
+            tournament.IsSingleElimination,
+            tournament.HasThirdPlaceMatch,
+            tournament.HalfDurationMinutes,
+            tournament.HalfTimeDurationMinutes,
+            tournament.GapBetweenMatchesMinutes);
+    }
+
+    private async Task ReconcileLocationsAsync(int tournamentId, IReadOnlyList<int> locationIds)
+    {
+        var requestedIds = locationIds.Distinct().ToList();
+
+        var currentLinks = await db.TournamentLocations
+            .Where(tl => tl.TournamentId == tournamentId)
+            .ToListAsync();
+        var currentIds = currentLinks.Select(tl => tl.LocationId).ToList();
+
+        var toRemove = currentLinks.Where(tl => !requestedIds.Contains(tl.LocationId)).ToList();
+        if (toRemove.Count > 0)
+            db.TournamentLocations.RemoveRange(toRemove);
+
+        foreach (var locationId in requestedIds.Where(rid => !currentIds.Contains(rid)))
+            db.TournamentLocations.Add(new TournamentLocation { TournamentId = tournamentId, LocationId = locationId });
+
+        logger.LogInformation(
+            "Tournament {TournamentId} locations reconciled: {Added} added, {Removed} removed",
+            tournamentId, requestedIds.Count(rid => !currentIds.Contains(rid)), toRemove.Count);
+    }
+
     public async Task<TeamDto> AddTeamAsync(int tournamentId, CreateTeamDto request)
     {
         var validation = await validationService.ValidateAddTeamAsync(
@@ -493,12 +560,18 @@ public class TournamentService(
             .AnyAsync(tm => tm.CreatedById == appUserId ||
                 tm.Members.Any(m => m.UserId == appUserId));
 
+        var locations = await db.TournamentLocations
+            .Where(tl => tl.TournamentId == id)
+            .OrderBy(tl => tl.Location.Name)
+            .Select(tl => new LocationDto(tl.LocationId, tl.Location.Name))
+            .ToListAsync();
+
         return new TournamentDetailDto(
             t.Id, t.Name, t.SportType, t.Status, t.CreatedById, t.StartDate,
             t.GroupsCount, t.TeamsPerGroup, t.QualifiedPerGroup,
             t.IsSingleElimination, t.HasThirdPlaceMatch,
             t.HalfDurationMinutes, t.HalfTimeDurationMinutes, t.GapBetweenMatchesMinutes,
-            isCurrentUserInTeam);
+            isCurrentUserInTeam, locations);
     }
 
     public async Task<IReadOnlyList<TournamentDto>> GetAllAsync()

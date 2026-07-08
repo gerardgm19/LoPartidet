@@ -27,6 +27,21 @@ public class TournamentsController(ITournamentService tournamentService) : Contr
         }
     }
 
+    [HttpPut("{id}")]
+    [Authorize(Roles = nameof(Role.Admin))]
+    public async Task<ActionResult<TournamentDto>> UpdateTournament(int id, UpdateTournamentDto request)
+    {
+        try
+        {
+            var result = await tournamentService.UpdateAsync(id, request);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     [HttpGet("{id}")]
     public async Task<ActionResult<TournamentDetailDto>> GetTournamentById(int id)
     {

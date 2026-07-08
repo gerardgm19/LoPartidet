@@ -204,7 +204,16 @@ export default function TournamentDetailPage() {
           <Ionicons name="arrow-back" size={22} color={colors.white} />
         </Pressable>
         <Text style={styles.navTitle}>{t.tournamentDetails}</Text>
-        <View style={styles.navPlaceholder} />
+        {isAdmin && tournament.status === TournamentStatus.Draft ? (
+          <Pressable
+            style={({ pressed }) => [styles.backButton, pressed && { opacity: 0.6 }]}
+            onPress={() => router.push({ pathname: "/tournament/edit-tournament", params: { id } })}
+          >
+            <Ionicons name="create-outline" size={22} color={colors.white} />
+          </Pressable>
+        ) : (
+          <View style={styles.navPlaceholder} />
+        )}
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
@@ -268,6 +277,24 @@ export default function TournamentDetailPage() {
                     <Text style={styles.yourTeamBadgeText}>{t.yourTeam}</Text>
                   </View>
                 )}
+              </View>
+            ))
+          }
+        </View>
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>{t.tournamentLocations}</Text>
+            <Text style={styles.sectionCount}>{tournament.locations?.length ?? 0}</Text>
+          </View>
+          {!tournament.locations || tournament.locations.length === 0
+            ? <Text style={styles.noTeamsText}>{t.noLocations}</Text>
+            : tournament.locations.map((loc) => (
+              <View key={loc.id} style={styles.teamRow}>
+                <View style={styles.teamAvatar}>
+                  <Ionicons name="location-outline" size={18} color={colors.black} />
+                </View>
+                <Text style={styles.teamName}>{loc.name}</Text>
               </View>
             ))
           }

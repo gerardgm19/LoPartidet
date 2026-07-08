@@ -48,6 +48,58 @@ public class TournamentValidationService(LoPartidetContext db) : ITournamentVali
         return ValidationResult.Ok();
     }
 
+    public async Task<ValidationResult> ValidateUpdateTournamentAsync(int tournamentId, UpdateTournamentDto request)
+    {
+        var tournament = await db.Tournaments.FindAsync(tournamentId);
+        if (tournament is null)
+            return ValidationResult.Fail("Tournament not found.");
+
+        if (tournament.Status != TournamentStatus.Draft)
+            return ValidationResult.Fail("Only Draft tournaments can be edited.");
+
+        if (string.IsNullOrWhiteSpace(request.Name))
+            return ValidationResult.Fail("Name is required.");
+
+        if (request.StartDate <= DateTime.Now)
+            return ValidationResult.Fail("Tournament start date must be in the future.");
+
+        if (request.GroupsCount < 1)
+            return ValidationResult.Fail("Groups count must be at least 1.");
+
+        if (request.TeamsPerGroup < 2)
+            return ValidationResult.Fail("Teams per group must be at least 2.");
+
+        if (request.QualifiedPerGroup < 1)
+            return ValidationResult.Fail("Qualified per group must be at least 1.");
+
+        if (request.QualifiedPerGroup > request.TeamsPerGroup)
+            return ValidationResult.Fail("Qualified per group cannot exceed teams per group.");
+
+        if (request.HalfDurationMinutes < 1)
+            return ValidationResult.Fail("Half duration must be at least 1 minute.");
+
+        if (request.HalfTimeDurationMinutes < 0)
+            return ValidationResult.Fail("Half-time duration cannot be negative.");
+
+        if (request.GapBetweenMatchesMinutes < 0)
+            return ValidationResult.Fail("Gap between matches cannot be negative.");
+
+        var teamCount = await db.Teams.CountAsync(t => t.TournamentId == tournamentId);
+        var capacity = request.GroupsCount * request.TeamsPerGroup;
+        if (teamCount > capacity)
+            return ValidationResult.Fail("New capacity is smaller than the number of teams already registered.");
+
+        var locationIds = request.LocationIds?.Distinct().ToList() ?? [];
+        if (locationIds.Count > 0)
+        {
+            var foundCount = await db.Locations.CountAsync(l => locationIds.Contains(l.Id));
+            if (foundCount != locationIds.Count)
+                return ValidationResult.Fail("One or more locations do not exist.");
+        }
+
+        return ValidationResult.Ok();
+    }
+
     public async Task<ValidationResult> ValidateAddTeamAsync(AddTeamValidationRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Name))

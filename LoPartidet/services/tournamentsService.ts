@@ -20,6 +20,12 @@ export type Tournament = {
   halfTimeDurationMinutes: number;
   gapBetweenMatchesMinutes: number;
   isCurrentUserInTeam?: boolean;
+  locations?: TournamentLocationInfo[];
+};
+
+export type TournamentLocationInfo = {
+  id: number;
+  name: string;
 };
 
 function normalizeTournament(raw: any): Tournament {
@@ -58,6 +64,26 @@ export async function getTournaments(): Promise<Tournament[]> {
 
 export async function createTournament(request: CreateTournamentRequest): Promise<Tournament> {
   const { data } = await apiClient.post<any>(`${API_BASE_URL}/tournaments`, request);
+  return normalizeTournament(data);
+}
+
+export type UpdateTournamentRequest = {
+  name: string;
+  sportType: SportType;
+  startDate: string;
+  groupsCount: number;
+  teamsPerGroup: number;
+  qualifiedPerGroup: number;
+  isSingleElimination: boolean;
+  hasThirdPlaceMatch: boolean;
+  halfDurationMinutes: number;
+  halfTimeDurationMinutes: number;
+  gapBetweenMatchesMinutes: number;
+  locationIds: number[];
+};
+
+export async function updateTournament(id: string, request: UpdateTournamentRequest): Promise<Tournament> {
+  const { data } = await apiClient.put<any>(`${API_BASE_URL}/tournaments/${id}`, request);
   return normalizeTournament(data);
 }
 

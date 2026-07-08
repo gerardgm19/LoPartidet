@@ -2,12 +2,9 @@ using LoPartidet.API.Models.Enums;
 
 namespace LoPartidet.API.Models;
 
-public record TournamentDetailDto(
-    int Id,
+public record UpdateTournamentDto(
     string Name,
     SportType SportType,
-    TournamentStatus Status,
-    int CreatedById,
     DateTime StartDate,
     int GroupsCount,
     int TeamsPerGroup,
@@ -17,6 +14,5 @@ public record TournamentDetailDto(
     int HalfDurationMinutes,
     int HalfTimeDurationMinutes,
     int GapBetweenMatchesMinutes,
-    bool IsCurrentUserInTeam,
-    IReadOnlyList<LocationDto> Locations
+    IReadOnlyList<int> LocationIds
 );
