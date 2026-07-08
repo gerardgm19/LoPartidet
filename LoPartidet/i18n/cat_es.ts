@@ -68,6 +68,8 @@ const cat_es = {
   createTeamFull: "El torneig està complet.",
 
   // Tournament results (preview)
+  generateTournament: "Generar torneig",
+  previewResults: "Previsualitzar resultats",
   viewResults: "Veure resultats",
   resultsTitle: "Resultats",
   tabGroupStage: "Fase de grups",

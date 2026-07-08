@@ -68,6 +68,8 @@ const es_es = {
   createTeamFull: "El torneo está completo.",
 
   // Tournament results (preview)
+  generateTournament: "Generar torneo",
+  previewResults: "Previsualizar resultados",
   viewResults: "Ver resultados",
   resultsTitle: "Resultados",
   tabGroupStage: "Fase de grupos",

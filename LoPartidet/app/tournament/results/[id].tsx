@@ -11,6 +11,7 @@ import { Toast } from "@/components/Toast";
 import { TournamentPhase } from "@/types/tournamentPhase";
 import {
   getTestTournamentGroupsAndMatches,
+  getTournamentResults,
   PreviewMatch,
   TournamentPreview,
 } from "@/services/tournamentsService";
@@ -220,7 +221,7 @@ export default function TournamentResultsPage() {
   const colors = useThemeStore((s) => s.colors);
   const styles = useStyles();
   const phaseLabel = usePhaseLabel();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, real } = useLocalSearchParams<{ id: string; real?: string }>();
 
   const [preview, setPreview] = useState<TournamentPreview | undefined>();
   const [tab, setTab] = useState<Tab>("groups");
@@ -228,11 +229,13 @@ export default function TournamentResultsPage() {
   const [toastVisible, setToastVisible] = useState(false);
 
   useEffect(() => {
-    getTestTournamentGroupsAndMatches(id)
+    // `real` → persisted tournament data (/results); otherwise the in-memory preview.
+    const load = real === "true" ? getTournamentResults(id) : getTestTournamentGroupsAndMatches(id);
+    load
       .then(setPreview)
       .catch(() => setToastVisible(true))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, real]);
 
   const rounds = (preview?.bracketMatches ?? []).length > 0
     ? BRACKET_PHASE_ORDER

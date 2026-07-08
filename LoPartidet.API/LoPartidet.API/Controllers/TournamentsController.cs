@@ -83,6 +83,28 @@ public class TournamentsController(ITournamentService tournamentService) : Contr
         }
     }
 
+    [HttpPost("{id}/generate")]
+    [Authorize(Roles = nameof(Role.Admin))]
+    public async Task<ActionResult<TournamentDataDto>> GenerateTournamentData(int id)
+    {
+        try
+        {
+            var result = await tournamentService.GenerateTournamentData(id);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpGet("{id}/results")]
+    public async Task<ActionResult<TournamentDataDto>> GetResults(int id)
+    {
+        var result = await tournamentService.GetResultsAsync(id);
+        return Ok(result);
+    }
+
     #region Test methods
 
     [HttpPost("{id}/test-teams")]

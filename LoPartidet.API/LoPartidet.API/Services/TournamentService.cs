@@ -308,7 +308,7 @@ public class TournamentService(
         return new TournamentLocationDto(tournamentLocation.Id, tournamentLocation.TournamentId, tournamentLocation.LocationId);
     }
 
-    public async Task StartTournamentAsync(int tournamentId)
+    public async Task<TournamentDataDto> GenerateTournamentData(int tournamentId)
     {
         var validation = await validationService.ValidateStartTournamentAsync(
             new StartTournamentValidationRequest(tournamentId));
@@ -326,6 +326,48 @@ public class TournamentService(
         await db.SaveChangesAsync();
 
         logger.LogInformation("Tournament {TournamentId} started", tournamentId);
+
+        return await GetResultsAsync(tournamentId);
+    }
+
+    public async Task<TournamentDataDto> GetResultsAsync(int tournamentId)
+    {
+        var groups = await db.TournamentGroups
+            .Where(g => g.TournamentId == tournamentId && g.Phase == TournamentPhase.GroupStage)
+            .OrderBy(g => g.Name)
+            .Select(g => new TournamentGroupDto(
+                g.Id,
+                g.Name,
+                g.Phase,
+                db.Teams
+                    .Where(t => t.GroupId == g.Id)
+                    .Select(t => new PreviewTeamDto(t.Id, t.Name))
+                    .ToList()))
+            .ToListAsync();
+
+        var matches = await db.TournamentMatches
+            .Where(m => m.TournamentId == tournamentId)
+            .OrderBy(m => m.Date)
+            .Select(m => new TournamentMatchDto(
+                m.Id,
+                m.GroupId!.Value,
+                m.Group!.Name,
+                m.Group.Phase,
+                m.Group.BracketSlot,
+                m.TeamAId,
+                m.TeamA != null ? m.TeamA.Name : null,
+                null,
+                m.TeamBId,
+                m.TeamB != null ? m.TeamB.Name : null,
+                null,
+                m.TournamentLocationId,
+                m.Date))
+            .ToListAsync();
+
+        var groupStageMatches = matches.Where(m => m.Phase == TournamentPhase.GroupStage).ToList();
+        var bracketMatches = matches.Where(m => m.Phase != TournamentPhase.GroupStage).ToList();
+
+        return new TournamentDataDto(groups, groupStageMatches, bracketMatches);
     }
 
     public async Task<IReadOnlyList<GroupDto>> AssignTeamsToGroupsAsync(int tournamentId)

@@ -160,6 +160,32 @@ export async function getTestTournamentGroupsAndMatches(tournamentId: string): P
   return data;
 }
 
+// Real (persisted) tournament data — superset of the preview shape with real DB ids.
+export type ResultGroup = PreviewGroup & { id: number };
+export type ResultMatch = PreviewMatch & { id: number; groupId: number };
+
+export type TournamentData = {
+  groups: ResultGroup[];
+  groupStageMatches: ResultMatch[];
+  bracketMatches: ResultMatch[];
+};
+
+// Generates and persists groups, matches and the bracket; flips the tournament to GroupStage.
+export async function generateTournamentData(tournamentId: string): Promise<TournamentData> {
+  const { data } = await apiClient.post<TournamentData>(
+    `${API_BASE_URL}/tournaments/${tournamentId}/generate`
+  );
+  return data;
+}
+
+// Reads the already-generated real data.
+export async function getTournamentResults(tournamentId: string): Promise<TournamentData> {
+  const { data } = await apiClient.get<TournamentData>(
+    `${API_BASE_URL}/tournaments/${tournamentId}/results`
+  );
+  return data;
+}
+
 export async function getTournamentById(id: string): Promise<Tournament | undefined> {
   try {
     const { data } = await apiClient.get<any>(`${API_BASE_URL}/tournaments/${id}`);

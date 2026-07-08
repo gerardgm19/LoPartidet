@@ -6,7 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useThemeStore } from "@/store/themeStore";
 import { makeStyles } from "@/utils/makeStyles";
 import { getSportTypeLabel } from "@/constants/match";
-import { generateTestTeams, getTournamentById, getTournamentTeams, Tournament, TournamentTeam } from "@/services/tournamentsService";
+import { generateTestTeams, generateTournamentData, getTournamentById, getTournamentResults, getTournamentTeams, Tournament, TournamentTeam } from "@/services/tournamentsService";
 import { TournamentStatus } from "@/types/tournamentStatus";
 import { DetailRow } from "@/components/DetailRow";
 import { formatDateShort } from "@/utils/formatDate";
@@ -137,12 +137,15 @@ export default function TournamentDetailPage() {
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [generating, setGenerating] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const [hasData, setHasData] = useState(false);
 
   useEffect(() => {
-    Promise.all([getTournamentById(id), getTournamentTeams(id)])
-      .then(([tournamentData, teamsData]) => {
+    Promise.all([getTournamentById(id), getTournamentTeams(id), getTournamentResults(id).catch(() => undefined)])
+      .then(([tournamentData, teamsData, resultsData]) => {
         setTournament(tournamentData);
         setTeams(teamsData);
+        setHasData((resultsData?.groupStageMatches.length ?? 0) > 0 || (resultsData?.bracketMatches.length ?? 0) > 0);
         if (!tournamentData) { setToastMessage(t.tournamentError); setToastVisible(true); }
       })
       .catch(() => { setToastMessage(t.tournamentError); setToastVisible(true); })
@@ -190,6 +193,19 @@ export default function TournamentDetailPage() {
       setToastVisible(true);
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const handleGenerateTournamentData = async () => {
+    setStarting(true);
+    try {
+      await generateTournamentData(id);
+      router.push({ pathname: "/tournament/results/[id]", params: { id, real: "true" } });
+    } catch {
+      setToastMessage(t.tournamentError);
+      setToastVisible(true);
+    } finally {
+      setStarting(false);
     }
   };
 
@@ -337,13 +353,39 @@ export default function TournamentDetailPage() {
 
             {isAdmin && isFull && (
               <Pressable
-                style={({ pressed }) => [styles.joinButton, pressed && { opacity: 0.8 }]}
+                style={({ pressed }) => [styles.testTeamsButton, pressed && { opacity: 0.8 }]}
                 onPress={() => router.push({ pathname: "/tournament/results/[id]", params: { id } })}
               >
-                <Text style={styles.joinButtonText}>{t.viewResults}</Text>
+                <Text style={styles.testTeamsButtonText}>{t.previewResults}</Text>
+              </Pressable>
+            )}
+
+            {isAdmin && isFull && !hasData && (
+              <Pressable
+                style={({ pressed }) => [
+                  styles.joinButton,
+                  starting && styles.joinButtonDisabled,
+                  !starting && pressed && { opacity: 0.8 },
+                ]}
+                onPress={handleGenerateTournamentData}
+                disabled={starting}
+              >
+                {starting
+                  ? <ActivityIndicator color={colors.black} />
+                  : <Text style={styles.joinButtonText}>{t.generateTournament}</Text>
+                }
               </Pressable>
             )}
           </>
+        )}
+
+        {hasData && (
+          <Pressable
+            style={({ pressed }) => [styles.joinButton, pressed && { opacity: 0.8 }]}
+            onPress={() => router.push({ pathname: "/tournament/results/[id]", params: { id, real: "true" } })}
+          >
+            <Text style={styles.joinButtonText}>{t.viewResults}</Text>
+          </Pressable>
         )}
 
       </ScrollView>
