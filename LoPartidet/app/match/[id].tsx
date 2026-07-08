@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -12,6 +12,7 @@ import { MatchStatus } from "@/types/matchStatus";
 import { DetailRow } from "@/components/DetailRow";
 import { formatDate } from "@/utils/formatDate";
 import { Toast } from "@/components/Toast";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { useLangStore } from "@/store/langStore";
 
 const useStyles = makeStyles((colors) => StyleSheet.create({
@@ -100,26 +101,6 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
   playerName: { color: colors.white, fontSize: 14, fontWeight: "600" },
   playerNickname: { color: colors.muted, fontSize: 12 },
   noPlayersText: { color: colors.muted, fontSize: 14, paddingVertical: 16, textAlign: "center" },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.6)",
-    justifyContent: "flex-end",
-  },
-  dialogSheet: {
-    margin: 32,
-    backgroundColor: colors.surface,
-    borderRadius: 20,
-    padding: 24,
-    gap: 8,
-  },
-  dialogTitle: { color: colors.white, fontSize: 17, fontWeight: "700", textAlign: "center" },
-  dialogMessage: { color: colors.muted, fontSize: 14, textAlign: "center", marginBottom: 8 },
-  dialogActions: { flexDirection: "row", gap: 12, marginTop: 4 },
-  dialogBtn: { flex: 1, paddingVertical: 13, borderRadius: 12, alignItems: "center" },
-  dialogBtnCancel: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
-  dialogBtnCancelText: { color: colors.white, fontSize: 15, fontWeight: "600" },
-  dialogBtnConfirm: { backgroundColor: colors.red },
-  dialogBtnConfirmText: { color: colors.white, fontSize: 15, fontWeight: "700" },
 }));
 
 export default function MatchDetailPage() {
@@ -323,33 +304,16 @@ export default function MatchDetailPage() {
 
       <Toast message={toastMessage} visible={toastVisible} onHide={() => setToastVisible(false)} />
 
-      <Modal
+      <ConfirmDialog
         visible={unjoinModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setUnjoinModalVisible(false)}
-      >
-        <Pressable style={styles.modalOverlay} onPress={() => setUnjoinModalVisible(false)}>
-          <View style={styles.dialogSheet}>
-            <Text style={styles.dialogTitle}>{t.unjoinMatchConfirmTitle}</Text>
-            <Text style={styles.dialogMessage}>{t.unjoinMatchConfirmMessage}</Text>
-            <View style={styles.dialogActions}>
-              <TouchableOpacity
-                style={[styles.dialogBtn, styles.dialogBtnCancel]}
-                onPress={() => setUnjoinModalVisible(false)}
-              >
-                <Text style={styles.dialogBtnCancelText}>{t.cancel}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.dialogBtn, styles.dialogBtnConfirm]}
-                onPress={confirmUnjoin}
-              >
-                <Text style={styles.dialogBtnConfirmText}>{t.confirm}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Pressable>
-      </Modal>
+        title={t.unjoinMatchConfirmTitle}
+        message={t.unjoinMatchConfirmMessage}
+        confirmLabel={t.confirm}
+        cancelLabel={t.cancel}
+        onConfirm={confirmUnjoin}
+        onCancel={() => setUnjoinModalVisible(false)}
+        destructive
+      />
     </SafeAreaView>
   );
 }
