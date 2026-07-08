@@ -307,6 +307,15 @@ export default function TournamentDetailPage() {
                 }
               </Pressable>
             )}
+
+            {isAdmin && isFull && (
+              <Pressable
+                style={({ pressed }) => [styles.joinButton, pressed && { opacity: 0.8 }]}
+                onPress={() => router.push({ pathname: "/tournament/results/[id]", params: { id } })}
+              >
+                <Text style={styles.joinButtonText}>{t.viewResults}</Text>
+              </Pressable>
+            )}
           </>
         )}
 

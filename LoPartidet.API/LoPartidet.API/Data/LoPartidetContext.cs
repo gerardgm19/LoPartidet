@@ -139,7 +139,7 @@ public class LoPartidetContext(DbContextOptions<LoPartidetContext> options) : Db
                   .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(tm => tm.Group)
-                  .WithMany()
+                  .WithMany(g => g.Matches)
                   .HasForeignKey(tm => tm.GroupId)
                   .OnDelete(DeleteBehavior.Restrict);
 
@@ -170,7 +170,7 @@ public class LoPartidetContext(DbContextOptions<LoPartidetContext> options) : Db
                   .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(t => t.Group)
-                  .WithMany()
+                  .WithMany(g => g.Teams)
                   .HasForeignKey(t => t.GroupId)
                   .OnDelete(DeleteBehavior.Restrict);
 
