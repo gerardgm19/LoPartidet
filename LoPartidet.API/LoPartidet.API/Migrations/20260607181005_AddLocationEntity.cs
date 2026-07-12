@@ -28,7 +28,7 @@ namespace LoPartidet.API.Migrations
 
             migrationBuilder.Sql(@"
                 INSERT INTO `Locations` (`Name`)
-                SELECT name FROM (
+                SELECT MIN(name) FROM (
                     SELECT TRIM(`Location`) AS name FROM `Matches` WHERE `Location` IS NOT NULL AND TRIM(`Location`) <> ''
                     UNION
                     SELECT TRIM(`Location`) AS name FROM `TournamentMatches` WHERE `Location` IS NOT NULL AND TRIM(`Location`) <> ''

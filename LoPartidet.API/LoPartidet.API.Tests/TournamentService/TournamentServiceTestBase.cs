@@ -165,5 +165,7 @@ public abstract class TournamentServiceTestBase
             Task.FromResult(ValidationResult.Ok());
         public Task<ValidationResult> ValidateStartTournamentAsync(StartTournamentValidationRequest request) =>
             Task.FromResult(ValidationResult.Ok());
+        public Task<ValidationResult> ValidateUpdateTournamentAsync(int tournamentId, UpdateTournamentDto request) =>
+            Task.FromResult(ValidationResult.Ok());
     }
 }
