@@ -55,6 +55,9 @@ public class RemoteJwtAuthHandler(
             .Select(u => u.UserRoles.Select(ur => ur.Role).ToList())
             .FirstOrDefaultAsync() ?? new List<Role>();
 
+        if (roles.Count == 0)
+            Logger.LogError("No roles found for user {UserId}", result.UserId);
+
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, result.UserId),

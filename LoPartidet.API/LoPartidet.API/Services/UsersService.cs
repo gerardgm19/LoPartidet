@@ -42,6 +42,14 @@ public class UsersService(LoPartidetContext db, IIdentityManagerService identity
         };
 
         db.PlayerSkills.Add(playerSkill);
+
+        var userRole = new UserRole
+        {
+            UserId = user.Id,
+            Role = Role.Player
+        };
+        db.UserRoles.Add(userRole);
+
         await db.SaveChangesAsync();
 
         return new RegisterUserResponse(user.Id, identity.Token);
