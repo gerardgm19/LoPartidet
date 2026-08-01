@@ -220,7 +220,14 @@ ssh urano@ssh.yourdomain.com "whoami"
 
 ---
 
-## 7. Troubleshooting
+## 7. Machine tailscale connection
+
+https://ubuntu-n8n.tail35f415.ts.net:10000/filemin/?xnavigation=1
+
+
+---
+
+## 8. Troubleshooting
 
 ### Hostname returns 502 / Cloudflare 1033 (tunnel error)
 Cloudflare can't reach the local service.
