@@ -2,68 +2,95 @@
 
 ## Overview
 
-This guide covers the full stack for exposing a server to the internet using a custom domain from Dondominio, Caddy as a reverse proxy with automatic HTTPS, and .NET services running in the background.
+The server is exposed to the internet through a **Cloudflare Tunnel** — no public IP,
+no router port forwarding, and no inbound ports. `cloudflared` runs on the server and
+opens an **outbound** connection to Cloudflare; Cloudflare terminates HTTPS at its edge
+and routes each hostname through the tunnel straight to its local service. **Caddy
+serves only the static front-end**; the .NET services are reached directly by the
+tunnel on their own localhost ports.
 
 ```
-Internet → Caddy (80/443) → .NET Services (localhost ports)
-                ↑
-        yourdomain.com (Dondominio DNS)
+Internet → Cloudflare edge (HTTPS/TLS)
+              │  outbound tunnel (no inbound ports)
+              ▼
+        cloudflared (on the server)
+              ├── yourdomain.com      → Caddy (localhost:80) → /var/www/html (static FE)
+              ├── api.yourdomain.com  → localhost:3000  (.NET API)
+              └── auth.yourdomain.com → localhost:4000  (.NET IdentityManager)
 ```
+
+**Gone from the old setup:** public IP, Dondominio A records, router port forwarding,
+opening ports 80/443, and Let's Encrypt. Cloudflare handles public DNS and TLS.
+**Caddy stays** — but only as the internal static server for the front-end (plain HTTP
+on localhost). It no longer faces the internet, manages certificates, or proxies the APIs.
 
 ---
 
-## 1. Dondominio — DNS Configuration
+## 1. Cloudflare — Domain & DNS
 
-### Point your domain to your public IP
+The domain must be managed by Cloudflare (its nameservers), not by Dondominio's DNS zone.
 
-Log in to [Dondominio](https://www.dondominio.com) → **Dominios** → click your domain → **Zona DNS**.
+1. Add the domain in the [Cloudflare dashboard](https://dash.cloudflare.com) → **Add a site**.
+2. Cloudflare gives you two nameservers. Set them at Dondominio → your domain →
+   **Nameservers** → *use custom nameservers* → enter the Cloudflare ones.
+3. Wait until Cloudflare reports the domain as **Active** (propagation up to 24h).
 
-| Type  | Host   | Value          |
-|-------|--------|----------------|
-| A     | `@`    | `your.public.IP` |
-| CNAME | `www`  | `yourdomain.com` |
-
-### Adding subdomains
-
-For each service/subdomain, add a new A record:
-
-| Type | Host    | Value            |
-|------|---------|------------------|
-| A    | `api`   | `your.public.IP` |
-| A    | `admin` | `your.public.IP` |
-| A    | `app`   | `your.public.IP` |
-
-> **Tip:** You can use a wildcard `*` A record pointing to your public IP to cover all subdomains automatically, without adding each one manually.
-
-### Notes
-- DNS changes can take **1–24 hours** to propagate.
-- Verify propagation with: `dig yourdomain.com`
-- Check your current public IP with: `curl ifconfig.me`
+You do **not** create A records or reference a public IP — the tunnel creates the DNS
+entries (proxied CNAMEs) for you in section 2.
 
 ---
 
-## 2. Router — Port Forwarding
+## 2. Cloudflare Tunnel (dashboard-managed)
 
-Caddy needs ports **80** and **443** reachable from the internet. Configure your router (usually at `192.168.1.1`):
+The tunnel is created and configured entirely in the **Cloudflare Zero Trust
+dashboard** (remotely-managed). The server only runs the `cloudflared` connector using
+a token from the dashboard — there is **no** `~/.cloudflared/config.yml` and **no**
+`cloudflared tunnel` CLI setup on the server.
 
-| External Port | Internal Port | Protocol | Target              |
-|---------------|---------------|----------|---------------------|
-| 80            | 80            | TCP      | your server local IP |
-| 443           | 443           | TCP      | your server local IP |
+### Create the tunnel (dashboard)
 
-Also open ports on the server firewall:
+[Cloudflare Zero Trust](https://one.dash.cloudflare.com) → **Networks → Tunnels** →
+**Create a tunnel** → type **Cloudflared** → name it `lopartidet` → **Save**.
+
+The dashboard shows an install command containing a **connector token**. Run it on the
+server:
 
 ```bash
-sudo ufw allow 80
-sudo ufw allow 443
-sudo ufw reload
+# Install the connector (token comes from the dashboard "Install connector" step)
+sudo cloudflared service install <CONNECTOR_TOKEN>
 ```
+
+`cloudflared` runs as a systemd service and pulls its config from Cloudflare.
+
+```bash
+sudo systemctl status cloudflared
+sudo journalctl -u cloudflared --follow
+```
+
+### Add public hostnames (dashboard)
+
+In the tunnel → **Public Hostnames** tab → **Add a public hostname** for each entry.
+The front-end points at **Caddy** on `localhost:80`; each .NET service points directly
+at its own port. Cloudflare creates the DNS records automatically — no A records, no IP.
+
+| Public hostname        | Service (dashboard)       | Target             |
+|------------------------|---------------------------|--------------------|
+| `yourdomain.com`       | `HTTP` → `localhost:80`   | Caddy (static FE)  |
+| `api.yourdomain.com`   | `HTTP` → `localhost:3000` | .NET API           |
+| `auth.yourdomain.com`  | `HTTP` → `localhost:4000` | .NET IdentityManager |
+| `ssh.yourdomain.com`   | `SSH`  → `localhost:22`   | SSH                |
+
+> **Firewall:** keep **all inbound ports closed**. Only outbound 443 to Cloudflare is
+> needed. Do not `ufw allow 80/443`.
 
 ---
 
-## 3. Caddy — Reverse Proxy with Automatic HTTPS
+## 3. Caddy — Front-end server (behind the tunnel)
 
-Caddy replaces Nginx as the public-facing server. It automatically obtains and renews Let's Encrypt certificates.
+Caddy serves **only** the static front-end from `/var/www/html`. The .NET services are
+reached directly by the tunnel (section 2), not through Caddy. Because Cloudflare
+terminates TLS at the edge, Caddy listens on **plain HTTP, localhost only** — no Let's
+Encrypt, no public binding.
 
 ### Installation
 
@@ -76,112 +103,50 @@ sudo apt update && sudo apt install caddy
 
 ### Caddyfile — `/etc/caddy/Caddyfile`
 
-Replace the default content entirely:
+Match on the `Host` header (the tunnel forwards it) and bind HTTP only. Using
+`http://` site addresses tells Caddy **not** to attempt automatic HTTPS.
 
 ```
-# Static website
-yourdomain.com {
-    root * /var/www/mysite
+# Static front-end (only site Caddy serves)
+http://yourdomain.com {
+    root * /var/www/html
     file_server
-}
-
-# API service
-api.yourdomain.com {
-    reverse_proxy localhost:3000
-}
-
-# Admin panel
-admin.yourdomain.com {
-    reverse_proxy localhost:4000
+    try_files {path} /index.html      # SPA fallback for Expo Router
 }
 ```
 
-> **Note:** Internal traffic between Caddy and your apps is plain **HTTP**. Caddy handles HTTPS only for external connections. Your apps do not need SSL configuration.
+> **Note:** TLS is handled by Cloudflare. Caddy serves the FE over plain HTTP on
+> localhost. The .NET services are exposed by the tunnel directly, not by Caddy.
 
 ### Commands
 
 ```bash
-# Start and enable on boot
 sudo systemctl enable caddy
-sudo systemctl start caddy
-
-# Reload after editing Caddyfile (no downtime)
-sudo systemctl reload caddy
-
-# Check status
+sudo systemctl reload caddy            # after editing the Caddyfile (no downtime)
 sudo systemctl status caddy
-
-# Live logs
 sudo journalctl -u caddy --follow
 ```
 
-### Serving static HTML
-
-```
-yourdomain.com {
-    root * /var/www/mysite
-    file_server
-}
-```
-
-Set correct permissions:
+Front-end file permissions (the `deploy.ps1` web deploy sets these automatically):
 
 ```bash
-sudo chown -R caddy:caddy /var/www/mysite
+sudo chown -R www-data:www-data /var/www/html
 ```
 
 ---
 
-## 4. Nginx (optional)
+## 4. .NET Services
 
-If keeping Nginx alongside Caddy, Nginx must listen on an internal port (not 80/443) and Caddy forwards to it.
-
-Change Nginx listen port in `/etc/nginx/sites-available/default`:
-
-```nginx
-server {
-    listen 8080;
-    ...
-}
-```
-
-Then in Caddyfile:
-
-```
-yourdomain.com {
-    reverse_proxy localhost:8080
-}
-```
-
-> **Recommendation:** If Nginx is only acting as a reverse proxy, replace it with Caddy directly to simplify the stack.
-
----
-
-## 5. .NET Services
-
-### Recommended file location
-
-```
-/var/www/myapp/
-```
-
-### Publish your app
-
-```bash
-dotnet publish -c Release -o ./publish
-sudo cp -r ./publish/* /var/www/myapp/
-```
-
-### systemd service — `/etc/systemd/system/myapp.service`
+### systemd service — `/etc/systemd/system/lopartidet.service`
 
 ```ini
 [Unit]
-Description=My .NET API
+Description=LoPartidet API
 After=network.target
 
 [Service]
-WorkingDirectory=/var/www/myapp
-ExecStart=/usr/bin/dotnet /var/www/myapp/myapp.dll
+WorkingDirectory=/opt/lopartidet
+ExecStart=/usr/bin/dotnet /opt/lopartidet/LoPartidet.API.dll
 Restart=always
 RestartSec=10
 User=www-data
@@ -192,70 +157,102 @@ Environment=ASPNETCORE_URLS=http://localhost:3000
 WantedBy=multi-user.target
 ```
 
-> The `ASPNETCORE_URLS` port must match the port in your Caddyfile `reverse_proxy` directive.
+> `ASPNETCORE_URLS` binds **localhost** only and must match the port in the Caddyfile
+> `reverse_proxy` directive. Services are never exposed directly.
 
 ### Service commands
 
 ```bash
-# Enable and start
-sudo systemctl enable myapp
-sudo systemctl start myapp
-
-# Check status
-sudo systemctl status myapp
-
-# View logs
-sudo journalctl -u myapp --follow
-
-# Restart after deploy
-sudo systemctl restart myapp
+sudo systemctl enable lopartidet
+sudo systemctl restart lopartidet      # after a deploy
+sudo systemctl status lopartidet
+sudo journalctl -u lopartidet --follow
 ```
 
-### Multiple services example
+### Services in this deployment
 
-| Service     | Port   | Subdomain            | Service file         |
-|-------------|--------|----------------------|----------------------|
-| Main API    | 3000   | `api.yourdomain.com` | `api.service`        |
-| Admin API   | 4000   | `admin.yourdomain.com` | `admin.service`    |
-| Background  | 5000   | *(internal only)*    | `worker.service`     |
+| Service          | Port | Hostname               | systemd unit              | Remote dir             |
+|------------------|------|------------------------|---------------------------|------------------------|
+| LoPartidet API   | 3000 | `api.yourdomain.com`   | `lopartidet.service`      | `/opt/lopartidet`      |
+| IdentityManager  | 4000 | `auth.yourdomain.com`  | `identitymanager.service` | `/opt/identitymanager` |
+| Web (static)     | —    | `yourdomain.com`       | Caddy → `/var/www/html`   | `/var/www/html`        |
 
 ---
 
-## 6. Troubleshooting
+## 5. Deployment (`deploy.ps1`)
 
-### 502 Bad Gateway
-Caddy is running but can't reach your app.
+Run from the repo root on Windows (PowerShell):
 
-```bash
-# Check what ports are listening
-sudo ss -tlnp | grep LISTEN
-
-# Test app locally
-curl http://localhost:3000
-
-# Check app logs
-sudo journalctl -u myapp --follow
+```powershell
+./deploy.ps1
 ```
 
-### Certificate error (timeout / firewall)
-Let's Encrypt can't reach your server.
+The script:
+1. Asks which services to deploy, then prompts for the SSH password (never stored).
+2. Connects over SSH through the Cloudflare Tunnel (see section 6).
+3. Builds locally, backs up the remote target, uploads a tarball, restarts the service.
+   For the web build it restarts **nginx and caddy**.
+
+---
+
+## 6. SSH access through the Tunnel
+
+SSH also goes through Cloudflare (no open port 22). Install `cloudflared` on your
+**client** machine, then add a `ProxyCommand` so `ssh`/`scp` route through the tunnel.
+
+`~/.ssh/config`:
+
+```
+Host ssh.yourdomain.com
+  ProxyCommand "C:\Program Files (x86)\cloudflared\cloudflared.exe" access ssh --hostname %h
+```
+
+> Use the full path to `cloudflared.exe` (or ensure it is on `PATH`) — a bare
+> `cloudflared` fails when it is not on `PATH`.
+
+Test:
 
 ```bash
-# Verify ports are open (run from another machine)
-Test-NetConnection -ComputerName your.public.IP -Port 80
-Test-NetConnection -ComputerName your.public.IP -Port 443
+ssh urano@ssh.yourdomain.com "whoami"
+```
 
-# Verify DNS is pointing to the right IP
-dig yourdomain.com
+`deploy.ps1` relies on this config to connect.
 
-# Verify your public IP
-curl ifconfig.me
+---
+
+## 7. Troubleshooting
+
+### Hostname returns 502 / Cloudflare 1033 (tunnel error)
+Cloudflare can't reach the local service.
+
+```bash
+# Tunnel up?
+sudo systemctl status cloudflared
+sudo journalctl -u cloudflared --follow
+
+# Is Caddy up (FE) and are the apps listening?
+sudo systemctl status caddy
+sudo ss -tlnp | grep -E ':(80|3000|4000)'
+curl http://localhost:80        # front-end via Caddy
+curl http://localhost:3000      # .NET API directly
 ```
 
 ### DNS not resolving
-Wait for propagation (up to 24h) or check with:
+Confirm the domain is **Active** on Cloudflare and the hostname is listed under the
+tunnel's **Public Hostnames** (Zero Trust → Networks → Tunnels → `lopartidet`).
+
 ```bash
-nslookup yourdomain.com 8.8.8.8
+nslookup api.yourdomain.com 1.1.1.1
+```
+
+### SSH connection times out or `Permission denied`
+- `ProxyCommand` path wrong / `cloudflared` not found → fix `~/.ssh/config`.
+- Password rejected → confirm the login user and `PasswordAuthentication yes` in
+  `/etc/ssh/sshd_config`.
+
+```bash
+cloudflared --version
+ssh -v urano@ssh.yourdomain.com "true"
 ```
 
 ---
@@ -264,15 +261,18 @@ nslookup yourdomain.com 8.8.8.8
 
 ```
 Internet
-   │
+   │  HTTPS (TLS terminated at Cloudflare edge)
    ▼
-Router (port forward 80/443)
-   │
-   ▼
-Caddy  ──── yourdomain.com      → /var/www/mysite (static)
-       ──── api.yourdomain.com  → localhost:3000  (.NET API)
-       ──── admin.yourdomain.com→ localhost:4000  (.NET Admin)
-                                        │
-                                  systemd services
-                                  /var/www/myapp/
+Cloudflare  ──── yourdomain.com      ┐
+                 api.yourdomain.com  │  outbound tunnel (no inbound ports)
+                 auth.yourdomain.com │
+                 ssh.yourdomain.com  ┘
+                        │
+                        ▼
+                 cloudflared (server)
+        ┌───────────────┼────────────────────┐
+        ▼               ▼                     ▼
+ Caddy (:80)      localhost:3000         localhost:4000
+ /var/www/html    LoPartidet API         IdentityManager
+ (static FE)      (systemd)              (systemd)
 ```

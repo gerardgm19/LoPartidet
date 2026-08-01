@@ -12,7 +12,7 @@ $ErrorActionPreference = "Stop"
 # Connection goes through Cloudflare Access. The ProxyCommand lives in
 # ~/.ssh/config (cloudflared access ssh --hostname %h). Native ssh/scp honor it;
 # SSH.NET (Posh-SSH) does NOT, hence the old connection timeout.
-# Auth is key-based (~/.ssh/id_ed25519 must be in the server's authorized_keys).
+# Auth is password-based, fed non-interactively via SSH_ASKPASS (see Open-Sessions).
 
 # ── PATHS ─────────────────────────────────────────────────────────────────────
 $RepoRoot = $PSScriptRoot
