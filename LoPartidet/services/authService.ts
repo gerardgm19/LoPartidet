@@ -44,6 +44,8 @@ export async function register(
     return { token: data.token, userId: data.userId.toString() };
   } catch (error: any) {
     const body = error.response?.data;
-    throw new Error(body?.error ?? "Registration failed. Please try again.");
+    const message =
+      typeof body === "string" ? body : body?.error;
+    throw new Error(message ?? "Registration failed. Please try again.");
   }
 }

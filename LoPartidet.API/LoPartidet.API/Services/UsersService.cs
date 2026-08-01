@@ -9,16 +9,17 @@ namespace LoPartidet.API.Services;
 
 public class UsersService(LoPartidetContext db, IIdentityManagerService identityManagerService) : IUsersService
 {
-    public async Task<RegisterUserResponse?> RegisterUserAsync(RegisterUserDto request)
+    public async Task<RegisterUserResult> RegisterUserAsync(RegisterUserDto request)
     {
         var identity = await identityManagerService.RegisterAsync(
             request.Name, request.Surname, request.Nickname, request.Email, request.Password);
 
-        if (identity is null) return null;
+        if (!identity.Succeeded || identity.Response is null)
+            return new RegisterUserResult(false, null, identity.Error ?? "Registration failed.");
 
         var user = new User
         {
-            IdentityId = identity.UserId,
+            IdentityId = identity.Response.UserId,
             Name = request.Name,
             Surname = request.Surname,
             Nickname = request.Nickname,
@@ -52,7 +53,7 @@ public class UsersService(LoPartidetContext db, IIdentityManagerService identity
 
         await db.SaveChangesAsync();
 
-        return new RegisterUserResponse(user.Id, identity.Token);
+        return new RegisterUserResult(true, new RegisterUserResponse(user.Id, identity.Response.Token), null);
     }
 
     public async Task<UserDto?> GetByIdAsync(int id)
