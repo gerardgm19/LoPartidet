@@ -2,27 +2,25 @@
 # deploy.ps1 - Build and deploy LoPartidet services to remote server
 
 param(
-    [string]$SshHost = "100.64.116.23",
-    [string]$SshUser = "urano",
-    [string]$SshPass = "Gera1908joseluis++"
+    [string]$SshHost = "ssh.lopartidet.cat",
+    [string]$SshUser = "urano"
 )
 
 $ErrorActionPreference = "Stop"
 
-# ── POSH-SSH ──────────────────────────────────────────────────────────────────
-if (-not (Get-Module -ListAvailable -Name Posh-SSH)) {
-    Write-Host "Installing Posh-SSH..." -ForegroundColor Yellow
-    Install-Module -Name Posh-SSH -Scope CurrentUser -Force -AllowClobber
-}
-Import-Module Posh-SSH
+# ── SSH ───────────────────────────────────────────────────────────────────────
+# Connection goes through Cloudflare Access. The ProxyCommand lives in
+# ~/.ssh/config (cloudflared access ssh --hostname %h). Native ssh/scp honor it;
+# SSH.NET (Posh-SSH) does NOT, hence the old connection timeout.
+# Auth is key-based (~/.ssh/id_ed25519 must be in the server's authorized_keys).
 
 # ── PATHS ─────────────────────────────────────────────────────────────────────
 $RepoRoot = $PSScriptRoot
 $BuildDir = "$RepoRoot/.deploy-build"
-$Date     = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
+$Date = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
 
 $Cfg = @{
-    LoPartidetAPI = @{
+    LoPartidetAPI   = @{
         Name       = "LoPartidet.API"
         Service    = "lopartidet"
         CsprojPath = "$RepoRoot/LoPartidet.API/LoPartidet.API/LoPartidet.API.csproj"
@@ -36,7 +34,7 @@ $Cfg = @{
         BuildOut   = "$BuildDir/identitymanager"
         RemoteDir  = "/opt/identitymanager"
     }
-    ExpoWeb = @{
+    ExpoWeb         = @{
         SourceDir = "$RepoRoot/LoPartidet"
         BuildOut  = "$RepoRoot/LoPartidet/dist"
         RemoteDir = "/var/www/html"
@@ -45,42 +43,57 @@ $Cfg = @{
 
 # ── SESSION HELPERS ───────────────────────────────────────────────────────────
 function Write-Step { param([string]$Msg) Write-Host "`n==> $Msg" -ForegroundColor Cyan }
-function Write-Err  { param([string]$Msg) Write-Host "ERROR: $Msg" -ForegroundColor Red }
+function Write-Err { param([string]$Msg) Write-Host "ERROR: $Msg" -ForegroundColor Red }
 
-$Credential  = [PSCredential]::new($SshUser, (ConvertTo-SecureString $SshPass -AsPlainText -Force))
-$SshSession  = $null
-$SftpSession = $null
+$Target = "$SshUser@$SshHost"
+$SshOpts = @(
+    '-o', 'ConnectTimeout=60',
+    '-o', 'ServerAliveInterval=15',
+    '-o', 'PreferredAuthentications=password',
+    '-o', 'PubkeyAuthentication=no'
+)
+
+# Feed the SSH password non-interactively via OpenSSH's SSH_ASKPASS helper.
+# (Native Windows ssh can't take a password on the command line; SSH_ASKPASS
+#  points at a helper that prints it. cloudflared ProxyCommand still applies.)
+# NOTE: password is echoed by a cmd script — chars & | < > ^ % would break it.
+$AskPass = "$env:TEMP\lop_askpass.cmd"
 
 function Open-Sessions {
     Write-Step "Connecting to $SshHost"
-    $script:SshSession  = New-SSHSession  -ComputerName $SshHost -Credential $Credential -AcceptKey -Force
-    $script:SftpSession = New-SFTPSession -ComputerName $SshHost -Credential $Credential -AcceptKey -Force
+    Set-Content -Path $AskPass -Value "@echo $SshPass" -Encoding Ascii
+    $env:SSH_ASKPASS = $AskPass
+    $env:SSH_ASKPASS_REQUIRE = "force"
+    $env:DISPLAY = "localhost:0"
+    ssh @SshOpts $Target "true" 2>&1 | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Err "SSH connection/auth to $SshHost failed."
+        Write-Host "Check host/user/password and that cloudflared is installed." -ForegroundColor Yellow
+        Close-Sessions; exit 1
+    }
 }
 
 function Close-Sessions {
-    if ($SshSession)  { Remove-SSHSession  -SSHSession  $SshSession  | Out-Null }
-    if ($SftpSession) { Remove-SFTPSession -SFTPSession $SftpSession | Out-Null }
+    Remove-Item $AskPass -ErrorAction SilentlyContinue
+    Remove-Item Env:\SSH_ASKPASS, Env:\SSH_ASKPASS_REQUIRE -ErrorAction SilentlyContinue
 }
 
 function Invoke-Remote {
     param([string]$Command)
-    $cmd = $Command -replace '\bsudo\b', "echo '$SshPass' | sudo -S"
-    $r = Invoke-SSHCommand -SSHSession $SshSession -Command $cmd
-    return $r.ExitStatus, $r.Output
+    $cmd = $Command -replace '\bsudo\b', "echo '$SshPass' | sudo -S -p ''"
+    # Base64-encode the whole script so PowerShell/ssh.exe native-arg quoting
+    # can't mangle the shell metachars (quotes, parens, $(( )) ). Decoded and
+    # executed by bash on the server.
+    $b64 = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($cmd))
+    $out = ssh @SshOpts $Target "echo $b64 | base64 -d | bash" 2>&1
+    return $LASTEXITCODE, $out
 }
 
-function Send-Dir {
-    param([string]$LocalDir, [string]$RemotePath)
-    foreach ($item in Get-ChildItem -Path $LocalDir) {
-        if ($item.Name -like "appsettings*.json") { continue }
-        if ($item.PSIsContainer) {
-            $dest = "$RemotePath/$($item.Name)"
-            Invoke-Remote "mkdir -p '$dest'" | Out-Null
-            Send-Dir -LocalDir $item.FullName -RemotePath $dest
-        } else {
-            Set-SFTPItem -SFTPSession $SftpSession -Path $item.FullName -Destination $RemotePath -Force
-        }
-    }
+# Uploads a single local file into a remote directory via scp.
+function Send-File {
+    param([string]$LocalPath, [string]$RemoteDir)
+    scp @SshOpts $LocalPath "${Target}:${RemoteDir}/"
+    if ($LASTEXITCODE -ne 0) { throw "scp of '$LocalPath' failed." }
 }
 
 # ── BACKUP HELPER ─────────────────────────────────────────────────────────────
@@ -89,8 +102,8 @@ function Invoke-RemoteBackup {
     # Finds unique filename: name.zip → name(1).zip → name(2).zip …
     # Skips zip if directory is empty (first deploy)
     $cmd = "sudo mkdir -p '$RemoteDir/backups'; base='$RemoteDir/backups/$Date'; " +
-           'target="${base}.zip"; n=1; while [ -f "$target" ]; do target="${base}(${n}).zip"; n=$((n+1)); done; ' +
-           "if find '$RemoteDir' -mindepth 1 -maxdepth 1 ! -name backups | grep -q .; then cd '$RemoteDir' && sudo zip -r " + '"$target"' + " . --exclude 'backups/*'; fi"
+    'target="${base}.zip"; n=1; while [ -f "$target" ]; do target="${base}(${n}).zip"; n=$((n+1)); done; ' +
+    "if find '$RemoteDir' -mindepth 1 -maxdepth 1 ! -name backups | grep -q .; then cd '$RemoteDir' && sudo zip -r " + '"$target"' + " . --exclude 'backups/*'; fi"
     return Invoke-Remote $cmd
 }
 
@@ -99,9 +112,9 @@ function Invoke-RemoteBackup {
 function Deploy-DotnetService {
     param([hashtable]$Svc)
 
-    $name      = $Svc.Name
-    $service   = $Svc.Service
-    $buildOut  = $Svc.BuildOut
+    $name = $Svc.Name
+    $service = $Svc.Service
+    $buildOut = $Svc.BuildOut
     $remoteDir = $Svc.RemoteDir
 
     # 1. Build locally
@@ -134,12 +147,22 @@ function Deploy-DotnetService {
         Close-Sessions; exit 1
     }
 
-    # 5. Upload build output
+    # 5. Pack build output (excluding appsettings) and upload as a single tarball
     Write-Step "Uploading $name -> $remoteDir"
+    $tarName = "$service-${Date}.tar.gz"
+    $localTar = "$env:TEMP\$tarName"
+    $remoteTar = "/tmp/$tarName"
     try {
-        Send-Dir -LocalDir $buildOut -RemotePath $remoteDir
-    } catch {
+        tar -czf $localTar --exclude='appsettings*.json' -C $buildOut .
+        if ($LASTEXITCODE -ne 0) { throw "tar pack failed." }
+        Send-File -LocalPath $localTar -RemoteDir "/tmp"
+        Remove-Item $localTar -ErrorAction SilentlyContinue
+        $exitCode, $out = Invoke-Remote "sudo tar -xzf '$remoteTar' -C '$remoteDir' && sudo rm '$remoteTar'"
+        if ($exitCode -ne 0) { throw "remote extract failed: $out" }
+    }
+    catch {
         Write-Err "Upload failed: $_"
+        Remove-Item $localTar -ErrorAction SilentlyContinue
         Invoke-Remote "sudo unzip -o '$remoteDir/backups/${Date}.zip' -d '$remoteDir'" | Out-Null
         Invoke-Remote "sudo systemctl start $service" | Out-Null
         Close-Sessions; exit 1
@@ -168,8 +191,8 @@ function Deploy-IdentityManager {
 }
 
 function Deploy-ExpoWeb {
-    $svc      = $Cfg.ExpoWeb
-    $tarName  = "expo-web-${Date}.tar.gz"
+    $svc = $Cfg.ExpoWeb
+    $tarName = "expo-web-${Date}.tar.gz"
     $localTar = "$env:TEMP\$tarName"
     $remoteTar = "/tmp/$tarName"
 
@@ -199,8 +222,9 @@ function Deploy-ExpoWeb {
     # 5. Upload tarball and extract on server
     Write-Step "Uploading and extracting -> $($svc.RemoteDir)"
     try {
-        Set-SFTPItem -SFTPSession $SftpSession -Path $localTar -Destination "/tmp" -Force
-    } catch {
+        Send-File -LocalPath $localTar -RemoteDir "/tmp"
+    }
+    catch {
         Write-Err "Tarball upload failed: $_"
         Remove-Item $localTar -ErrorAction SilentlyContinue
         Close-Sessions; exit 1
@@ -233,16 +257,27 @@ Write-Host "  [2] LoPartidet.API"
 Write-Host "  [3] LoPartidet Web"
 Write-Host ""
 
-$validChoices = @("1","2","3")
+$validChoices = @("1", "2", "3")
 do {
-    $raw     = Read-Host "Choice (e.g. 1 3)"
+    $raw = Read-Host "Choice (e.g. 1 3)"
     $choices = $raw.Trim() -split '\s+' | Select-Object -Unique
     $invalid = $choices | Where-Object { $_ -notin $validChoices }
 } while ($invalid.Count -gt 0 -or $choices.Count -eq 0)
 
-$deployIdentity    = "1" -in $choices
-$deployLoPartidet  = "2" -in $choices
-$deployExpoWeb     = "3" -in $choices
+$deployIdentity = "1" -in $choices
+$deployLoPartidet = "2" -in $choices
+$deployExpoWeb = "3" -in $choices
+
+# ── SSH PASSWORD (prompted, never stored) ─────────────────────────────────────
+Write-Host "`n┌─────────────────────────────────────────────┐" -ForegroundColor Cyan
+Write-Host   "│  INPUT NEEDED — SSH password                 │" -ForegroundColor Cyan
+Write-Host   "└─────────────────────────────────────────────┘" -ForegroundColor Cyan
+Write-Host "  Used for the SSH login and for 'sudo' on the server." -ForegroundColor DarkGray
+Write-Host ">>> " -ForegroundColor Green -NoNewline
+$securePass = Read-Host "Password for $SshUser@$SshHost" -AsSecureString
+$SshPass = [Runtime.InteropServices.Marshal]::PtrToStringBSTR(
+    [Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePass))
+if ([string]::IsNullOrEmpty($SshPass)) { Write-Err "No password entered."; exit 1 }
 
 # ── PREFLIGHT CHECKS ──────────────────────────────────────────────────────────
 if (($deployIdentity -or $deployLoPartidet) -and -not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
@@ -255,9 +290,9 @@ if ($deployExpoWeb -and -not (Get-Command npx -ErrorAction SilentlyContinue)) {
 # ── CONNECT AND DEPLOY ────────────────────────────────────────────────────────
 Open-Sessions
 
-if ($deployIdentity)   { Deploy-IdentityManager }
+if ($deployIdentity) { Deploy-IdentityManager }
 if ($deployLoPartidet) { Deploy-LoPartidetAPI }
-if ($deployExpoWeb)    { Deploy-ExpoWeb }
+if ($deployExpoWeb) { Deploy-ExpoWeb }
 
 # ── CLEANUP ───────────────────────────────────────────────────────────────────
 Close-Sessions
