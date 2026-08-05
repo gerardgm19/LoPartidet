@@ -9,6 +9,7 @@ import { useAuthStore } from "@/store/authStore";
 export type Match = {
   id: string;
   createdBy: string;
+  createdById: number;
   createdAt: string;
   type: SportType;
   date: string;
@@ -119,4 +120,12 @@ export async function joinMatch(matchId: string): Promise<void> {
 export async function unjoinMatch(matchId: string): Promise<void> {
   const userId = useAuthStore.getState().userId ?? "";
   await apiClient.delete(`${API_BASE_URL}/matches/${matchId}/join`, { data: { userId } });
+}
+
+export async function cancelMatch(matchId: string): Promise<void> {
+  await apiClient.post(`${API_BASE_URL}/matches/${matchId}/cancel`);
+}
+
+export async function deleteMatch(matchId: string): Promise<void> {
+  await apiClient.delete(`${API_BASE_URL}/matches/${matchId}`);
 }

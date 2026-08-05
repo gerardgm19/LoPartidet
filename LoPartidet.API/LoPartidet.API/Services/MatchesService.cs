@@ -8,7 +8,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LoPartidet.API.Services;
 
-public class MatchesService(LoPartidetContext db, IMatchValidationService validationService) : IMatchesService
+public class MatchesService(
+    LoPartidetContext db,
+    IMatchValidationService validationService,
+    ILogger<MatchesService> logger) : IMatchesService
 {
     public async Task<IEnumerable<MatchDto>> GetAllAsync(string identityId, MatchFilterDto filter)
     {
@@ -142,5 +145,29 @@ public class MatchesService(LoPartidetContext db, IMatchValidationService valida
         var userMatch = await db.UserMatches.FirstAsync(um => um.MatchId == matchId && um.UserId == userId);
         db.UserMatches.Remove(userMatch);
         await db.SaveChangesAsync();
+    }
+
+    public async Task DeleteMatchAsync(int matchId)
+    {
+        var joinRows = await db.UserMatches.Where(um => um.MatchId == matchId).ToListAsync();
+        if (joinRows.Count > 0)
+            db.UserMatches.RemoveRange(joinRows);
+
+        var match = await db.Matches.FirstAsync(m => m.Id == matchId);
+        db.Matches.Remove(match);
+        await db.SaveChangesAsync();
+
+        logger.LogInformation("Match {MatchId} deleted", matchId);
+    }
+
+    public async Task CancelMatchAsync(int matchId)
+    {
+        var match = await db.Matches.FirstAsync(m => m.Id == matchId);
+
+        // Match.Status uses an init accessor; update through the change tracker.
+        db.Entry(match).Property(m => m.Status).CurrentValue = MatchStatus.Cancelled;
+        await db.SaveChangesAsync();
+
+        logger.LogInformation("Match {MatchId} cancelled", matchId);
     }
 }

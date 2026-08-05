@@ -142,6 +142,7 @@ const cat_es = {
   statusScheduled: "Programat",
   statusLive: "En viu",
   statusFinished: "Finalitzat",
+  statusCancelled: "Cancel·lat",
 
   // Create match
   createMatchTitle: "Nou partit",
@@ -178,6 +179,17 @@ const cat_es = {
   unjoinMatchConfirmMessage: "S'eliminarà la teva plaça en aquest partit.",
   unjoinMatchSuccess: "T'has desapuntat del partit.",
   unjoinMatchError: "No s'ha pogut desapuntar del partit.",
+  matchManagement: "Gestió del partit",
+  cancelMatch: "Cancel·lar partit",
+  cancelMatchConfirmTitle: "Cancel·lar partit?",
+  cancelMatchConfirmMessage: "El partit es marcarà com a cancel·lat. Aquesta acció no es pot desfer.",
+  cancelMatchSuccess: "Partit cancel·lat.",
+  cancelMatchError: "No s'ha pogut cancel·lar el partit.",
+  deleteMatch: "Eliminar partit",
+  deleteMatchConfirmTitle: "Eliminar partit?",
+  deleteMatchConfirmMessage: "El partit s'eliminarà permanentment. Aquesta acció no es pot desfer.",
+  deleteMatchSuccess: "Partit eliminat.",
+  deleteMatchError: "No s'ha pogut eliminar el partit.",
   playersList: "Jugadors apuntats",
   noPlayers: "Ningú apuntat encara",
 

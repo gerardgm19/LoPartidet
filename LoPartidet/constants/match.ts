@@ -22,5 +22,6 @@ export function getStatusConfig(
     [MatchStatus.Live]:      { label: t.statusLive,      bg: colors.green,  fg: colors.black },
     [MatchStatus.Scheduled]: { label: t.statusScheduled, bg: colors.border, fg: colors.muted },
     [MatchStatus.Finished]:  { label: t.statusFinished,  bg: colors.border, fg: colors.muted },
+    [MatchStatus.Cancelled]: { label: t.statusCancelled, bg: colors.red,    fg: colors.white },
   };
 }

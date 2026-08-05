@@ -6,7 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useThemeStore } from "@/store/themeStore";
 import { makeStyles } from "@/utils/makeStyles";
 import { getSportTypeLabel, getStatusConfig } from "@/constants/match";
-import { getMatchById, joinMatch, unjoinMatch, MatchDetail, MatchPlayer } from "@/services/matchesService";
+import { getMatchById, joinMatch, unjoinMatch, cancelMatch, deleteMatch, MatchDetail, MatchPlayer } from "@/services/matchesService";
 import { useAuthStore } from "@/store/authStore";
 import { MatchStatus } from "@/types/matchStatus";
 import { DetailRow } from "@/components/DetailRow";
@@ -101,6 +101,36 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
   playerName: { color: colors.white, fontSize: 14, fontWeight: "600" },
   playerNickname: { color: colors.muted, fontSize: 12 },
   noPlayersText: { color: colors.muted, fontSize: 14, paddingVertical: 16, textAlign: "center" },
+  manageSection: {
+    marginHorizontal: 16,
+    marginTop: -8,
+    marginBottom: 24,
+    gap: 10,
+  },
+  manageLabel: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+    textAlign: "center",
+  },
+  manageRow: { flexDirection: "row", gap: 12 },
+  manageButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderRadius: 14,
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.card,
+  },
+  manageButtonDanger: { borderColor: colors.red },
+  manageButtonText: { color: colors.white, fontSize: 15, fontWeight: "700" },
+  manageButtonTextDanger: { color: colors.red },
 }));
 
 export default function MatchDetailPage() {
@@ -109,6 +139,7 @@ export default function MatchDetailPage() {
   const styles = useStyles();
   const { id } = useLocalSearchParams<{ id: string }>();
   const userId = useAuthStore((s) => s.userId);
+  const isAdmin = useAuthStore((s) => s.isAdmin);
   const [match, setMatch] = useState<MatchDetail | undefined>();
   const [loading, setLoading] = useState(true);
   const [toastVisible, setToastVisible] = useState(false);
@@ -116,6 +147,9 @@ export default function MatchDetailPage() {
   const [joining, setJoining] = useState(false);
   const [joined, setJoined] = useState(false);
   const [unjoinModalVisible, setUnjoinModalVisible] = useState(false);
+  const [cancelModalVisible, setCancelModalVisible] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [managing, setManaging] = useState(false);
 
   const handleJoin = async () => {
     if (joining || joined || !id) return;
@@ -165,6 +199,38 @@ export default function MatchDetailPage() {
     }
   };
 
+  const confirmCancel = async () => {
+    setCancelModalVisible(false);
+    if (!id) return;
+    setManaging(true);
+    try {
+      await cancelMatch(id);
+      setToastMessage(t.cancelMatchSuccess);
+      setToastVisible(true);
+      const refreshed = await getMatchById(id);
+      if (refreshed) setMatch(refreshed);
+    } catch {
+      setToastMessage(t.cancelMatchError);
+      setToastVisible(true);
+    } finally {
+      setManaging(false);
+    }
+  };
+
+  const confirmDelete = async () => {
+    setDeleteModalVisible(false);
+    if (!id) return;
+    setManaging(true);
+    try {
+      await deleteMatch(id);
+      router.replace("/(tabs)/matches");
+    } catch {
+      setToastMessage(t.deleteMatchError);
+      setToastVisible(true);
+      setManaging(false);
+    }
+  };
+
   useEffect(() => {
     getMatchById(id)
       .then(setMatch)
@@ -206,6 +272,8 @@ export default function MatchDetailPage() {
   const sportTypeLabel = getSportTypeLabel(t);
   const statusCfg = getStatusConfig(t, colors)[match.status];
   const myId = userId ? parseInt(userId) : -1;
+  const canManage = isAdmin() || match.createdById === myId;
+  const canCancel = match.status !== MatchStatus.Cancelled && match.status !== MatchStatus.Finished;
 
   const renderPlayer = (player: MatchPlayer) => {
     const isMe = player.id === myId;
@@ -300,6 +368,32 @@ export default function MatchDetailPage() {
             </Text>
           }
         </Pressable>
+
+        {canManage && (
+          <View style={styles.manageSection}>
+            <Text style={styles.manageLabel}>{t.matchManagement}</Text>
+            <View style={styles.manageRow}>
+              {canCancel && (
+                <Pressable
+                  style={({ pressed }) => [styles.manageButton, pressed && { opacity: 0.6 }]}
+                  onPress={() => setCancelModalVisible(true)}
+                  disabled={managing}
+                >
+                  <Ionicons name="close-circle-outline" size={18} color={colors.white} />
+                  <Text style={styles.manageButtonText}>{t.cancelMatch}</Text>
+                </Pressable>
+              )}
+              <Pressable
+                style={({ pressed }) => [styles.manageButton, styles.manageButtonDanger, pressed && { opacity: 0.6 }]}
+                onPress={() => setDeleteModalVisible(true)}
+                disabled={managing}
+              >
+                <Ionicons name="trash-outline" size={18} color={colors.red} />
+                <Text style={[styles.manageButtonText, styles.manageButtonTextDanger]}>{t.deleteMatch}</Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
       </ScrollView>
 
       <Toast message={toastMessage} visible={toastVisible} onHide={() => setToastVisible(false)} />
@@ -312,6 +406,28 @@ export default function MatchDetailPage() {
         cancelLabel={t.cancel}
         onConfirm={confirmUnjoin}
         onCancel={() => setUnjoinModalVisible(false)}
+        destructive
+      />
+
+      <ConfirmDialog
+        visible={cancelModalVisible}
+        title={t.cancelMatchConfirmTitle}
+        message={t.cancelMatchConfirmMessage}
+        confirmLabel={t.cancelMatch}
+        cancelLabel={t.cancel}
+        onConfirm={confirmCancel}
+        onCancel={() => setCancelModalVisible(false)}
+        destructive
+      />
+
+      <ConfirmDialog
+        visible={deleteModalVisible}
+        title={t.deleteMatchConfirmTitle}
+        message={t.deleteMatchConfirmMessage}
+        confirmLabel={t.deleteMatch}
+        cancelLabel={t.cancel}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteModalVisible(false)}
         destructive
       />
     </SafeAreaView>

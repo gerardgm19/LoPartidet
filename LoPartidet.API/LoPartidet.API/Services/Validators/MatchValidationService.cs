@@ -1,4 +1,5 @@
 using LoPartidet.API.Data;
+using LoPartidet.API.Entities;
 using LoPartidet.API.Models;
 using LoPartidet.API.Services.Validators.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -73,5 +74,48 @@ public class MatchValidationService(LoPartidetContext db) : IMatchValidationServ
             return ValidationResult.Fail("User is not joined to this match.");
 
         return ValidationResult.Ok();
+    }
+
+    public async Task<ValidationResult> ValidateDeleteMatchAsync(DeleteMatchValidationRequest request)
+    {
+        var match = await db.Matches.FindAsync(request.MatchId);
+        if (match is null)
+            return ValidationResult.Fail("Match not found.");
+
+        if (!await IsOwnerOrAdminAsync(match, request.IdentityId, request.IsAdmin))
+            return ValidationResult.Fail("Only the match owner or an admin can delete this match.");
+
+        return ValidationResult.Ok();
+    }
+
+    public async Task<ValidationResult> ValidateCancelMatchAsync(CancelMatchValidationRequest request)
+    {
+        var match = await db.Matches.FindAsync(request.MatchId);
+        if (match is null)
+            return ValidationResult.Fail("Match not found.");
+
+        if (!await IsOwnerOrAdminAsync(match, request.IdentityId, request.IsAdmin))
+            return ValidationResult.Fail("Only the match owner or an admin can cancel this match.");
+
+        if (match.Status == MatchStatus.Cancelled)
+            return ValidationResult.Fail("Match is already cancelled.");
+
+        if (match.Status == MatchStatus.Finished)
+            return ValidationResult.Fail("Cannot cancel a finished match.");
+
+        return ValidationResult.Ok();
+    }
+
+    private async Task<bool> IsOwnerOrAdminAsync(Match match, string identityId, bool isAdmin)
+    {
+        if (isAdmin)
+            return true;
+
+        var userId = await db.Users
+            .Where(u => u.IdentityId == identityId)
+            .Select(u => u.Id)
+            .FirstOrDefaultAsync();
+
+        return userId != 0 && match.CreatedById == userId;
     }
 }

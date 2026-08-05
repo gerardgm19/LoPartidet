@@ -9,4 +9,6 @@ public interface IMatchesService
     Task<MatchDto> CreateMatchAsync(CreateMatchDto request);
     Task<UserMatchDto> JoinMatchAsync(int matchId, int userId);
     Task UnjoinMatchAsync(int matchId, int userId);
+    Task DeleteMatchAsync(int matchId);
+    Task CancelMatchAsync(int matchId);
 }

@@ -65,4 +65,34 @@ public class MatchesController(IMatchesService matchesService, IMatchValidationS
         await matchesService.UnjoinMatchAsync(id, int.Parse(request.UserId));
         return NoContent();
     }
+
+    [HttpDelete("{id}")]
+    [Authorize(Roles = nameof(Role.Player) + "," + nameof(Role.Admin))]
+    public async Task<IActionResult> DeleteMatch(int id)
+    {
+        var identityId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var isAdmin = User.IsInRole(nameof(Role.Admin));
+        var validation = await validationService.ValidateDeleteMatchAsync(
+            new DeleteMatchValidationRequest(id, identityId, isAdmin));
+        if (!validation.IsValid)
+            return BadRequest(validation.Error);
+
+        await matchesService.DeleteMatchAsync(id);
+        return NoContent();
+    }
+
+    [HttpPost("{id}/cancel")]
+    [Authorize(Roles = nameof(Role.Player) + "," + nameof(Role.Admin))]
+    public async Task<IActionResult> CancelMatch(int id)
+    {
+        var identityId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var isAdmin = User.IsInRole(nameof(Role.Admin));
+        var validation = await validationService.ValidateCancelMatchAsync(
+            new CancelMatchValidationRequest(id, identityId, isAdmin));
+        if (!validation.IsValid)
+            return BadRequest(validation.Error);
+
+        await matchesService.CancelMatchAsync(id);
+        return NoContent();
+    }
 }

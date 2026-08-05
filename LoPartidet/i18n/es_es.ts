@@ -142,6 +142,7 @@ const es_es = {
   statusScheduled: "Programado",
   statusLive: "En vivo",
   statusFinished: "Finalizado",
+  statusCancelled: "Cancelado",
 
   // Create match
   createMatchTitle: "Nuevo partido",
@@ -178,6 +179,17 @@ const es_es = {
   unjoinMatchConfirmMessage: "Se eliminará tu plaza en este partido.",
   unjoinMatchSuccess: "Te has desapuntado del partido.",
   unjoinMatchError: "No se pudo desapuntar del partido.",
+  matchManagement: "Gestión del partido",
+  cancelMatch: "Cancelar partido",
+  cancelMatchConfirmTitle: "¿Cancelar partido?",
+  cancelMatchConfirmMessage: "El partido se marcará como cancelado. Esta acción no se puede deshacer.",
+  cancelMatchSuccess: "Partido cancelado.",
+  cancelMatchError: "No se pudo cancelar el partido.",
+  deleteMatch: "Eliminar partido",
+  deleteMatchConfirmTitle: "¿Eliminar partido?",
+  deleteMatchConfirmMessage: "El partido se eliminará permanentemente. Esta acción no se puede deshacer.",
+  deleteMatchSuccess: "Partido eliminado.",
+  deleteMatchError: "No se pudo eliminar el partido.",
   playersList: "Jugadores apuntados",
   noPlayers: "Nadie apuntado todavía",
 

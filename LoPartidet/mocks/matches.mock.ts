@@ -6,6 +6,7 @@ export const MOCK_MATCHES: Match[] = [
   {
     id: "1",
     createdBy: "user-001",
+    createdById: 1,
     createdAt: "2026-04-01T10:00:00Z",
     type: SportType.Fut7,
     date: "2026-04-10T20:00:00Z",
@@ -18,6 +19,7 @@ export const MOCK_MATCHES: Match[] = [
   {
     id: "2",
     createdBy: "user-002",
+    createdById: 2,
     createdAt: "2026-04-02T09:00:00Z",
     type: SportType.Fut5,
     date: "2026-04-08T19:45:00Z",
@@ -30,6 +32,7 @@ export const MOCK_MATCHES: Match[] = [
   {
     id: "3",
     createdBy: "user-003",
+    createdById: 3,
     createdAt: "2026-04-03T11:00:00Z",
     type: SportType.Futsal,
     date: "2026-04-06T17:30:00Z",
@@ -42,6 +45,7 @@ export const MOCK_MATCHES: Match[] = [
   {
     id: "4",
     createdBy: "user-001",
+    createdById: 1,
     createdAt: "2026-04-04T08:30:00Z",
     type: SportType.Fut11,
     date: "2026-04-12T11:00:00Z",
@@ -54,6 +58,7 @@ export const MOCK_MATCHES: Match[] = [
   {
     id: "5",
     createdBy: "user-004",
+    createdById: 4,
     createdAt: "2026-04-05T12:00:00Z",
     type: SportType.Beach,
     date: "2026-04-13T10:30:00Z",
