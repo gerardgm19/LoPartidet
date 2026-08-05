@@ -6,7 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useThemeStore } from "@/store/themeStore";
 import { makeStyles } from "@/utils/makeStyles";
 import { getSportTypeLabel, getStatusConfig } from "@/constants/match";
-import { getMatchById, joinMatch, unjoinMatch, cancelMatch, deleteMatch, MatchDetail, MatchPlayer } from "@/services/matchesService";
+import { getMatchById, getCanEditMatch, joinMatch, unjoinMatch, cancelMatch, deleteMatch, MatchDetail, MatchPlayer } from "@/services/matchesService";
 import { useAuthStore } from "@/store/authStore";
 import { MatchStatus } from "@/types/matchStatus";
 import { DetailRow } from "@/components/DetailRow";
@@ -150,6 +150,7 @@ export default function MatchDetailPage() {
   const [cancelModalVisible, setCancelModalVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [managing, setManaging] = useState(false);
+  const [canEdit, setCanEdit] = useState(false);
 
   const handleJoin = async () => {
     if (joining || joined || !id) return;
@@ -244,6 +245,13 @@ export default function MatchDetailPage() {
     }
   }, [match, userId]);
 
+  useEffect(() => {
+    if (!id) return;
+    getCanEditMatch(id)
+      .then(setCanEdit)
+      .catch(() => setCanEdit(false));
+  }, [id, match?.status, match?.date]);
+
   if (loading) {
     return (
       <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
@@ -274,7 +282,6 @@ export default function MatchDetailPage() {
   const myId = userId ? parseInt(userId) : -1;
   const canManage = isAdmin() || match.createdById === myId;
   const canCancel = match.status !== MatchStatus.Cancelled && match.status !== MatchStatus.Finished;
-  const canEdit = canManage && match.status === MatchStatus.Scheduled && new Date(match.date) > new Date();
 
   const renderPlayer = (player: MatchPlayer) => {
     const isMe = player.id === myId;

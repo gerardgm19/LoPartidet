@@ -10,4 +10,5 @@ public interface IMatchValidationService
     Task<ValidationResult> ValidateUnjoinMatchAsync(UnjoinMatchValidationRequest request);
     Task<ValidationResult> ValidateDeleteMatchAsync(DeleteMatchValidationRequest request);
     Task<ValidationResult> ValidateCancelMatchAsync(CancelMatchValidationRequest request);
+    Task<ValidationResult> ValidateCanEditMatchAsync(int matchId, string identityId, bool isAdmin);
 }

@@ -3,6 +3,7 @@ using LoPartidet.API.Entities;
 using LoPartidet.API.Models;
 using LoPartidet.API.Models.Enums;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace LoPartidet.API.Tests.MatchValidationService;
 
@@ -15,6 +16,14 @@ public abstract class MatchValidationServiceTestBase
             .Options;
         return new LoPartidetContext(options);
     }
+
+    protected static IConfiguration MakeConfig(int maxDaysBeforeEditingMatchBlocks = 0) =>
+        new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["MaxDaysBeforeEditingMatchBlocks"] = maxDaysBeforeEditingMatchBlocks.ToString(),
+            })
+            .Build();
 
     protected static User MakeUser(int id = 1) => new()
     {

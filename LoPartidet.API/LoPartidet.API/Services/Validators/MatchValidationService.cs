@@ -3,10 +3,11 @@ using LoPartidet.API.Entities;
 using LoPartidet.API.Models;
 using LoPartidet.API.Services.Validators.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace LoPartidet.API.Services.Validators;
 
-public class MatchValidationService(LoPartidetContext db) : IMatchValidationService
+public class MatchValidationService(LoPartidetContext db, IConfiguration configuration) : IMatchValidationService
 {
     public async Task<ValidationResult> ValidateCreateMatchAsync(CreateMatchDto request)
     {
@@ -33,17 +34,10 @@ public class MatchValidationService(LoPartidetContext db) : IMatchValidationServ
     public async Task<ValidationResult> ValidateUpdateMatchAsync(UpdateMatchValidationRequest request)
     {
         var match = await db.Matches.FindAsync(request.MatchId);
-        if (match is null)
-            return ValidationResult.Fail("Match not found.");
 
-        if (!await IsOwnerOrAdminAsync(match, request.IdentityId, request.IsAdmin))
-            return ValidationResult.Fail("Only the match owner or an admin can edit this match.");
-
-        if (match.Status != MatchStatus.Scheduled)
-            return ValidationResult.Fail("Only scheduled matches can be edited.");
-
-        if (match.Date <= DateTime.Now)
-            return ValidationResult.Fail("Cannot edit a match that has already started.");
+        var editable = await ValidateMatchEditableAsync(match, request.IdentityId, request.IsAdmin);
+        if (!editable.IsValid)
+            return editable;
 
         if (request.Date <= DateTime.Now)
             return ValidationResult.Fail("Match date must be in the future.");
@@ -60,6 +54,33 @@ public class MatchValidationService(LoPartidetContext db) : IMatchValidationServ
 
         if (request.DurationInMinutes <= 0)
             return ValidationResult.Fail("Duration must be greater than 0.");
+
+        return ValidationResult.Ok();
+    }
+
+    public async Task<ValidationResult> ValidateCanEditMatchAsync(int matchId, string identityId, bool isAdmin)
+    {
+        var match = await db.Matches.FindAsync(matchId);
+        return await ValidateMatchEditableAsync(match, identityId, isAdmin);
+    }
+
+    private async Task<ValidationResult> ValidateMatchEditableAsync(Match? match, string identityId, bool isAdmin)
+    {
+        if (match is null)
+            return ValidationResult.Fail("Match not found.");
+
+        if (!await IsOwnerOrAdminAsync(match, identityId, isAdmin))
+            return ValidationResult.Fail("Only the match owner or an admin can edit this match.");
+
+        if (match.Status != MatchStatus.Scheduled)
+            return ValidationResult.Fail("Only scheduled matches can be edited.");
+
+        if (match.Date <= DateTime.Now)
+            return ValidationResult.Fail("Cannot edit a match that has already started.");
+
+        var maxDaysBeforeBlock = configuration.GetValue<int>("MaxDaysBeforeEditingMatchBlocks");
+        if (match.Date <= DateTime.Now.AddDays(maxDaysBeforeBlock))
+            return ValidationResult.Fail($"Matches cannot be edited within {maxDaysBeforeBlock} days of their start.");
 
         return ValidationResult.Ok();
     }

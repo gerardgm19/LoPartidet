@@ -21,7 +21,7 @@ public class ValidateUpdateMatchAsyncTests : MatchValidationServiceTestBase
     public async Task ValidateUpdateMatch_MatchNotFound_ReturnsFail()
     {
         using var db = CreateContext();
-        var svc = new API.Services.Validators.MatchValidationService(db);
+        var svc = new API.Services.Validators.MatchValidationService(db, MakeConfig());
 
         var result = await svc.ValidateUpdateMatchAsync(MakeRequest(matchId: 999));
 
@@ -35,7 +35,7 @@ public class ValidateUpdateMatchAsyncTests : MatchValidationServiceTestBase
         using var db = CreateContext();
         db.Matches.Add(MakeMatch(id: 1, createdById: 1));
         await db.SaveChangesAsync();
-        var svc = new API.Services.Validators.MatchValidationService(db);
+        var svc = new API.Services.Validators.MatchValidationService(db, MakeConfig());
 
         var result = await svc.ValidateUpdateMatchAsync(MakeRequest(isAdmin: false));
 
@@ -49,7 +49,7 @@ public class ValidateUpdateMatchAsyncTests : MatchValidationServiceTestBase
         using var db = CreateContext();
         db.Matches.Add(MakeMatch(id: 1, status: MatchStatus.Finished));
         await db.SaveChangesAsync();
-        var svc = new API.Services.Validators.MatchValidationService(db);
+        var svc = new API.Services.Validators.MatchValidationService(db, MakeConfig());
 
         var result = await svc.ValidateUpdateMatchAsync(MakeRequest());
 
@@ -63,7 +63,7 @@ public class ValidateUpdateMatchAsyncTests : MatchValidationServiceTestBase
         using var db = CreateContext();
         db.Matches.Add(MakeMatch(id: 1, date: DateTime.UtcNow.AddDays(-1)));
         await db.SaveChangesAsync();
-        var svc = new API.Services.Validators.MatchValidationService(db);
+        var svc = new API.Services.Validators.MatchValidationService(db, MakeConfig());
 
         var result = await svc.ValidateUpdateMatchAsync(MakeRequest());
 
@@ -72,12 +72,26 @@ public class ValidateUpdateMatchAsyncTests : MatchValidationServiceTestBase
     }
 
     [Fact]
+    public async Task ValidateUpdateMatch_MatchWithinBlockWindow_ReturnsFail()
+    {
+        using var db = CreateContext();
+        db.Matches.Add(MakeMatch(id: 1, date: DateTime.UtcNow.AddDays(1)));
+        await db.SaveChangesAsync();
+        var svc = new API.Services.Validators.MatchValidationService(db, MakeConfig(2));
+
+        var result = await svc.ValidateUpdateMatchAsync(MakeRequest(date: DateTime.UtcNow.AddDays(3)));
+
+        Assert.False(result.IsValid);
+        Assert.Equal("Matches cannot be edited within 2 days of their start.", result.Error);
+    }
+
+    [Fact]
     public async Task ValidateUpdateMatch_PastDate_ReturnsFail()
     {
         using var db = CreateContext();
         db.Matches.Add(MakeMatch(id: 1));
         await db.SaveChangesAsync();
-        var svc = new API.Services.Validators.MatchValidationService(db);
+        var svc = new API.Services.Validators.MatchValidationService(db, MakeConfig());
 
         var result = await svc.ValidateUpdateMatchAsync(MakeRequest(date: DateTime.UtcNow.AddDays(-1)));
 
@@ -91,7 +105,7 @@ public class ValidateUpdateMatchAsyncTests : MatchValidationServiceTestBase
         using var db = CreateContext();
         db.Matches.Add(MakeMatch(id: 1));
         await db.SaveChangesAsync();
-        var svc = new API.Services.Validators.MatchValidationService(db);
+        var svc = new API.Services.Validators.MatchValidationService(db, MakeConfig());
 
         var result = await svc.ValidateUpdateMatchAsync(MakeRequest(location: "   "));
 
@@ -105,7 +119,7 @@ public class ValidateUpdateMatchAsyncTests : MatchValidationServiceTestBase
         using var db = CreateContext();
         db.Matches.Add(MakeMatch(id: 1));
         await db.SaveChangesAsync();
-        var svc = new API.Services.Validators.MatchValidationService(db);
+        var svc = new API.Services.Validators.MatchValidationService(db, MakeConfig());
 
         var result = await svc.ValidateUpdateMatchAsync(MakeRequest(maxPlayers: 1));
 
@@ -123,7 +137,7 @@ public class ValidateUpdateMatchAsyncTests : MatchValidationServiceTestBase
             new UserMatch { MatchId = 1, UserId = 2 },
             new UserMatch { MatchId = 1, UserId = 3 });
         await db.SaveChangesAsync();
-        var svc = new API.Services.Validators.MatchValidationService(db);
+        var svc = new API.Services.Validators.MatchValidationService(db, MakeConfig());
 
         var result = await svc.ValidateUpdateMatchAsync(MakeRequest(maxPlayers: 2));
 
@@ -137,7 +151,7 @@ public class ValidateUpdateMatchAsyncTests : MatchValidationServiceTestBase
         using var db = CreateContext();
         db.Matches.Add(MakeMatch(id: 1));
         await db.SaveChangesAsync();
-        var svc = new API.Services.Validators.MatchValidationService(db);
+        var svc = new API.Services.Validators.MatchValidationService(db, MakeConfig());
 
         var result = await svc.ValidateUpdateMatchAsync(MakeRequest(durationInMinutes: 0));
 
@@ -151,7 +165,7 @@ public class ValidateUpdateMatchAsyncTests : MatchValidationServiceTestBase
         using var db = CreateContext();
         db.Matches.Add(MakeMatch(id: 1));
         await db.SaveChangesAsync();
-        var svc = new API.Services.Validators.MatchValidationService(db);
+        var svc = new API.Services.Validators.MatchValidationService(db, MakeConfig());
 
         var result = await svc.ValidateUpdateMatchAsync(MakeRequest());
 

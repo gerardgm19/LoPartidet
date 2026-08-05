@@ -28,6 +28,15 @@ public class MatchesController(IMatchesService matchesService, IMatchValidationS
         return match is null ? NotFound() : Ok(match);
     }
 
+    [HttpGet("{id}/can-edit")]
+    public async Task<ActionResult<CanEditMatchDto>> CanEditMatch(int id)
+    {
+        var identityId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var isAdmin = User.IsInRole(nameof(Role.Admin));
+        var result = await validationService.ValidateCanEditMatchAsync(id, identityId, isAdmin);
+        return Ok(new CanEditMatchDto(result.IsValid));
+    }
+
     [HttpPost]
     public async Task<ActionResult<MatchDto>> CreateMatch(CreateMatchDto request)
     {

@@ -120,6 +120,11 @@ export async function createMatch(request: CreateMatchRequest): Promise<Match> {
   return normalizeMatch(data);
 }
 
+export async function getCanEditMatch(id: string): Promise<boolean> {
+  const { data } = await apiClient.get<{ canEdit: boolean }>(`${API_BASE_URL}/matches/${id}/can-edit`);
+  return data.canEdit;
+}
+
 export async function updateMatch(id: string, request: UpdateMatchRequest): Promise<Match> {
   const { data } = await apiClient.put<any>(`${API_BASE_URL}/matches/${id}`, {
     type: request.type,

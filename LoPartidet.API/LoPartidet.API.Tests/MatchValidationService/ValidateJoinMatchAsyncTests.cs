@@ -12,7 +12,7 @@ public class ValidateJoinMatchAsyncTests : MatchValidationServiceTestBase
     public async Task ValidateJoinMatch_InvalidUserId_ReturnsFail()
     {
         using var db = CreateContext();
-        var svc = new API.Services.Validators.MatchValidationService(db);
+        var svc = new API.Services.Validators.MatchValidationService(db, MakeConfig());
         var request = new JoinMatchValidationRequest(1, "not-a-number");
 
         var result = await svc.ValidateJoinMatchAsync(request);
@@ -25,7 +25,7 @@ public class ValidateJoinMatchAsyncTests : MatchValidationServiceTestBase
     public async Task ValidateJoinMatch_UserNotFound_ReturnsFail()
     {
         using var db = CreateContext();
-        var svc = new API.Services.Validators.MatchValidationService(db);
+        var svc = new API.Services.Validators.MatchValidationService(db, MakeConfig());
         var request = new JoinMatchValidationRequest(1, "999");
 
         var result = await svc.ValidateJoinMatchAsync(request);
@@ -40,7 +40,7 @@ public class ValidateJoinMatchAsyncTests : MatchValidationServiceTestBase
         using var db = CreateContext();
         db.Users.Add(MakeUser(1));
         await db.SaveChangesAsync();
-        var svc = new API.Services.Validators.MatchValidationService(db);
+        var svc = new API.Services.Validators.MatchValidationService(db, MakeConfig());
         var request = new JoinMatchValidationRequest(999, "1");
 
         var result = await svc.ValidateJoinMatchAsync(request);
@@ -56,7 +56,7 @@ public class ValidateJoinMatchAsyncTests : MatchValidationServiceTestBase
         db.Users.Add(MakeUser(1));
         db.Matches.Add(MakeMatch(1, 1, 10, MatchStatus.Finished));
         await db.SaveChangesAsync();
-        var svc = new API.Services.Validators.MatchValidationService(db);
+        var svc = new API.Services.Validators.MatchValidationService(db, MakeConfig());
         var request = new JoinMatchValidationRequest(1, "1");
 
         var result = await svc.ValidateJoinMatchAsync(request);
@@ -74,7 +74,7 @@ public class ValidateJoinMatchAsyncTests : MatchValidationServiceTestBase
         await db.SaveChangesAsync();
         db.UserMatches.Add(new UserMatch { UserId = 1, MatchId = 1 });
         await db.SaveChangesAsync();
-        var svc = new API.Services.Validators.MatchValidationService(db);
+        var svc = new API.Services.Validators.MatchValidationService(db, MakeConfig());
         var request = new JoinMatchValidationRequest(1, "1");
 
         var result = await svc.ValidateJoinMatchAsync(request);
@@ -95,7 +95,7 @@ public class ValidateJoinMatchAsyncTests : MatchValidationServiceTestBase
         db.UserMatches.Add(new UserMatch { UserId = 1, MatchId = 1 });
         db.UserMatches.Add(new UserMatch { UserId = 2, MatchId = 1 });
         await db.SaveChangesAsync();
-        var svc = new API.Services.Validators.MatchValidationService(db);
+        var svc = new API.Services.Validators.MatchValidationService(db, MakeConfig());
         var request = new JoinMatchValidationRequest(1, "3");
 
         var result = await svc.ValidateJoinMatchAsync(request);
@@ -111,7 +111,7 @@ public class ValidateJoinMatchAsyncTests : MatchValidationServiceTestBase
         db.Users.Add(MakeUser(1));
         db.Matches.Add(MakeMatch(1, 1, 10, MatchStatus.Scheduled));
         await db.SaveChangesAsync();
-        var svc = new API.Services.Validators.MatchValidationService(db);
+        var svc = new API.Services.Validators.MatchValidationService(db, MakeConfig());
         var request = new JoinMatchValidationRequest(1, "1");
 
         var result = await svc.ValidateJoinMatchAsync(request);
