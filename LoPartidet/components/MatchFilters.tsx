@@ -16,6 +16,9 @@ type Props = {
 const CURRENT_YEAR = new Date().getFullYear();
 const DATE_YEARS = Array.from({ length: 6 }, (_, i) => CURRENT_YEAR + i);
 
+const NOW = new Date();
+const TODAY = `${NOW.getFullYear()}-${String(NOW.getMonth() + 1).padStart(2, "0")}-${String(NOW.getDate()).padStart(2, "0")}`;
+
 const useStyles = makeStyles((colors) => StyleSheet.create({
   panel: {
     backgroundColor: colors.card,
@@ -67,7 +70,7 @@ export default function MatchFilters({ value, onApply, onClear }: Props) {
 
   const [location, setLocation] = useState(value.location ?? "");
   const [joined, setJoined] = useState<boolean | undefined>(value.joined);
-  const [minDate, setMinDate] = useState<string | undefined>(value.minDate);
+  const [minDate, setMinDate] = useState<string | undefined>(value.minDate ?? TODAY);
   const [maxDate, setMaxDate] = useState<string | undefined>(value.maxDate);
   const [minTime, setMinTime] = useState<string | undefined>(value.minTime);
   const [maxTime, setMaxTime] = useState<string | undefined>(value.maxTime);
@@ -86,7 +89,7 @@ export default function MatchFilters({ value, onApply, onClear }: Props) {
   function clear() {
     setLocation("");
     setJoined(undefined);
-    setMinDate(undefined);
+    setMinDate(TODAY);
     setMaxDate(undefined);
     setMinTime(undefined);
     setMaxTime(undefined);
