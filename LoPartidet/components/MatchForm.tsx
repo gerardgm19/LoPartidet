@@ -16,10 +16,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { useThemeStore } from "@/store/themeStore";
 import { makeStyles } from "@/utils/makeStyles";
 import { getSportTypeLabel } from "@/constants/match";
-import { createMatch, getMatchById, updateMatch } from "@/services/matchesService";
+import { createMatch, getMatchById, updateMatch, cancelMatch, deleteMatch } from "@/services/matchesService";
 import { SportType } from "@/types/sportType";
 import { useLangStore } from "@/store/langStore";
 import { Toast } from "@/components/Toast";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import TimePicker from "@/components/TimePicker";
 import BirthdayPicker from "@/components/BirthdayPicker";
 import DurationPicker from "@/components/DurationPicker";
@@ -121,6 +122,31 @@ const useStyles = makeStyles((colors) => StyleSheet.create({
     marginTop: 8,
   },
   createBtnText: { color: colors.black, fontSize: 16, fontWeight: "800", letterSpacing: 0.3 },
+  manageSection: { gap: 10, marginTop: 8 },
+  manageLabel: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+    textAlign: "center",
+  },
+  manageRow: { flexDirection: "row", gap: 12 },
+  manageButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderRadius: 14,
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.card,
+  },
+  manageButtonDanger: { borderColor: colors.red },
+  manageButtonText: { color: colors.white, fontSize: 15, fontWeight: "700" },
+  manageButtonTextDanger: { color: colors.red },
 }));
 
 type MatchFormProps = {
@@ -143,6 +169,9 @@ export default function MatchForm({ matchId }: MatchFormProps) {
   const [loadingMatch, setLoadingMatch] = useState(editMode);
   const [toastMessage, setToastMessage] = useState("");
   const [toastVisible, setToastVisible] = useState(false);
+  const [cancelModalVisible, setCancelModalVisible] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [managing, setManaging] = useState(false);
 
   function showToast(msg: string) {
     setToastMessage(msg);
@@ -195,6 +224,33 @@ export default function MatchForm({ matchId }: MatchFormProps) {
       setLoading(false);
     }
   }
+
+  const confirmCancel = async () => {
+    setCancelModalVisible(false);
+    if (!matchId) return;
+    setManaging(true);
+    try {
+      await cancelMatch(matchId);
+      showToast(t.cancelMatchSuccess);
+      setTimeout(() => router.replace(`/match/${matchId}`), 1200);
+    } catch {
+      showToast(t.cancelMatchError);
+      setManaging(false);
+    }
+  };
+
+  const confirmDelete = async () => {
+    setDeleteModalVisible(false);
+    if (!matchId) return;
+    setManaging(true);
+    try {
+      await deleteMatch(matchId);
+      router.replace("/(tabs)/matches");
+    } catch {
+      showToast(t.deleteMatchError);
+      setManaging(false);
+    }
+  };
 
   if (loadingMatch) {
     return (
@@ -328,10 +384,56 @@ export default function MatchForm({ matchId }: MatchFormProps) {
             : <Text style={styles.createBtnText}>{editMode ? t.saveChanges : t.createMatchBtn}</Text>
           }
         </Pressable>
+
+        {editMode && (
+          <View style={styles.manageSection}>
+            <Text style={styles.manageLabel}>{t.matchManagement}</Text>
+            <View style={styles.manageRow}>
+              <Pressable
+                style={({ pressed }) => [styles.manageButton, pressed && { opacity: 0.6 }]}
+                onPress={() => setCancelModalVisible(true)}
+                disabled={managing}
+              >
+                <Ionicons name="close-circle-outline" size={18} color={colors.white} />
+                <Text style={styles.manageButtonText}>{t.cancelMatch}</Text>
+              </Pressable>
+              <Pressable
+                style={({ pressed }) => [styles.manageButton, styles.manageButtonDanger, pressed && { opacity: 0.6 }]}
+                onPress={() => setDeleteModalVisible(true)}
+                disabled={managing}
+              >
+                <Ionicons name="trash-outline" size={18} color={colors.red} />
+                <Text style={[styles.manageButtonText, styles.manageButtonTextDanger]}>{t.deleteMatch}</Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
       </ScrollView>
 
       </KeyboardAvoidingView>
       <Toast message={toastMessage} visible={toastVisible} onHide={() => setToastVisible(false)} />
+
+      <ConfirmDialog
+        visible={cancelModalVisible}
+        title={t.cancelMatchConfirmTitle}
+        message={t.cancelMatchConfirmMessage}
+        confirmLabel={t.cancelMatch}
+        cancelLabel={t.cancel}
+        onConfirm={confirmCancel}
+        onCancel={() => setCancelModalVisible(false)}
+        destructive
+      />
+
+      <ConfirmDialog
+        visible={deleteModalVisible}
+        title={t.deleteMatchConfirmTitle}
+        message={t.deleteMatchConfirmMessage}
+        confirmLabel={t.deleteMatch}
+        cancelLabel={t.cancel}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteModalVisible(false)}
+        destructive
+      />
     </SafeAreaView>
   );
 }
