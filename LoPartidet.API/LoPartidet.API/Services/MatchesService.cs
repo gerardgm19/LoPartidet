@@ -117,6 +117,29 @@ public class MatchesService(
             false);
     }
 
+    public async Task<MatchDto> UpdateMatchAsync(int matchId, UpdateMatchDto request)
+    {
+        var match = await db.Matches.FirstAsync(m => m.Id == matchId);
+
+        var locationId = await GetOrCreateLocationIdAsync(request.Location);
+
+        // Match properties use init accessors; update through the change tracker.
+        var entry = db.Entry(match);
+        entry.Property(m => m.Type).CurrentValue = request.Type;
+        entry.Property(m => m.Date).CurrentValue = request.Date;
+        entry.Property(m => m.LocationId).CurrentValue = locationId;
+        entry.Property(m => m.MaxPlayers).CurrentValue = request.MaxPlayers;
+        entry.Property(m => m.DurationInMinutes).CurrentValue = request.DurationInMinutes;
+        await db.SaveChangesAsync();
+
+        logger.LogInformation("Match {MatchId} updated", matchId);
+
+        return new MatchDto(
+            match.Id, match.CreatedById, match.CreatedAt, request.Type,
+            request.Date, request.Location, request.MaxPlayers, request.DurationInMinutes, match.Status,
+            false);
+    }
+
     private async Task<int> GetOrCreateLocationIdAsync(string name)
     {
         var trimmed = name.Trim();

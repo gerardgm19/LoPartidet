@@ -274,6 +274,7 @@ export default function MatchDetailPage() {
   const myId = userId ? parseInt(userId) : -1;
   const canManage = isAdmin() || match.createdById === myId;
   const canCancel = match.status !== MatchStatus.Cancelled && match.status !== MatchStatus.Finished;
+  const canEdit = canManage && match.status === MatchStatus.Scheduled && new Date(match.date) > new Date();
 
   const renderPlayer = (player: MatchPlayer) => {
     const isMe = player.id === myId;
@@ -303,7 +304,16 @@ export default function MatchDetailPage() {
           <Ionicons name="arrow-back" size={22} color={colors.white} />
         </Pressable>
         <Text style={styles.navTitle}>{t.matchDetails}</Text>
-        <View style={styles.navPlaceholder} />
+        {canEdit ? (
+          <Pressable
+            style={({ pressed }) => [styles.backButton, pressed && { opacity: 0.6 }]}
+            onPress={() => router.push(`/match/edit-match/${id}`)}
+          >
+            <Ionicons name="pencil" size={20} color={colors.white} />
+          </Pressable>
+        ) : (
+          <View style={styles.navPlaceholder} />
+        )}
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>

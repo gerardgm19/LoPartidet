@@ -68,6 +68,7 @@ function RootNavigator() {
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="match/[id]" options={{ headerShown: false }} />
       <Stack.Screen name="match/create-match" options={{ headerShown: false }} />
+      <Stack.Screen name="match/edit-match/[id]" options={{ headerShown: false }} />
       <Stack.Screen name="tournament/create-tournament" options={{ headerShown: false }} />
       <Stack.Screen name="tournament/edit-tournament" options={{ headerShown: false }} />
       <Stack.Screen name="tournament/[id]" options={{ headerShown: false }} />

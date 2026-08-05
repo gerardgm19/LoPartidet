@@ -152,6 +152,10 @@ const es_es = {
   duration: "Duración",
   matchCreated: "¡Partido creado!",
   createMatchError: "No se pudo crear el partido.",
+  editMatchTitle: "Editar partido",
+  saveChanges: "Guardar cambios",
+  matchUpdated: "¡Partido actualizado!",
+  updateMatchError: "No se pudo actualizar el partido.",
 
   // Match detail
   matchDetails: "Detalles del partido",

@@ -39,6 +39,14 @@ export type CreateMatchRequest = {
   durationInMinutes: number;
 };
 
+export type UpdateMatchRequest = {
+  type: SportType;
+  date: string;
+  location: string;
+  maxPlayers: number;
+  durationInMinutes: number;
+};
+
 export type MatchFilter = {
   location?: string;
   joined?: boolean;
@@ -106,6 +114,17 @@ export async function createMatch(request: CreateMatchRequest): Promise<Match> {
     date: request.date,
     location: request.location,
     createdBy,
+    maxPlayers: request.maxPlayers,
+    durationInMinutes: request.durationInMinutes,
+  });
+  return normalizeMatch(data);
+}
+
+export async function updateMatch(id: string, request: UpdateMatchRequest): Promise<Match> {
+  const { data } = await apiClient.put<any>(`${API_BASE_URL}/matches/${id}`, {
+    type: request.type,
+    date: request.date,
+    location: request.location,
     maxPlayers: request.maxPlayers,
     durationInMinutes: request.durationInMinutes,
   });

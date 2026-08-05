@@ -30,11 +30,12 @@ public abstract class MatchValidationServiceTestBase
         int id = 1,
         int createdById = 1,
         int maxPlayers = 10,
-        MatchStatus status = MatchStatus.Scheduled) => new()
+        MatchStatus status = MatchStatus.Scheduled,
+        DateTime? date = null) => new()
     {
         Id = id,
         CreatedById = createdById,
-        Date = DateTime.UtcNow.AddDays(1),
+        Date = date ?? DateTime.UtcNow.AddDays(1),
         LocationId = 1,
         Type = SportType.Fut5,
         MaxPlayers = maxPlayers,

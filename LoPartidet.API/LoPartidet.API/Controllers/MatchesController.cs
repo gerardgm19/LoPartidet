@@ -42,6 +42,21 @@ public class MatchesController(IMatchesService matchesService, IMatchValidationS
         }
     }
 
+    [HttpPut("{id}")]
+    [Authorize(Roles = nameof(Role.Player) + "," + nameof(Role.Admin))]
+    public async Task<ActionResult<MatchDto>> UpdateMatch(int id, UpdateMatchDto request)
+    {
+        var identityId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var isAdmin = User.IsInRole(nameof(Role.Admin));
+        var validation = await validationService.ValidateUpdateMatchAsync(
+            new UpdateMatchValidationRequest(id, identityId, isAdmin, request.Date, request.Location, request.MaxPlayers, request.DurationInMinutes));
+        if (!validation.IsValid)
+            return BadRequest(validation.Error);
+
+        var match = await matchesService.UpdateMatchAsync(id, request);
+        return Ok(match);
+    }
+
     [HttpPost("{id}/join")]
     public async Task<ActionResult<UserMatchDto>> JoinMatch(int id, JoinMatchDto request)
     {

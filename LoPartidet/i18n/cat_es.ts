@@ -152,6 +152,10 @@ const cat_es = {
   duration: "Durada",
   matchCreated: "Partit creat!",
   createMatchError: "No s'ha pogut crear el partit.",
+  editMatchTitle: "Editar partit",
+  saveChanges: "Desar canvis",
+  matchUpdated: "Partit actualitzat!",
+  updateMatchError: "No s'ha pogut actualitzar el partit.",
 
   // Match detail
   matchDetails: "Detalls del partit",

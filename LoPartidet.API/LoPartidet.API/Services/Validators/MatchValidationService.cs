@@ -30,6 +30,40 @@ public class MatchValidationService(LoPartidetContext db) : IMatchValidationServ
         return ValidationResult.Ok();
     }
 
+    public async Task<ValidationResult> ValidateUpdateMatchAsync(UpdateMatchValidationRequest request)
+    {
+        var match = await db.Matches.FindAsync(request.MatchId);
+        if (match is null)
+            return ValidationResult.Fail("Match not found.");
+
+        if (!await IsOwnerOrAdminAsync(match, request.IdentityId, request.IsAdmin))
+            return ValidationResult.Fail("Only the match owner or an admin can edit this match.");
+
+        if (match.Status != MatchStatus.Scheduled)
+            return ValidationResult.Fail("Only scheduled matches can be edited.");
+
+        if (match.Date <= DateTime.Now)
+            return ValidationResult.Fail("Cannot edit a match that has already started.");
+
+        if (request.Date <= DateTime.Now)
+            return ValidationResult.Fail("Match date must be in the future.");
+
+        if (string.IsNullOrWhiteSpace(request.Location))
+            return ValidationResult.Fail("Location is required.");
+
+        if (request.MaxPlayers < 2)
+            return ValidationResult.Fail("A match requires at least 2 players.");
+
+        var currentPlayers = await db.UserMatches.CountAsync(um => um.MatchId == request.MatchId);
+        if (request.MaxPlayers < currentPlayers)
+            return ValidationResult.Fail("Max players cannot be lower than the number of joined players.");
+
+        if (request.DurationInMinutes <= 0)
+            return ValidationResult.Fail("Duration must be greater than 0.");
+
+        return ValidationResult.Ok();
+    }
+
     public async Task<ValidationResult> ValidateJoinMatchAsync(JoinMatchValidationRequest request)
     {
         if (!int.TryParse(request.UserId, out var userId))
