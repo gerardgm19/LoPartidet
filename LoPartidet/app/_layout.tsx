@@ -5,6 +5,7 @@ import { setUnauthorizedHandler } from "@/services/api";
 import { getMe } from "@/services/usersService";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { useEffect, useState } from "react";
+import { Platform } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import LoadingScreen from "@/components/LoadingScreen";
 
@@ -16,6 +17,12 @@ function RootNavigator() {
   const initLang = useLangStore((s) => s.initialize);
   const initTheme = useThemeStore((s) => s.initialize);
   const [bootstrapped, setBootstrapped] = useState(false);
+
+  useEffect(() => {
+    if (Platform.OS === "web") {
+      document.title = "Lo Partidet";
+    }
+  }, []);
 
   useEffect(() => {
     Promise.all([
